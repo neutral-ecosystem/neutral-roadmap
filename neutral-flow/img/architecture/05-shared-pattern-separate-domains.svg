@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Shared language pattern, separate domains</title>
+  <desc id="desc">Neutral Flow and Neux consume the same Neutral IR but apply different domain-specific logic.</desc>
+  <defs><marker id="a" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0L12 6L0 12Z" fill="#dbeafe"/></marker>
+    <style>.t{font:700 48px system-ui,sans-serif;fill:#fff}.s{font:400 22px system-ui,sans-serif;fill:#94a3b8}.n{font:700 27px system-ui,sans-serif;fill:#fff}.b{font:400 20px system-ui,sans-serif;fill:#dbeafe}.sm{font:600 18px system-ui,sans-serif;fill:#94a3b8}.box{stroke-width:3;rx:22}.ar{fill:none;stroke:#dbeafe;stroke-width:5;marker-end:url(#a)}</style></defs>
+  <rect width="1600" height="900" fill="#071426"/>
+  <text x="70" y="85" class="t">Shared language pattern, separate domains</text>
+  <text x="70" y="125" class="s">The shared part ends at Neutral IR; domain meaning remains inside each application</text>
+
+  <rect x="80" y="205" width="230" height="130" class="box" fill="#312e81" stroke="#8b5cf6"/>
+  <text x="195" y="260" text-anchor="middle" class="n">.neu</text><text x="195" y="300" text-anchor="middle" class="b">source</text>
+  <path d="M310 270H390" class="ar"/>
+  <rect x="410" y="205" width="270" height="130" class="box" fill="#4c1d95" stroke="#a78bfa"/>
+  <text x="545" y="260" text-anchor="middle" class="n">neutral-lang</text><text x="545" y="300" text-anchor="middle" class="b">generates IR</text>
+  <path d="M680 270H760" class="ar"/>
+  <rect x="780" y="205" width="230" height="130" class="box" fill="#0f766e" stroke="#2dd4bf"/>
+  <text x="895" y="260" text-anchor="middle" class="n">Neutral IR</text><text x="895" y="300" text-anchor="middle" class="b">shared output</text>
+
+  <path d="M1010 270H1090V455H1160" class="ar"/><path d="M895 335V665H1160" class="ar"/>
+
+  <rect x="1160" y="370" width="360" height="180" class="box" fill="#075985" stroke="#38bdf8"/>
+  <text x="1340" y="430" text-anchor="middle" class="n">neutral-flow</text>
+  <text x="1340" y="475" text-anchor="middle" class="b">pipeline-specific logic</text>
+  <text x="1340" y="515" text-anchor="middle" class="b">→ CI/CD</text>
+
+  <rect x="1160" y="595" width="360" height="180" class="box" fill="#92400e" stroke="#fbbf24"/>
+  <text x="1340" y="655" text-anchor="middle" class="n">neux</text>
+  <text x="1340" y="700" text-anchor="middle" class="b">OS-specific logic</text>
+  <text x="1340" y="740" text-anchor="middle" class="b">→ GNU command shell</text>
+
+  <rect x="80" y="430" width="880" height="330" rx="24" fill="#0f2138" stroke="#334155" stroke-width="2"/>
+  <text x="130" y="490" class="n">What is shared</text>
+  <text x="130" y="540" class="b">• .neu is the common authoring language</text>
+  <text x="130" y="585" class="b">• neutral-lang is the only IR generator</text>
+  <text x="130" y="630" class="b">• both applications consume Neutral IR</text>
+  <text x="540" y="490" class="n">What stays separate</text>
+  <text x="540" y="540" class="b">• Flow owns pipeline concepts</text>
+  <text x="540" y="585" class="b">• Neux owns OS and GNU-shell concepts</text>
+  <text x="540" y="630" class="b">• neither domain leaks into neutral-lang</text>
+  <text x="520" y="720" text-anchor="middle" class="sm">Same consumption pattern does not mean the applications are coupled.</text>
+</svg>

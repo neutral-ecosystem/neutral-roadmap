@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Neutral Flow domain architecture</title>
+  <desc id="desc">Neutral Flow consumes Neutral IR and applies pipeline-specific interpretation to create CI/CD behavior.</desc>
+  <defs><marker id="a" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0L12 6L0 12Z" fill="#dbeafe"/></marker>
+    <style>.t{font:700 48px system-ui,sans-serif;fill:#fff}.s{font:400 22px system-ui,sans-serif;fill:#94a3b8}.n{font:700 28px system-ui,sans-serif;fill:#fff}.b{font:400 21px system-ui,sans-serif;fill:#dbeafe}.sm{font:600 18px system-ui,sans-serif;fill:#94a3b8}.box{stroke-width:3;rx:24}.ar{fill:none;stroke:#dbeafe;stroke-width:5;marker-end:url(#a)}</style></defs>
+  <rect width="1600" height="900" fill="#071426"/>
+  <text x="70" y="85" class="t">neutral-flow: pipeline-specific application</text>
+  <text x="70" y="125" class="s">Neutral IR is the input contract; CI/CD is the domain owned by Flow</text>
+
+  <rect x="80" y="310" width="250" height="180" class="box" fill="#0f766e" stroke="#2dd4bf"/>
+  <text x="205" y="380" text-anchor="middle" class="n">Neutral IR</text><text x="205" y="425" text-anchor="middle" class="b">from neutral-lang</text>
+  <path d="M330 400H450" class="ar"/>
+
+  <rect x="470" y="215" width="600" height="380" class="box" fill="#075985" stroke="#38bdf8"/>
+  <text x="770" y="285" text-anchor="middle" class="n">neutral-flow</text>
+  <line x1="520" y1="320" x2="1020" y2="320" stroke="#38bdf8" stroke-width="2"/>
+  <rect x="540" y="355" width="460" height="80" rx="15" fill="#0c4a6e" stroke="#7dd3fc" stroke-width="2"/>
+  <text x="770" y="405" text-anchor="middle" class="b">understand pipeline-specific intent</text>
+  <rect x="540" y="465" width="460" height="80" rx="15" fill="#0c4a6e" stroke="#7dd3fc" stroke-width="2"/>
+  <text x="770" y="515" text-anchor="middle" class="b">create CI/CD pipeline behavior</text>
+
+  <path d="M1070 400H1190" class="ar"/>
+  <rect x="1210" y="250" width="310" height="300" class="box" fill="#0f2138" stroke="#60a5fa"/>
+  <text x="1365" y="320" text-anchor="middle" class="n">CI/CD domain</text>
+  <text x="1365" y="375" text-anchor="middle" class="b">pipelines</text>
+  <text x="1365" y="420" text-anchor="middle" class="b">jobs and dependencies</text>
+  <text x="1365" y="465" text-anchor="middle" class="b">CI/CD targets</text>
+  <text x="1365" y="510" text-anchor="middle" class="b">pipeline execution</text>
+
+  <rect x="300" y="690" width="1000" height="100" rx="18" fill="#111827" stroke="#334155" stroke-width="2"/>
+  <text x="800" y="733" text-anchor="middle" class="b">Boundary: neutral-flow does not generate Neutral IR</text>
+  <text x="800" y="768" text-anchor="middle" class="sm">It consumes IR and applies CI/CD-specific logic as a separate application</text>
+</svg>

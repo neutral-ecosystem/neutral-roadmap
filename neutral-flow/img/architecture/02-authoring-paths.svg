@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Neutral authoring paths</title>
+  <desc id="desc">Text authoring and a future GUI both produce Neutral source, which neutral-lang compiles into IR for Neutral Flow or Neux.</desc>
+  <defs><marker id="a" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0L12 6L0 12Z" fill="#e2e8f0"/></marker>
+    <style>.t{font:700 48px system-ui,sans-serif;fill:#fff}.s{font:400 22px system-ui,sans-serif;fill:#94a3b8}.n{font:700 28px system-ui,sans-serif;fill:#fff}.b{font:400 20px system-ui,sans-serif;fill:#dbeafe}.box{stroke-width:3;rx:22}.ar{fill:none;stroke:#e2e8f0;stroke-width:5;marker-end:url(#a)}.dash{fill:none;stroke:#a78bfa;stroke-width:4;stroke-dasharray:12 10;marker-end:url(#a)}</style></defs>
+  <rect width="1600" height="900" fill="#071426"/>
+  <text x="70" y="85" class="t">Neutral authoring paths</text><text x="70" y="125" class="s">The GUI is an authoring surface, not a bypass around the language</text>
+
+  <rect x="80" y="230" width="300" height="150" class="box" fill="#312e81" stroke="#8b5cf6"/>
+  <text x="230" y="290" text-anchor="middle" class="n">Text editor</text><text x="230" y="330" text-anchor="middle" class="b">author writes .neu</text>
+  <rect x="80" y="500" width="300" height="170" class="box" fill="#1e3a8a" stroke="#60a5fa"/>
+  <text x="230" y="555" text-anchor="middle" class="n">Future GUI</text><text x="230" y="600" text-anchor="middle" class="b">visual authoring</text><text x="230" y="635" text-anchor="middle" class="b">transcribes to .neu</text>
+
+  <path d="M380 305H500" class="ar"/><path d="M380 585H440V355H500" class="dash"/>
+  <rect x="520" y="285" width="260" height="160" class="box" fill="#4c1d95" stroke="#a78bfa"/>
+  <text x="650" y="350" text-anchor="middle" class="n">.neu source</text><text x="650" y="392" text-anchor="middle" class="b">single authoring ground</text>
+
+  <path d="M780 365H900" class="ar"/>
+  <rect x="920" y="285" width="270" height="160" class="box" fill="#5b21b6" stroke="#c4b5fd"/>
+  <text x="1055" y="350" text-anchor="middle" class="n">neutral-lang</text><text x="1055" y="392" text-anchor="middle" class="b">generates Neutral IR</text>
+
+  <path d="M1190 365H1310" class="ar"/>
+  <rect x="1330" y="285" width="200" height="160" class="box" fill="#0f766e" stroke="#2dd4bf"/>
+  <text x="1430" y="350" text-anchor="middle" class="n">Neutral IR</text><text x="1430" y="392" text-anchor="middle" class="b">compiler output</text>
+
+  <path d="M1430 445V545H1200" class="ar"/><path d="M1430 445V700H1200" class="ar"/>
+  <rect x="900" y="505" width="280" height="120" class="box" fill="#075985" stroke="#38bdf8"/>
+  <text x="1040" y="575" text-anchor="middle" class="n">neutral-flow</text>
+  <rect x="900" y="665" width="280" height="120" class="box" fill="#92400e" stroke="#fbbf24"/>
+  <text x="1040" y="735" text-anchor="middle" class="n">neux</text>
+
+  <rect x="90" y="760" width="650" height="80" rx="16" fill="#0f2138" stroke="#334155" stroke-width="2"/>
+  <text x="415" y="810" text-anchor="middle" class="b">GUI → .neu → neutral-lang → IR; never GUI → app directly</text>
+</svg>

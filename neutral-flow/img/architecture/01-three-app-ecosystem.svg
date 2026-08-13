@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Neutral ecosystem: three applications</title>
+  <desc id="desc">Neutral source is compiled by neutral-lang into Neutral IR. Neutral Flow and Neux separately consume that IR for CI/CD and operating-system automation.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0L12 6L0 12Z" fill="#dbeafe"/></marker>
+    <style>
+      .title{font:700 48px system-ui,sans-serif;fill:#f8fafc}.subtitle{font:400 22px system-ui,sans-serif;fill:#94a3b8}
+      .name{font:700 30px system-ui,sans-serif;fill:#fff}.body{font:400 21px system-ui,sans-serif;fill:#dbeafe}.small{font:600 18px system-ui,sans-serif;fill:#94a3b8}
+      .box{stroke-width:3;rx:24}.arrow{fill:none;stroke:#dbeafe;stroke-width:5;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#071426"/>
+  <text x="70" y="85" class="title">Neutral ecosystem: three applications</text>
+  <text x="70" y="125" class="subtitle">One language toolchain, two separate domain applications</text>
+
+  <rect x="80" y="320" width="250" height="170" class="box" fill="#312e81" stroke="#8b5cf6"/>
+  <text x="205" y="385" text-anchor="middle" class="name">.neu source</text>
+  <text x="205" y="430" text-anchor="middle" class="body">Neutral language</text>
+
+  <path d="M330 405H430" class="arrow"/>
+  <rect x="450" y="275" width="310" height="260" class="box" fill="#4c1d95" stroke="#a78bfa"/>
+  <text x="605" y="350" text-anchor="middle" class="name">neutral-lang</text>
+  <text x="605" y="395" text-anchor="middle" class="body">parses and compiles</text>
+  <line x1="495" y1="430" x2="715" y2="430" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="605" y="475" text-anchor="middle" class="body">generates Neutral IR</text>
+
+  <path d="M760 405H870" class="arrow"/>
+  <rect x="890" y="325" width="250" height="160" class="box" fill="#0f766e" stroke="#2dd4bf"/>
+  <text x="1015" y="390" text-anchor="middle" class="name">Neutral IR</text>
+  <text x="1015" y="430" text-anchor="middle" class="small">shared compiler output</text>
+
+  <path d="M1140 405H1210V245H1260" class="arrow"/>
+  <rect x="1280" y="155" width="250" height="180" class="box" fill="#075985" stroke="#38bdf8"/>
+  <text x="1405" y="220" text-anchor="middle" class="name">neutral-flow</text>
+  <text x="1405" y="265" text-anchor="middle" class="body">CI/CD pipelines</text>
+  <text x="1405" y="302" text-anchor="middle" class="small">separate application</text>
+
+  <path d="M1140 405H1210V625H1260" class="arrow"/>
+  <rect x="1280" y="535" width="250" height="180" class="box" fill="#92400e" stroke="#fbbf24"/>
+  <text x="1405" y="600" text-anchor="middle" class="name">neux</text>
+  <text x="1405" y="645" text-anchor="middle" class="body">OS automation</text>
+  <text x="1405" y="682" text-anchor="middle" class="small">separate application</text>
+
+  <rect x="430" y="690" width="710" height="105" rx="18" fill="#0f2138" stroke="#334155" stroke-width="2"/>
+  <text x="785" y="735" text-anchor="middle" class="body">neutral-flow and neux consume Neutral IR</text>
+  <text x="785" y="770" text-anchor="middle" class="small">Neither application owns neutral-lang or the other domain</text>
+</svg>
