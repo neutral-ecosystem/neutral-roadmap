@@ -641,26 +641,192 @@ public API. They should be written progressively; this file does not create them
 16. **Decision log** — accepted, rejected, experimental, and deferred choices,
     including the evidence used to promote a domain concept into Neutral core.
 
-## 22. Decision gates before version checklists
+## 22. Decisions before version checklists
 
-Future v0/v1/v2 checklists should not be generated mechanically from this file
-until these questions are answered:
+The following recommended answers are the planning baseline. Their alternatives,
+trade-offs, evidence requirements, and fuller rationale are recorded in
+[choices.md](choices.md). “Recommended” does not mean permanently frozen: the
+Neux corpus, resource measurements, and real release cadence still have to test
+the provisional decisions.
 
-1. What is Neutral's smallest cross-domain user journey, independent of Flow?
-2. Which structures are demonstrated by both the Flow and Neux problem corpora?
-3. What is core IR versus a versioned Flow domain vocabulary?
-4. Which symbolic behavior must the compiler understand, and which behavior is
-   preserved for a consumer?
-5. What complete source closure and derivation identity can neutral-lang
-   guarantee?
-6. What logical equality and optional canonical-byte guarantees are required?
-7. Which IR and API compatibility window is credible before 1.0?
-8. How are domain vocabularies resolved and validated without executing
-   untrusted plugins?
-9. What are the initial size, expansion, latency, memory, and diagnostic limits?
-10. Which consumer conformance case proves the boundary without implementing
-    Flow or Neux inside the compiler?
+### 1. What is Neutral's smallest cross-domain user journey, independent of Flow?
 
-Version checklists should allocate coherent, testable slices of these
-requirements. They must not equate “needed eventually” with “belongs in v0,” and
-they must preserve the separation between neutral-lang, neutral-flow, and neux.
+Prove one small, effect-free vertical slice. It accepts an explicitly captured
+`.neu` source unit; resolves named declarations, structured literal values, and
+a typed reference; validates one explicitly selected data-only vocabulary; and
+emits immutable Neutral IR, diagnostics, a source map, and a derivation manifest.
+An effect-free probe then reads the result only through the public consumer API
+and produces a private summary or source-linked diagnostic.
+
+This journey performs no command execution, scheduling, provider access, secret
+resolution, or domain-condition evaluation. It is complete because it crosses
+the compiler/IR/consumer boundaries, not because it implements Flow.
+
+### 2. Which structures are demonstrated by both the Flow and Neux problem corpora?
+
+Use a two-corpus promotion rule: a structure enters Neutral core only after one
+real Flow case and one independently derived Neux case demonstrate the same
+invariant and explain why a domain vocabulary cannot safely own it.
+
+The current provisional candidates are stable declaration identity and names;
+namespaces, scopes, and typed references; typed scalar and structured values;
+containment and typed relationships without execution meaning; immutable
+documents; source provenance; structured diagnostics; required-feature
+negotiation; and namespaced domain nodes. They are not yet a frozen core because
+the Neux corpus has not been established.
+
+Flow graphs, jobs, conditions, retries, runners, artifacts, and deployments stay
+outside core. Neux commands, processes, files, and packages also stay outside
+core. Symbolic computation, composition, and expansion remain provisional until
+equivalent needs are demonstrated in both domains.
+
+### 3. What is core IR versus a versioned Flow domain vocabulary?
+
+Use a small fixed core plus versioned, namespaced, data-described domain
+vocabularies. The core owns document identity, declarations, scopes, references,
+common value forms, provenance, source maps, diagnostics, feature negotiation,
+resource limits, and safe extension framing.
+
+The Flow vocabulary owns pipeline declarations, dependency meaning, operation
+contracts, conditions, outputs, requirements, and other CI/CD behavior. Neux
+owns OS- and command-specific declarations. Every domain item identifies its
+vocabulary, owner assertion, schema version, behavior version, and whether it is
+required or optional. Unknown required behavior fails closed; only explicitly
+non-behavioral optional metadata may be skipped or preserved opaquely.
+
+A Flow normalized definition or logical plan remains a private Flow record. It
+is not Neutral IR and does not belong to `neutral-lang`.
+
+### 4. Which symbolic behavior must the compiler understand, and which behavior is preserved for a consumer?
+
+The compiler understands bounded symbolic structure, operation identity and
+owner, behavior version, static input and result types, resolved references,
+evaluation dependencies, declared availability, purity, determinism, effects,
+capabilities, and source origin.
+
+It may evaluate only a deliberately small set of pure core operations whose
+complete inputs are captured and whose behavior Neutral defines normatively.
+All domain-owned operations are preserved as structured typed IR for the
+responsible consumer. They are never stored as source strings for consumer
+reparsing and never inherit host-language behavior accidentally.
+
+Flow owns condition truth, skip/failure propagation, missing outputs, result
+aggregation, and provider/runtime values. Neux owns OS lookup and command
+behavior.
+
+### 5. What complete source closure and derivation identity can neutral-lang guarantee?
+
+Every authoritative successful compilation binds a complete captured closure:
+the root and transitive source units, vocabulary/schema bundles, reusable
+packages, decision-affecting resolver results, compiler behavior identity,
+options, feature policy, and explicit nondeterministic inputs. It also identifies
+the resulting IR, source map, and diagnostic contract.
+
+Acquisition occurs only through the caller-supplied resolver. Captured content
+must support offline replay, and mutable paths, URLs, or tags remain provenance
+rather than identity. Credentials and secret values are excluded.
+
+Derivation identity and logical IR content identity remain distinct because two
+different captured derivations can produce logically equal IR. If the complete
+decision-affecting closure cannot be identified, output may be exploratory and
+explicitly non-authoritative, but it cannot be called reproducible.
+
+### 6. What logical equality and optional canonical-byte guarantees are required?
+
+Define record identity, derivation identity, logical equality, and byte equality
+as separate contracts. Normative logical equality under a named IR version is
+the primary conformance rule. The same captured derivation must produce
+deterministic logical IR and diagnostics, but permitted encoders may produce
+different bytes for logically equal documents.
+
+Do not require canonical bytes until a named need such as cross-tool signing or
+content-addressed exchange justifies the compatibility cost. At that point,
+define a separately versioned canonical encoding with explicit ordering,
+duplicates, Unicode, numeric, and unknown-field rules. Ordinary serializer or
+JSON output is never canonical by assumption. Domain semantic equivalence
+remains owned by the relevant vocabulary or consumer.
+
+### 7. Which IR and API compatibility window is credible before 1.0?
+
+Version `.neu` behavior, logical IR, concrete encodings, compiler API, consumer
+API, and each vocabulary's schema and behavior independently. Unpublished
+experiments may break freely. After the first intentionally published IR
+schema, producers write the current schema and readers support the current and
+immediately previous published schema for at least one release overlap.
+
+Unknown required behavior is rejected before interpretation. Migrations create
+a new immutable IR with a derivation link and explicit loss report; downgrade,
+data loss, and behavior-changing defaults are never silent. This rolling window
+is provisional until the actual upgrade cadence of neutral-lang, Flow, and Neux
+supports a longer time-based policy.
+
+### 8. How are domain vocabularies resolved and validated without executing untrusted plugins?
+
+Resolve versioned, data-only vocabulary bundles through the explicit compilation
+resolver and capture their exact content in the source closure. A bundle
+declares its identity, owner assertion, schema and behavior versions,
+compatibility range, dependencies, allowed structures and values, reference
+targets, operation contracts, static constraints, and resource bounds.
+
+The compiler validates bundles using built-in bounded machinery. Source cannot
+activate an unapproved profile or cause ambient network access. Signatures are
+policy evidence about bytes, not automatic proof of identity, safety, or intent.
+Checks requiring Flow or Neux meaning run in that consumer. Executable compiler
+plugins are excluded from the initial design and would require a separate
+security and determinism decision.
+
+### 9. What are the initial size, expansion, latency, memory, and diagnostic limits?
+
+Put a versioned resource-budget object in the first compiler and reader APIs.
+Named safe baselines apply by default; callers may choose stricter limits and a
+host may impose a documented ceiling. Decision-affecting limits are recorded in
+the derivation. Exceeding one produces a bounded diagnostic and no apparently
+complete authoritative IR.
+
+Use these only as initial desktop/CI measurement values, not stable promises:
+
+| Budget | Provisional measurement value |
+| --- | ---: |
+| Source units | 256 |
+| Bytes per source unit | 2 MiB |
+| Complete source closure | 16 MiB |
+| Import or composition depth | 64 |
+| Structural nesting depth | 128 |
+| Expanded IR elements | 10,000 |
+| Decoded IR size | 32 MiB |
+| Emitted diagnostics | 200, then one truncation diagnostic |
+| Compilation deadline | 10 seconds on a named reference benchmark host |
+| Process memory | 512 MiB on a named reference benchmark host |
+
+Before any stable release, replace or confirm the numbers using representative,
+near-limit, and adversarial Flow and Neux corpora. Any latency claim must name
+hardware, compiler build, cache state, input class, and percentile.
+
+### 10. Which consumer conformance case proves the boundary without implementing Flow or Neux inside the compiler?
+
+Use two test-only, effect-free probe consumers. A Flow-profile probe and an
+independently designed Neux-profile probe each read only the public IR API,
+validate required vocabulary support, traverse declarations and typed
+references, and emit a deterministic private summary or domain diagnostic.
+They do not parse `.neu`, evaluate domain operations, share a private model,
+invoke a shell, or contact a CI provider.
+
+The cases must cover successful reading, rejection of unknown required
+behavior, safe handling of optional non-behavioral metadata, typed traversal,
+mapping a consumer diagnostic back to `.neu`, bounded malformed-input rejection,
+and deterministic results. Flow graph semantics and Neux OS semantics retain
+separate consumer conformance suites.
+
+### Remaining gates
+
+Version checklists may allocate coherent vertical slices from these answers,
+but must retain three open evidence gates:
+
+1. Build the independent Neux corpus before freezing any proposed common core.
+2. Measure the resource profile before treating its values as compatibility
+   commitments.
+3. Observe real release cadence before extending the provisional compatibility
+   window.
+
+The checklists must not equate “needed eventually” with “belongs in v0,” and
+must preserve the separation between neutral-lang, neutral-flow, and neux.
