@@ -16,35 +16,49 @@ binds the owning document/derivation, so equal spellings in different captured
 documents are not conflated. Renaming changes identity in v0; durable aliases
 are deferred.
 
-## SYN-DEC-002 — Immutable bindings
+## SYN-DEC-002 — Type-first bindings
 
 Bindings use:
 
 ```neu
-let name: Type = value;
+Type name = value
 ```
 
-They are immutable and initialized once. v0 has no `var`, assignment,
-increment, or mutation. This preserves declarative serialization and avoids
-introducing execution order.
+There is no `let` keyword and no colon between the name and type. Bindings are
+immutable and initialized once unless explicitly prefixed with `mut`:
+
+```neu
+mut num counter = 0
+counter = 1
+```
+
+Assignment may target only a previously declared mutable local identifier in
+the same lexical scope. A qualified assignment target, compound assignment,
+increment, and mutation method are invalid. Mutation is resolved during
+compilation; issued IR remains immutable.
+
+The last valid assignment in the lexical scope determines the emitted binding
+value. `ref(...)` resolves to the binding identity and observes that final
+compiled value; it does not capture a value snapshot at the reference's textual
+position. All assignments remain in source provenance.
 
 ## SYN-DEC-003 — Explicit types
 
-Every `let` and record field states a type. v0 checks contextual literals but
+Every binding and record field states a type. v0 checks contextual literals but
 does not infer a public declaration type. Domain fields obtain expected types
-from the captured vocabulary schema. Empty lists and `absent` require an
-expected type.
+from the captured vocabulary schema. Empty lists and `null` require an expected
+type.
 
 ## SYN-DEC-004 — Domain declaration kinds
 
 A domain declaration has:
 
 ```text
-vocabulary-alias :: schema-kind declaration-name { schema fields }
+vocabulary-alias.schema-kind declaration-name { schema fields }
 ```
 
 ```neu
-flow::pipeline verify {
+flow.pipeline verify {
     config: ref(config),
 }
 ```
@@ -57,7 +71,7 @@ during parsing or static schema validation.
 
 ```neu
 namespace checks {
-    let image: Text = "example.invalid/check:1";
+    string image = "example.invalid/check:1"
 }
 ```
 
@@ -77,9 +91,10 @@ source order never chooses a winner.
 
 ## SYN-DEC-007 — Forward references
 
-References may target later declarations in the captured closure. The compiler
-collects declarations before resolving/checking values, so source order is not
-execution order.
+Immutable references may target later declarations in the captured closure.
+The compiler collects declarations before resolving/checking immutable values,
+so their source order is not execution order. A mutable assignment is processed
+in source order and cannot be referenced before its declaration.
 
 Forward references do not legalize cycles. Cyclic immutable values and recursive
 records are invalid in v0. A domain relationship cycle is rejected only when

@@ -43,7 +43,8 @@ Recovery is deterministic and bounded:
 - lexical errors consume the smallest invalid sequence that makes progress;
 - unterminated text/comments consume to their specified safe boundary;
 - fields/lists synchronize at comma or matching close;
-- simple declarations synchronize at semicolon;
+- simple declarations synchronize at the next logical line ending or recognized
+  declaration starter;
 - braced declarations synchronize at matching close; and
 - top level may synchronize at a recognized declaration starter.
 
@@ -69,8 +70,9 @@ If invalid input admits competing recovery trees, emit
 `NL-SYN-PAR-AMBIGUOUS` over the smallest distinguishing span and no
 authoritative IR. Do not silently select the first parser alternative.
 
-The ambiguity corpus covers keyword boundaries, qualified names, negative
-numbers, record/domain bodies, optional markers, and missing separators.
+The ambiguity corpus covers keyword boundaries, `::` qualified names, `.`
+member selection/invocation, negative numbers, record/domain bodies, nullable
+markers, trailing comments, and missing line endings/separators.
 
 ## SYN-DIA-006 — Example obligations
 

@@ -14,7 +14,7 @@ when no blank line or other token intervenes.
 /// Configuration consumed by the selected profile.
 record Config {
     /// Human-facing label; not symbol identity.
-    label: Text,
+    string label,
 }
 ```
 
@@ -36,7 +36,7 @@ The reference formatter uses:
 - opening brace on the declaration line;
 - one item per line in multiline constructs;
 - trailing commas in multiline fields/lists;
-- required semicolons on simple declarations;
+- no semicolons and one logical declaration per line;
 - double-quoted text with shortest unambiguous supported escapes;
 - preserved comments/documentation attachment; and
 - default width 100 Unicode scalar columns except unbreakable tokens.

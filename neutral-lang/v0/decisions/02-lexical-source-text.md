@@ -17,30 +17,38 @@ silent replacement of invalid bytes are rejected as non-reproducible.
 
 ## SYN-LEX-002 — Whitespace and termination
 
-Space, horizontal tab, and normalized newline separate tokens but carry no
-meaning. Indentation is not syntactic. There is no automatic semicolon
-insertion and no backslash line continuation.
+Space and horizontal tab separate tokens but carry no meaning. Indentation is
+not syntactic. A logical newline terminates a complete header, simple
+declaration, or assignment in a source or namespace declaration list. There is
+no semicolon token and no backslash line continuation.
 
-Simple declarations and headers end with `;`. Braced declarations do not take
-a following semicolon. Fields and collection elements use `,`, with one
-optional trailing comma. Newlines may occur wherever whitespace is legal.
+A line comment is trivia before its newline, so this is valid:
 
 ```neu
-let image: Text =
-    "example.invalid/image:1";
+num x = 10 // explanation
+```
+
+Newlines are insignificant inside value constructors, field lists, argument
+lists, list values, and type arguments. Namespace braces establish a nested
+declaration-list mode and therefore do not suppress declaration terminators.
+Fields and collection elements use `,`, with one optional trailing comma.
+
+```neu
+string image = "example.invalid/image:1"
 
 record Pair {
-    left: Text,
-    right: Text,
+    string left,
+    string right,
 }
 ```
 
-A missing terminator is diagnosed at the end of its construct; the parser MUST
-NOT infer one from a newline.
+A missing line ending between two simple declarations is diagnosed; the parser
+MUST NOT infer a separator from indentation or token adjacency.
 
 ## SYN-LEX-003 — Comments
 
-`//` begins a line comment. `/*` and `*/` delimit block comments, and
+`//` begins a line comment but does not consume its terminating logical newline.
+`/*` and `*/` delimit block comments, and
 block comments may nest. Delimiters inside text are ordinary characters. An
 unterminated block comment is one error from its opening delimiter to end of
 source.
@@ -69,20 +77,29 @@ in the first public contract.
 The v0 reserved words are:
 
 ```text
-neu module requires vocabulary namespace record let
-true false null absent ref secret_ref
+neu module requires vocabulary namespace record mut
+true false null ref secret_ref
 ```
 
-`Bool`, `Int`, `Decimal`, `Text`, `Null`, `Nullable`, `List`,
-`Ref`, and `SecretRef` are predeclared core type names and cannot be
-redeclared in the root namespace.
+`bool`, `num`, `string`, `List`, `Ref`, and `SecretRef` are predeclared
+core type names and cannot be redeclared in the root namespace.
 
 `::` joins name segments and qualification is explicit, left-to-right:
 
 ```neu
 acme::delivery::config
-flow::pipeline
+flow::Mode
 ```
+
+`.` selects or invokes a member rather than extending a qualification path:
+
+```neu
+flow.pipeline verify { }
+flow::Mode.strict
+```
+
+Future member calls may use `value.method()`. Built-in calls remain
+`ref(...)` and `secret_ref(...)`.
 
 v0 has no escaped identifiers. A conflicting name must be renamed, and a
 vocabulary must expose a legal source alias for any external name. Quoted
@@ -92,17 +109,18 @@ tools.
 ## SYN-LEX-006 — Delimiters and separators
 
 The delimiters are `()`, `[]`, `{}`, and type-application `<>`.
-Separators are `,`, `:`, `;`, `=`, `?`, and `::`:
+Separators are `,`, `:`, `=`, `?`, `::`, `.`, and logical newline:
 
 - `()` encloses arguments to built-in forms such as `ref(...)`;
 - `[]` constructs ordered lists;
-- `<>` encloses a type argument in `List<T>`, `Nullable<T>`, or
-  `Ref<T>` only;
+- `<>` encloses a type argument in `List<T>` or `Ref<T>` only;
 - `{}` encloses namespaces, records, domain declarations, and record values;
-- `:` separates a name/type or field/value;
+- `:` separates a field name from its constructed value;
 - `=` introduces a binding value or field default;
-- `?` marks an optional record field only; and
-- `::` qualifies names.
+- `?` after a declared variable or field name marks it nullable;
+- `::` qualifies modules, namespaces, types, and symbols;
+- `.` selects or invokes a member; and
+- logical newline terminates complete declaration-list items.
 
 `-` is recognized only as the immediately adjacent leading sign of a numeric
 literal in v0; it is not a subtraction operator. Whitespace between `-` and
@@ -126,30 +144,31 @@ logical value; original spelling remains only in provenance.
 v0 has no interpolation, raw string, or multiline string. A dollar-brace
 sequence is ordinary text.
 
-## SYN-LEX-008 — Scalars and absence
+## SYN-LEX-008 — Scalars and null
 
 | Category | v0 forms | Logical rule |
 | --- | --- | --- |
-| Boolean | `true`, `false` | Exactly two `Bool` values |
-| Integer | `0`, `17`, `-4`, `1_000` | Exact base-10 integer |
-| Decimal | `0.0`, `-2.50`, `1_000.25` | Exact base-10 numeric value |
-| Null | `null` | Sole value of `Null` |
-| Absence | `absent` | Explicit omission, not a value |
+| Boolean | `true`, `false` | Exactly two `bool` values |
+| Number | `0`, `17`, `-4`, `1_000.25` | Exact source number, automatically represented as compatible `int`, `uint`, or `float` |
+| String | `"text"` | Finite Unicode scalar sequence |
+| Null | `null` | The only explicit source null/empty literal; legal only in nullable positions |
 
 Underscores may occur only between digits. Leading zeroes other than `0` are
 invalid. A decimal needs digits on both sides of the point. v0 has no exponent,
 non-decimal base, `NaN`, or infinity.
 
-`Int` and `Decimal` are exact values bounded by the resource profile, not
-host integers or floating point. Overflow is therefore a limit diagnostic, not
-wraparound. Decimal logical equality is numeric, so `2.50` equals `2.5`;
-the original spelling and scale remain only in source provenance/presentation.
+`num` is the only source numeric type. The compiler automatically selects or
+converts `int`, `uint`, or `float` representations when an expected captured
+contract requires one. Automatic conversion must preserve value and range;
+overflow, invalid sign conversion, and precision loss are type diagnostics.
+Widths and floating formats come from the contract, never the host machine.
 
-`absent` is legal only in an optional position and differs from omission,
-`null`, and future deferred/unavailable results.
+There is no `absent` token or standalone null type. A field omitted because a
+declared default applies is structural omission, not a second source value.
 
 ## Required evidence
 
-Fixtures MUST cover BOM position, newline forms, nested comments, every escape,
-delimiter mismatch, missing separators, numeric boundaries, non-ASCII names,
-keyword collisions, and inputs below/at/above each lexical limit.
+Fixtures MUST cover BOM position, newline forms, nested comments, trailing line
+comments, every escape, delimiter mismatch, missing line endings/separators,
+numeric conversion boundaries, non-ASCII names, keyword collisions, and inputs
+below/at/above each lexical limit.

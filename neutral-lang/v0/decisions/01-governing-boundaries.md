@@ -64,18 +64,18 @@ fixtures, and compatibility/provenance analysis.
 
 Shape similarity alone is insufficient. Similar shapes with different behavior
 remain in separate vocabularies. v0 core syntax is limited to modules,
-namespaces, immutable bindings, nominal records, typed values, explicit
+namespaces, type-first bindings, nominal records, typed values, explicit
 references, vocabulary declarations, and documentation.
 
 The union of Flow and Neux keywords is explicitly rejected as a core design.
 
 ## SYN-GOV-004 — Core and vocabulary syntax
 
-Core declarations use unqualified reserved forms such as `record`, `let`,
+Core declarations use unqualified reserved forms such as `record`, `mut`,
 and `namespace`. A domain declaration kind MUST be vocabulary-qualified:
 
 ```neu
-flow::pipeline verify {
+flow.pipeline verify {
     config: ref(config),
 }
 ```

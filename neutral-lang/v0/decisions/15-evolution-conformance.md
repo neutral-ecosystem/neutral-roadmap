@@ -16,7 +16,6 @@ v0 has no infix operators or general precedence. Its value hierarchy is:
 ```text
 value
   = scalar
-  | absent
   | list
   | nominal-record
   | qualified-domain-value
@@ -25,8 +24,9 @@ value
   | secret-reference
 ```
 
-`::` belongs to qualified-name grammar, and leading minus belongs to a numeric
-literal. Delimiters determine nesting. Implementations cannot invent precedence.
+`::` belongs to qualified-name grammar, `.` selects or invokes a member, and
+leading minus belongs to a numeric literal. Delimiters determine nesting.
+Implementations cannot invent precedence.
 
 The specification records grammar version, definitions, Unicode/encoding
 assumptions, and a machine-readable fixture manifest.

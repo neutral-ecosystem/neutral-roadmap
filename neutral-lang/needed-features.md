@@ -187,16 +187,21 @@ readiness edge.
 ## 7. Values, types, and data contracts
 
 - **NL-VAL-001:** IR distinguishes literal values, structured values,
-  references, symbolic/deferred values, and explicitly absent values.
+  references, and symbolic/deferred values. Field presence and structural
+  omission are recorded separately; omission is not a second source value.
 - **NL-VAL-002:** Values can carry an explicit type or schema identity whose
-  owner and version are known.
-- **NL-VAL-003:** Required, optional, defaulted, nullable, and repeated values
-  are distinguishable.
+  owner and version are known. The core source scalar types are `num`, `string`,
+  and `bool`; `null` is admitted only by nullable positions. `int`, `uint`, and
+  `float` are automatically selected numeric representations, not additional
+  author-facing scalar declarations.
+- **NL-VAL-003:** Required, schema-optional, defaulted, nullable, and repeated
+  fields are distinguishable even though `null` is the only explicit source
+  null/empty literal.
 - **NL-VAL-004:** Records, collections, tagged alternatives, and opaque
   domain-owned values are representable without embedding application keywords
   in the Neutral core.
 - **NL-VAL-005:** Numeric ranges, precision, text/binary distinction, ordering,
-  duplicate-key behavior, and null/absence behavior are not left to an encoding
+  duplicate-key behavior, and null/omission behavior are not left to an encoding
   library's defaults.
 - **NL-VAL-006:** A value retains its declaration, origin, and transformation
   provenance sufficiently for a consumer diagnostic.
@@ -223,9 +228,10 @@ safe way to preserve symbolic intent without becoming the Flow evaluator.
 - **NL-EXP-003:** Inputs and results declare when and by which domain component
   they may become available; the compiler does not invent a Flow-specific set of
   phases.
-- **NL-EXP-004:** The representation distinguishes known, deferred, absent,
-  failed-to-evaluate, and indeterminate results where the owning profile needs
-  those states.
+- **NL-EXP-004:** The representation distinguishes known, `null`, deferred,
+  unavailable, failed-to-evaluate, and indeterminate results where the owning
+  profile needs those states. Structural omission is field-presence metadata,
+  not a result value.
 - **NL-EXP-005:** Evaluation dependencies are explicit and inspectable.
 - **NL-EXP-006:** Purity, determinism, possible external effects, and required
   capabilities are declared by the owning operation contract rather than

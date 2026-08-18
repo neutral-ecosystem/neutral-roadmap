@@ -17,7 +17,7 @@ accepts one symbolic name, not computed text. A target of type/kind `T`
 produces `Ref<T>` and lowers to target document/element identity, expected
 target kind, and provenance.
 
-Text equal to a declaration name remains text. References are never inferred
+`string` text equal to a declaration name remains text. References are never inferred
 from strings.
 
 ## SYN-REF-002 — Qualification
@@ -42,7 +42,7 @@ so:
 
 ```neu
 namespace checks {
-    let config: Text = "value";
+    string config = "value"
 }
 ```
 
@@ -53,7 +53,7 @@ different relationship kinds. Indentation never establishes either.
 ## SYN-REF-004 — Typed domain relationships
 
 ```neu
-flow::dependency check_after_build {
+flow.dependency check_after_build {
     from: ref(build),
     to: ref(check),
 }

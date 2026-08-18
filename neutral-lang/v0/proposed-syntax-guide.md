@@ -1,14 +1,10 @@
 # Proposed Neutral language v0 authoring guide
 
-Status: editable syntax proposal — revised toward a less Rust-like surface
+Status: working v0 authoring decision
 
-Purpose: show how people and a future GUI would write the complete proposed v0
-`.neu` surface. Edit this file first. After the syntax is approved, the
-[decision records](decisions/README.md), checklist, grammar, and examples should
-be synchronized with it.
-
-This revision intentionally differs from some existing decision records. Those
-records remain unchanged until this author-facing syntax is reviewed.
+Purpose: show how people and a future GUI write the complete v0 `.neu` surface.
+The [decision records](decisions/README.md), checklist answers, grammar, and
+examples must remain synchronized with this guide.
 
 ## 1. Current design direction
 
@@ -17,12 +13,15 @@ The revised surface follows these preferences:
 - declarations are type-first: `num x = 10`;
 - bindings are immutable unless prefixed with `mut`;
 - `num` is the preferred author-facing numeric type;
-- integer and decimal primitive representations remain compiler/IR concerns;
-- safe numeric promotion is automatic;
-- text uses `String`;
+- `int`, `uint`, and `float` representations remain compiler/IR and domain
+  contract concerns beneath `num`;
+- checked numeric conversion among those representations is automatic;
+- text uses `string`;
 - nullability uses `?` after the variable or field name;
-- there is no separate optional-field or `absent` syntax;
-- qualification uses `.` rather than Rust-like `::`; and
+- `null` is the only explicit source null/empty literal; there is no `absent`
+  token;
+- `::` qualifies modules, namespaces, types, and symbols;
+- `.` selects or invokes a member; and
 - Neutral remains a tool-abstraction language, not a general-purpose language.
 
 Three details need deliberate review:
@@ -32,14 +31,14 @@ Three details need deliberate review:
    real Flow and Neux need justifies it.
 2. Automatic numeric conversion is limited to exact or safely widening
    conversion. Silent precision loss is rejected.
-3. `String label?` means nullable, not optional. A record field must still be
+3. `string label?` means nullable, not optional. A record field must still be
    supplied unless it has a default.
 
 ## 2. Complete example
 
 ```neu
 neu "0.1"
-module acme.delivery
+module acme::delivery
 
 requires vocabulary flow {
     id: "org.neutral.flow",
@@ -50,9 +49,9 @@ requires vocabulary flow {
 
 /// Reusable configuration data.
 record ToolConfig {
-    String image,
-    String note?,
-    List<String> labels = [],
+    string image,
+    string note?,
+    List<string> labels = [],
 }
 
 /// Data containing symbolic references.
@@ -73,8 +72,8 @@ InvocationInput input = InvocationInput {
 
 namespace checks {
     flow.pipeline verify {
-        input: ref(acme.delivery.input),
-        mode: flow.Mode.strict,
+        input: ref(acme::delivery::input),
+        mode: flow::Mode.strict,
     }
 }
 ```
@@ -105,10 +104,10 @@ version, `latest`, or range.
 ### Module
 
 ```neu
-module acme.delivery
+module acme::delivery
 ```
 
-A module name is a dot-qualified logical name. It is not a file path, URL,
+A module name is a `::`-qualified logical name. It is not a file path, URL,
 package download instruction, or mutable version tag.
 
 v0 has no source-level import statement. The compiler request supplies the
@@ -144,7 +143,7 @@ Field order is not meaningful. The formatter writes `id`, `schema`,
  */
 
 /// Documentation attached to the next declaration.
-String label = "visible in generated documentation"
+string label = "visible in generated documentation"
 ```
 
 `//` and `/* ... */` are non-semantic comments. `///` attaches
@@ -162,18 +161,18 @@ v0 identifiers remain ASCII:
 Valid:
 
 ```neu
-String image_2 = "tool"
-String _internal_name = "value"
+string image_2 = "tool"
+string _internal_name = "value"
 ```
 
 Invalid:
 
 ```neu
-String 2image = "tool"
-String naïve = "value"
+string 2image = "tool"
+string naïve = "value"
 ```
 
-Identifiers are case-sensitive. Unicode display names belong in `String`
+Identifiers are case-sensitive. Unicode display names belong in `string`
 values. v0 has no quoted identifiers.
 
 Reserved core words are:
@@ -183,20 +182,28 @@ neu module requires vocabulary namespace record mut
 true false null ref secret_ref
 ```
 
-`bool`, `num`, `String`, `List`, `Ref`, and `SecretRef` are
+`bool`, `num`, `string`, `List`, `Ref`, and `SecretRef` are
 predeclared core type names and cannot be redeclared in the root namespace.
 
-Use `.` for qualification:
+Use `::` for module, namespace, type, and symbol qualification:
 
 ```neu
-checks.config
-acme.delivery.checks.config
-flow.pipeline
-flow.Mode.strict
+checks::config
+acme::delivery::checks::config
+flow::Mode
 ```
 
-The lexer distinguishes a decimal point between digits from a qualification
-point between identifiers.
+Use `.` when selecting a value/member or invoking a vocabulary-owned member:
+
+```neu
+flow.pipeline verify { }
+flow::Mode.strict
+```
+
+This keeps static ownership paths distinct from member access. Future calls may
+use forms such as `value.method()`, while ordinary built-ins remain `ref(...)`
+and `secret_ref(...)`. A decimal point occurs only between digits in a numeric
+literal, so it cannot be confused with `::` qualification.
 
 ## 6. Declaring variables and bindings
 
@@ -212,15 +219,15 @@ Examples:
 bool enabled = true
 num attempts = 3
 num ratio = 0.75
-String label = "build"
-List<String> labels = ["portable", "checked"]
+string label = "build"
+List<string> labels = ["portable", "checked"]
 SecretRef token = secret_ref("ci/token")
 ```
 
 There is no `let` keyword and no colon between name and type.
 
 A declared name creates the machine-facing symbolic identity within its module
-and namespace. Human display labels remain ordinary String fields. Renaming a
+and namespace. Human display labels remain ordinary `string` fields. Renaming a
 declaration changes its symbolic identity in v0.
 
 The declared type remains explicit. The following is invalid:
@@ -251,11 +258,18 @@ The restricted proposal is:
 
 - assignment must appear after the mutable declaration in the same lexical
   scope;
+- the assignment target is a local identifier, never a `::`-qualified name;
 - an assignment must preserve the declared type;
 - there are no compound assignments, increments, or mutation methods;
 - mutation happens only while compiling source;
 - the final emitted IR value is immutable; and
 - every assignment remains in source provenance.
+
+At the end of the lexical scope, the last valid assignment determines the
+binding's emitted value. Every `ref(...)` resolves to the binding identity and
+therefore observes that final emitted value; references are not value snapshots
+at their textual position. Reading a mutable binding before its declaration is
+invalid.
 
 This makes assignment order semantic for mutable bindings, unlike other
 declarations. That cost is why `mut` is not recommended for v0 without a
@@ -272,22 +286,27 @@ num negative = -4
 num grouped = 1_000_000
 ```
 
-Primitive numeric categories remain inside the compiler and IR: integer and
-exact decimal are portable categories, while binary float exists only when an
-explicit domain/target contract requires it. They are not preferred v0 source
-keywords. The source-level `num` type accepts integer- and fractional-shaped
-literals while preserving their exact value and conversion requirements.
+The source has only `num`; `int`, `uint`, and `float` are not author-facing type
+keywords. A numeric literal is captured exactly, and an expected domain or IR
+contract may require one of those representations. The compiler selects and
+converts the representation automatically rather than requiring a cast in
+source.
 
 Automatic numeric casting follows these rules:
 
-- integer to exact decimal is automatic;
-- smaller exact representations may widen automatically;
-- a conversion that overflows or loses precision is rejected;
-- decimal to integer is not automatic unless the value is exactly integral and
-  the receiving contract explicitly allows it;
+- a non-negative whole value may become `uint`, `int`, or `float` when the
+  receiving representation can preserve it;
+- a negative whole value may become `int` or `float` when representable;
+- a fractional value becomes `float` when required by the receiving contract;
+- `int`, `uint`, and `float` representations widen automatically when the
+  destination preserves the value;
+- narrowing, sign-changing, overflow, and precision-losing conversions are
+  rejected with a type diagnostic;
+- a fractional value becomes `int` or `uint` only when it is mathematically
+  integral and within range;
 - text never automatically converts to a number;
-- provider binary floating-point conversion is consumer-owned and may be
-  rejected when it cannot preserve the required value.
+- representation widths and floating-point formats come from the captured
+  domain contract; Neutral never guesses a host-machine width.
 
 Examples:
 
@@ -301,23 +320,39 @@ num not_supported = NaN
 num not_supported_either = infinity
 ```
 
+Automatic conversion examples, where the receiving vocabulary contract names
+the representation, are:
+
+| Source value | Expected representation | Result |
+| --- | --- | --- |
+| `10` | `uint32` | Accepted automatically |
+| `-4` | `uint32` | Rejected: invalid sign |
+| `10.0` | `int32` | Accepted automatically because it is integral |
+| `10.5` | `int32` | Rejected: fractional loss |
+| `0.5` | IEEE binary32 | Accepted automatically because it is exact |
+| `16_777_217` | IEEE binary32 | Rejected: precision loss |
+
 v0 numeric literals use decimal digits. Underscores may occur only between
 digits. Leading zeroes other than `0` are invalid. Fractional values require
 digits on both sides of the point. There is no exponent or non-decimal base.
 
-## 9. Other primitive types
+## 9. Primitive and opaque core types
 
 | Type | Example | Meaning |
 | --- | --- | --- |
 | `bool` | `true` | Boolean value |
 | `num` | `10.5` | Generic exact numeric value |
-| `String` | `"hello"` | Unicode text |
-| `SecretRef` | `secret_ref("id")` | Opaque secret request |
+| `string` | `"hello"` | Unicode text |
+| `SecretRef` | `secret_ref("id")` | Opaque secret request; not a primitive scalar |
+
+The primitive scalar types are exactly `num`, `string`, and `bool`. `List<T>`
+and `Ref<T>` are generic core types, named records are nominal types, and
+`SecretRef` is a security-sensitive opaque reference type.
 
 `null` has no standalone declared type. It is accepted only when the
 declaration or field name ends with `?`.
 
-There are no implicit conversions among `bool`, `String`, `SecretRef`,
+There are no implicit conversions among `bool`, `string`, `SecretRef`,
 records, lists, and references.
 
 ## 10. Nullable variables
@@ -325,7 +360,7 @@ records, lists, and references.
 Place `?` after the variable name:
 
 ```neu
-String label? = null
+string label? = null
 num result? = null
 ToolConfig config? = null
 ```
@@ -333,14 +368,14 @@ ToolConfig config? = null
 The same declarations may contain non-null values:
 
 ```neu
-String label? = "build"
+string label? = "build"
 num result? = 42
 ```
 
 Without `?`, null is invalid:
 
 ```neu
-String label = null // Invalid.
+string label = null // Invalid.
 ```
 
 There is no `Nullable<T>` type, optional declaration marker, or `absent`
@@ -351,10 +386,10 @@ value. Nullability does not mean omission.
 `List<T>` is ordered and homogeneous:
 
 ```neu
-List<String> names = ["build", "test"]
+List<string> names = ["build", "test"]
 List<num> values = [1, 2.5, 3]
 List<List<num>> matrix = [[1, 2], [3]]
-List<String> empty = []
+List<string> empty = []
 ```
 
 Order and duplicates are preserved. A trailing comma is allowed. v0 has no map,
@@ -363,7 +398,7 @@ set, tuple, or heterogeneous list.
 A nullable list places `?` after the variable:
 
 ```neu
-List<String> names? = null
+List<string> names? = null
 ```
 
 ## 12. Declaring record types
@@ -372,25 +407,25 @@ Record fields are type-first:
 
 ```neu
 record Config {
-    String image,
-    String note?,
-    List<String> labels = [],
+    string image,
+    string note?,
+    List<string> labels = [],
 }
 ```
 
 | Form | Meaning |
 | --- | --- |
-| `String name,` | Required and non-null |
-| `String name?,` | Required and nullable |
-| `String name = "default",` | Required field with omission default |
-| `List<String> names,` | Ordered repeated values |
+| `string name,` | Required and non-null |
+| `string name?,` | Required and nullable |
+| `string name = "default",` | Required field with omission default |
+| `List<string> names,` | Ordered repeated values |
 
 There is no optional field. A nullable field must still be supplied unless it
 has a default:
 
 ```neu
 record NullableDefaults {
-    String note? = null,
+    string note? = null,
 }
 ```
 
@@ -436,7 +471,7 @@ There is no anonymous record value.
 
 ```neu
 namespace checks {
-    String mode = "strict"
+    string mode = "strict"
 
     namespace internal {
         bool enabled = true
@@ -444,7 +479,7 @@ namespace checks {
 }
 ```
 
-The names are `checks.mode` and `checks.internal.enabled`. Namespaces do not
+The names are `checks::mode` and `checks::internal::enabled`. Namespaces do not
 create files, execution stages, OS namespaces, provider groups, or security
 zones.
 
@@ -459,8 +494,8 @@ Use `ref(...)` to link to a declaration:
 
 ```neu
 ref(config)
-ref(checks.config)
-ref(acme.delivery.checks.config)
+ref(checks::config)
+ref(acme::delivery::checks::config)
 ```
 
 If the target has type/kind `T`, the reference has type `Ref<T>`:
@@ -488,7 +523,7 @@ module in the captured closure. They never fetch it.
 SecretRef token = secret_ref("ci/signing-token")
 ```
 
-`SecretRef` is not `String`:
+`SecretRef` is not `string`:
 
 ```neu
 SecretRef wrong = "ci/signing-token" // Invalid.
@@ -519,7 +554,7 @@ Illustrative Flow-profile source:
 ```neu
 flow.pipeline verify {
     input: ref(input),
-    mode: flow.Mode.strict,
+    mode: flow::Mode.strict,
 }
 ```
 
@@ -536,14 +571,14 @@ pipeline verify {} // Invalid: no vocabulary owner.
 ## 18. Domain-owned types and enums
 
 ```neu
-flow.ArtifactRef artifact = flow.ArtifactRef {
+flow::ArtifactRef artifact = flow::ArtifactRef {
     value: "sha256:example",
 }
 
-flow.Mode mode = flow.Mode.strict
+flow::Mode mode = flow::Mode.strict
 ```
 
-The qualified enum value is not a String. The vocabulary bundle defines exact
+The qualified enum value is not a `string`. The vocabulary bundle defines exact
 schema and behavior versions, allowed variants, and must-understand behavior.
 Domain-owned values remain bounded data and cannot execute code.
 
@@ -571,33 +606,37 @@ its independent OS meaning.
 - `CRLF` and lone `CR` behave as logical `LF` while original bytes remain
   available for identity and source spans.
 - Indentation is not syntax.
-- A newline at delimiter depth zero terminates a complete simple declaration or
-  assignment.
-- Newlines inside `()`, `[]`, `{}`, and `<>` are ordinary whitespace.
-- A newline after an incomplete token such as `=`, `,`, or `.` continues
+- A physical newline terminates a complete header, simple declaration, or
+  assignment in a source or namespace declaration list.
+- A trailing `//` comment is trivia before that terminator, so
+  `num x = 10 // explanation` is one valid declaration.
+- Newlines inside value constructors, field lists, argument lists, list values,
+  and type arguments are ordinary whitespace. Namespace braces do not suppress
+  declaration-terminating newlines.
+- A newline after an incomplete token such as `=`, `,`, `::`, or `.` continues
   the construct.
 - A closing brace ends a braced declaration.
 - Fields and list items require commas.
 - A trailing comma is allowed and preferred in multiline forms.
-- Semicolons are not part of the proposed source grammar and are rejected.
+- Semicolons are not part of the source grammar and are rejected.
 - Two simple declarations cannot share one physical line.
 - Braces, brackets, parentheses, and generic angle brackets must match.
-- `.` qualifies names and also appears inside a numeric literal; token context
-  disambiguates the two.
+- `::` qualifies names. `.` selects or invokes a member and also appears inside
+  numeric literals; a numeric dot is the dot directly between decimal digits.
 
 The formatter uses four spaces, a default width of 100 columns, UTF-8, `LF`,
-one final newline, double-quoted Strings, and multiline trailing commas.
+one final newline, double-quoted strings, and multiline trailing commas.
 
 ## 21. String literals
 
 ```neu
-String message = "line one\nline two"
-String symbol = "\u{03BB}"
+string message = "line one\nline two"
+string symbol = "\u{03BB}"
 ```
 
-Double-quoted Strings support escaped backslash, quote, newline, carriage
+Double-quoted strings support escaped backslash, quote, newline, carriage
 return, tab, and Unicode scalar. v0 has no raw, multiline, or interpolated
-String.
+string.
 
 ## 22. Features with no source spelling
 
@@ -648,7 +687,7 @@ v0 still has no:
 - source-level imports;
 - maps, sets, tuples, unions, or core enums;
 - field shorthand or anonymous records;
-- raw, multiline, or interpolated String;
+- raw, multiline, or interpolated string;
 - arithmetic, boolean, or comparison operators;
 - functions, lambdas, loops, exceptions, or threads;
 - compound assignment or mutation methods;
@@ -666,25 +705,25 @@ language.
 | Goal | Revised syntax |
 | --- | --- |
 | Language version | `neu "0.1"` |
-| Module | `module acme.delivery` |
+| Module | `module acme::delivery` |
 | Vocabulary | `requires vocabulary flow { ... }` |
 | Immutable variable | `num x = 10` |
 | Mutable variable | `mut num x = 10` |
 | Reassignment | `x = 11` |
-| String | `String name = "value"` |
-| Nullable variable | `String name? = null` |
-| List | `List<String> names = ["one"]` |
-| Record | `record Config { String name, }` |
+| `string` | `string name = "value"` |
+| Nullable variable | `string name? = null` |
+| List | `List<string> names = ["one"]` |
+| Record | `record Config { string name, }` |
 | Record value | `Config config = Config { name: "value", }` |
-| Nullable field | `String note?,` |
-| Default field | `List<String> names = [],` |
+| Nullable field | `string note?,` |
+| Default field | `List<string> names = [],` |
 | Namespace | `namespace checks { ... }` |
-| Reference | `ref(checks.config)` |
+| Reference | `ref(checks::config)` |
 | Reference type | `Ref<Config>` |
 | Secret | `secret_ref("logical/id")` |
 | Domain declaration | `flow.pipeline verify { ... }` |
-| Domain value | `flow.ArtifactRef { ... }` |
-| Domain enum | `flow.Mode.strict` |
+| Domain value | `flow::ArtifactRef { ... }` |
+| Domain enum | `flow::Mode.strict` |
 | Documentation | `/// documentation` |
 
 ## 26. Compact grammar sketch
@@ -739,7 +778,7 @@ binding_declaration =
     [ "mut" ], type, nullable_name, "=", value, LINE_END ;
 
 assignment =
-    qualified_name, "=", value, LINE_END ;
+    identifier, "=", value, LINE_END ;
 
 nullable_name =
     identifier, [ "?" ] ;
@@ -772,7 +811,7 @@ nominal_value =
     type_name, "{", { value_field }, "}" ;
 
 qualified_enum_value =
-    vocabulary_member, ".", identifier ;
+    qualified_name, ".", identifier ;
 
 value_field =
     identifier, ":", value, "," ;
@@ -789,7 +828,7 @@ vocabulary_member =
 type_name = qualified_name ;
 
 qualified_name =
-    identifier, { ".", identifier } ;
+    identifier, { "::", identifier } ;
 ```
 
 Static validation—not grammar alone—enforces exactly one vocabulary `id`,
@@ -797,10 +836,12 @@ Static validation—not grammar alone—enforces exactly one vocabulary `id`,
 assignment rejection; type-preserving mutation; declaration uniqueness; and
 schema-owned domain fields.
 
-`LINE_END` is emitted for a physical newline at delimiter depth zero when the
-preceding tokens can complete the current header, declaration, or assignment.
-The lexer also emits a synthetic `LINE_END` before end-of-file when needed.
-It is suppressed inside delimiters and after syntactically incomplete tokens.
+`LINE_END` is emitted after a physical newline, including after a trailing line
+comment, when the current source or namespace declaration-list item is complete.
+It is suppressed inside value/type delimiters and after syntactically incomplete
+tokens. Namespace declaration braces establish a nested declaration-list mode;
+they do not suppress `LINE_END`. The lexer emits a synthetic `LINE_END` before
+end-of-file when needed.
 
 ## 27. How to revise this proposal
 
@@ -819,8 +860,8 @@ For the current requested style, the central examples are:
 num x = 10
 mut num counter = 0
 counter = 1
-String label = "hello"
-String nullable_label? = null
+string label = "hello"
+string nullable_label? = null
 ```
 
 Once these choices are finalized, the v0 decision records and the master/version

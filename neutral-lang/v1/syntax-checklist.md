@@ -27,7 +27,7 @@ parser example.
 ## 4. Declarations, bindings, and names
 
 - [ ] **SYN-DEC-008 · v1** — Define parameter declarations, result declarations, and their ordering and naming rules.
-- [ ] **SYN-DEC-009 · v1** — Define default values and required/optional parameters with an inspectable distinction from explicit absence.
+- [ ] **SYN-DEC-009 · v1** — Define default values and required/schema-optional parameters with an inspectable distinction among omission, default application, and explicit `null`.
 - [ ] **SYN-DEC-010 · v1** — Define nested declarations and local scope boundaries, if retained after corpus testing.
 
 ## 5. Type and schema notation
@@ -70,7 +70,7 @@ parser example.
 - [ ] **SYN-EXP-003 · v1** — Define call/application syntax and named versus positional argument policy.
 - [ ] **SYN-EXP-004 · v1** — Define grouping and precedence so no expression meaning depends on parser folklore.
 - [ ] **SYN-EXP-005 · v1** — Define boolean, comparison, and conditional-expression forms together with owning behavior contracts.
-- [ ] **SYN-EXP-006 · v1** — Define how known, deferred, absent, failed, and indeterminate values can be distinguished where a vocabulary supports them.
+- [ ] **SYN-EXP-006 · v1** — Define how known, `null`, deferred, unavailable, failed, and indeterminate values can be distinguished where a vocabulary supports them.
 - [ ] **SYN-EXP-007 · v1** — Define explicit references to earlier/domain-produced results without claiming the result exists at compile time.
 - [ ] **SYN-EXP-008 · v1** — Define the syntax boundary between compiler-evaluable pure core operations and consumer-evaluated domain operations.
 
@@ -119,4 +119,3 @@ parser example.
 ## Version completion rule
 
 v1 syntax is complete only when v0 remains conformant, every new construct preserves provenance and bounded validation, and domain behavior remains owned by Flow or Neux rather than the compiler.
-

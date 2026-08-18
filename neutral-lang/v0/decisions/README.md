@@ -1,6 +1,6 @@
 # Neutral language v0 syntax decisions
 
-Status: proposed decision baseline
+Status: working v0 decision baseline
 
 These files answer every item in
 [the v0 syntax checklist](../syntax-checklist.md), grouped by its section.
@@ -37,8 +37,8 @@ applications.
 The decision set uses this shape for examples:
 
 ```neu
-neu "0.1";
-module acme::delivery;
+neu "0.1"
+module acme::delivery
 
 requires vocabulary flow {
     id: "org.neutral.flow",
@@ -48,30 +48,35 @@ requires vocabulary flow {
 }
 
 record ImageConfig {
-    image: Text,
-    note?: Text,
-    labels: List<Text> = [],
+    string image,
+    string note?,
+    List<string> labels = [],
 }
 
-let base: ImageConfig = ImageConfig {
+ImageConfig base = ImageConfig {
     image: "example.invalid/tool:1",
+    note: null,
     labels: ["portable"],
-};
+}
 
 namespace checks {
-    flow::pipeline verify {
+    flow.pipeline verify {
         config: ref(acme::delivery::base),
     }
 }
 ```
 
-This is a language-design fixture, not a claim that `flow::pipeline` has any
+This is a language-design fixture, not a claim that `flow.pipeline` has any
 particular CI/CD meaning. The Flow vocabulary owns that declaration kind and
 the Flow consumer owns its interpretation.
 
 ## Deliberate v0 exclusions
 
-v0 has no mutation, imports written in source, executable macros, general loops,
-anonymous functions, implicit network lookup, native plugins, shell execution,
-provider credentials, or runtime lifecycle syntax. Later checklists may add
-composition and symbolic structure, but only through their recorded decisions.
+v0 has no unmarked mutation, imports written in source, executable macros,
+general loops, anonymous functions, implicit network lookup, native plugins,
+shell execution, provider credentials, or runtime lifecycle syntax. Later
+checklists may add composition and symbolic structure, but only through their
+recorded decisions.
+
+Bindings are immutable by default. The explicitly marked, local-only `mut`
+form remains provisional until a cross-domain case justifies retaining it.

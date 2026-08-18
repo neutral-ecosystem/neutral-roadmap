@@ -35,7 +35,7 @@ Proposed answers: [lexical and source-text decisions](decisions/02-lexical-sourc
 - [ ] **SYN-LEX-005 · v0** — Define reserved words, contextual words, qualified names, and the escape mechanism for conflicting names if one exists.
 - [ ] **SYN-LEX-006 · v0** — Define delimiter pairs, separators, optional versus required terminators, and trailing-separator rules.
 - [ ] **SYN-LEX-007 · v0** — Define ordinary text literals, escapes, invalid escape handling, and Unicode scalar behavior.
-- [ ] **SYN-LEX-008 · v0** — Define integer, decimal, boolean, and explicit null/absence spellings without inheriting host-language range or precision rules.
+- [ ] **SYN-LEX-008 · v0** — Define `num`, `string`, `bool`, and `null` spellings without inheriting host-language range or precision rules; v0 has no second `absent` value.
 
 ## 3. Documents, modules, imports, and profiles
 
@@ -51,7 +51,7 @@ Proposed answers: [document and profile decisions](decisions/03-documents-module
 Proposed answers: [declaration and binding decisions](decisions/04-declarations-bindings-names.md).
 
 - [ ] **SYN-DEC-001 · v0** — Define the common shape of a named declaration and the distinction between stable machine identity and display name.
-- [ ] **SYN-DEC-002 · v0** — Define variable/binding declaration syntax and decide that bindings are immutable unless a cross-domain corpus proves mutation is required.
+- [ ] **SYN-DEC-002 · v0** — Define type-first binding syntax without `let`; bindings are immutable by default and any explicit `mut` form requires cross-domain evidence and deterministic lowering.
 - [ ] **SYN-DEC-003 · v0** — Define explicit type/schema annotations and the limited positions, if any, where type inference is permitted.
 - [ ] **SYN-DEC-004 · v0** — Define domain-owned declaration kinds without adding their names as Neutral core keywords.
 - [ ] **SYN-DEC-005 · v0** — Define namespace declaration and qualification syntax.
@@ -62,10 +62,10 @@ Proposed answers: [declaration and binding decisions](decisions/04-declarations-
 
 Proposed answers: [type and schema decisions](decisions/05-type-schema-notation.md).
 
-- [ ] **SYN-TYP-001 · v0** — Define syntax for the minimal scalar types and their exact value domains.
+- [ ] **SYN-TYP-001 · v0** — Define the primitive scalar set as `num`, `string`, and `bool`; define `null` as a nullable-position literal and `int`/`uint`/`float` as automatically selected numeric representations.
 - [ ] **SYN-TYP-002 · v0** — Define record/structured-value type syntax, field names, field order, and duplicate-field diagnostics.
 - [ ] **SYN-TYP-003 · v0** — Define homogeneous collection type syntax and whether collection order is part of the type contract.
-- [ ] **SYN-TYP-004 · v0** — Distinguish required, optional, nullable, defaulted, and repeated fields in type notation.
+- [ ] **SYN-TYP-004 · v0** — Distinguish required, nullable, defaulted, and repeated fields in type notation, and document schema-owned omission without adding an `absent` source value.
 - [ ] **SYN-TYP-005 · v0** — Define named type and schema references with vocabulary/package qualification.
 - [ ] **SYN-TYP-006 · v0** — Define opaque domain-owned types that remain inspectable and versioned without exposing consumer semantics.
 
@@ -76,7 +76,7 @@ Proposed answers: [literal and value decisions](decisions/06-literal-values.md).
 - [ ] **SYN-VAL-001 · v0** — Define scalar literal construction and overflow, precision, and invalid-literal diagnostics.
 - [ ] **SYN-VAL-002 · v0** — Define record value construction, field association, trailing separators, and duplicate fields.
 - [ ] **SYN-VAL-003 · v0** — Define ordered collection value construction and empty-collection type disambiguation.
-- [ ] **SYN-VAL-004 · v0** — Define explicit absence separately from null and from an unavailable/deferred result.
+- [ ] **SYN-VAL-004 · v0** — Define `null` as the only explicit source null/empty literal and distinguish it from structural omission/default application and unavailable/deferred results.
 - [ ] **SYN-VAL-005 · v0** — Define symbolic reference values as syntax distinct from ordinary text.
 - [ ] **SYN-VAL-006 · v0** — Define qualified tagged/enum value construction without relying on unscoped strings.
 - [ ] **SYN-VAL-007 · v0** — Define domain-owned typed value construction and schema-linked diagnostics.

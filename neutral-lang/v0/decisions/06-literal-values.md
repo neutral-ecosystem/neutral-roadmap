@@ -7,12 +7,14 @@ Answers: `SYN-VAL-001` through `SYN-VAL-008`
 ## SYN-VAL-001 — Scalar construction
 
 Scalar forms follow `SYN-LEX-007` and `SYN-LEX-008` and are checked against
-an explicit expected type. There are no implicit conversions or host overflow
-rules.
+an explicit expected type. `num` automatically converts to a captured
+contract's `int`, `uint`, or `float` representation when value and range are
+preserved. Host-machine widths and overflow rules never participate.
 
-Integers and decimals are exact within configured digit/scale limits. Text is a
-Unicode scalar sequence after escape processing. Invalid spelling, wrong type,
-and resource exhaustion are separate diagnostics.
+Numeric source values are exact within configured digit/scale limits. A
+`string` is a Unicode scalar sequence after escape processing. Invalid spelling,
+wrong type, failed numeric conversion, and resource exhaustion are separate
+diagnostics.
 
 ## SYN-VAL-002 — Record construction
 
@@ -42,17 +44,17 @@ Every element matches one expected `List<T>` type. Order and duplicates are
 preserved. An empty list needs an expected type. There is no implicit set
 behavior, flattening, heterogeneous element type, or comma elision.
 
-## SYN-VAL-004 — Omission, absence, null, unavailability
+## SYN-VAL-004 — Omission, null, and unavailability
 
-- An omitted optional field has no source entry.
-- `absent` is an explicit absence marker legal only where optional.
-- `null` is a value legal only for `Null` or `Nullable<T>`.
+- A field with a default may have no source entry.
+- `null` is the only explicit source null/empty literal and is legal only after a
+  nullable declaration or field name marked with `?`.
 - Deferred/unavailable is not constructible in v0.
 
-The compiler preserves omission versus explicit absence in provenance and as
-distinct IR states when the logical model requires it. A default applies to
-omission, not explicit absence. A domain schema allowing optional defaults must
-define the interaction.
+The compiler preserves structural omission/default application versus explicit
+`null` in provenance and IR. v0 has no `absent` token and no optional-field
+marker. Domain-owned optional fields may be omitted only when their captured
+schema permits it; omission is still not a source value.
 
 ## SYN-VAL-005 — Explicit references
 
@@ -72,7 +74,7 @@ execution dependency.
 v0 core has no enum declaration, but a vocabulary may expose a closed enum/tag:
 
 ```neu
-flow::Mode::strict
+flow::Mode.strict
 ```
 
 The bundle defines type, variants, behavior version, and unknown policy.
@@ -99,6 +101,7 @@ bindings and fields and improves source maps/migrations.
 
 ## Required evidence
 
-Fixtures MUST cover scalar mismatch, every record error, empty/heterogeneous
-lists, omission/absence/null, unresolved/wrong-kind references, unknown enum
+Fixtures MUST cover scalar mismatch, automatic numeric conversion boundaries,
+every record error, empty/heterogeneous lists, omission/null,
+unresolved/wrong-kind references, unknown enum
 variants, invalid domain values, and shorthand rejection.

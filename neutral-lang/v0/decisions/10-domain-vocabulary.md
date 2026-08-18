@@ -9,7 +9,7 @@ Answers: `SYN-DOM-001` through `SYN-DOM-006`
 Domain declarations use a vocabulary alias and bundle-defined kind:
 
 ```neu
-flow::pipeline verify {
+flow.pipeline verify {
     config: ref(config),
 }
 ```
@@ -76,14 +76,14 @@ feature; otherwise unknown fields are errors.
 
 ## SYN-DOM-005 — Typed fields rather than extension maps
 
-Domain bodies and values use core scalar, record, list, null/absence, reference,
+Domain bodies and values use core scalar, record, list, null, reference,
 secret-reference, enum, and qualified domain-value forms. Every field has a
 schema identity and expected type.
 
 The following design is rejected:
 
 ```neu
-flow::pipeline verify {
+flow.pipeline verify {
     extensions: {
         arbitrary_provider_blob: "...",
     },

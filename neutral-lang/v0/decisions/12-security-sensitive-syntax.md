@@ -22,7 +22,7 @@ credential, or broker response. neutral-lang never resolves the reference.
 
 ## SYN-SEC-002 — Secret references are not text
 
-`SecretRef` is not `Text` and has no implicit conversion, interpolation,
+`SecretRef` is not `string` and has no implicit conversion, interpolation,
 concatenation, formatting, equality display, or ordinary serialization as text.
 v0 has no interpolation in any case. A quoted value
 `"ci/signing-token"` is merely text and cannot satisfy `SecretRef`.

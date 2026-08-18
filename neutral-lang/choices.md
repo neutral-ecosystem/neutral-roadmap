@@ -126,7 +126,8 @@ are:
 
 - stable declaration identity and human-readable names;
 - namespaces, scopes, and resolved typed references;
-- typed scalar and structured values, including explicit absence;
+- typed scalar and structured values, including explicit `null` and structural
+  field presence/omission without a second absence value;
 - containment and typed relationships without execution meaning;
 - immutable documents and deterministic validation;
 - source provenance, origin chains, and structured diagnostics;

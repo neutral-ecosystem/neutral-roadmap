@@ -49,7 +49,7 @@ accepts one example.
 - [ ] **SYN-LEX-005 · v0** — Define reserved words, contextual words, qualified names, and the escape mechanism for conflicting names if one exists.
 - [ ] **SYN-LEX-006 · v0** — Define delimiter pairs, separators, optional versus required terminators, and trailing-separator rules.
 - [ ] **SYN-LEX-007 · v0** — Define ordinary text literals, escapes, invalid escape handling, and Unicode scalar behavior.
-- [ ] **SYN-LEX-008 · v0** — Define integer, decimal, boolean, and explicit null/absence spellings without inheriting host-language range or precision rules.
+- [ ] **SYN-LEX-008 · v0** — Define `num`, `string`, `bool`, and `null` spellings without inheriting host-language range or precision rules; do not add a second `absent` source value.
 - [ ] **SYN-LEX-009 · v1** — Decide whether raw and multiline text literals exist and specify indentation stripping, delimiter collision, and newline preservation.
 - [ ] **SYN-LEX-010 · v1** — Decide whether binary literals exist in core or only through typed/domain constructors, including size and display rules.
 - [ ] **SYN-LEX-011 · v2** — Decide whether text interpolation exists; if it does, define its boundary from symbolic expressions and domain escaping.
@@ -80,17 +80,17 @@ accepts one example.
 - [ ] **SYN-DEC-006 · v0** — Define duplicate declaration, shadowing, and reserved-name diagnostics.
 - [ ] **SYN-DEC-007 · v0** — Define whether references may appear before declarations and ensure source order is not accidental execution order.
 - [ ] **SYN-DEC-008 · v1** — Define parameter declarations, result declarations, and their ordering and naming rules.
-- [ ] **SYN-DEC-009 · v1** — Define default values and required/optional parameters with an inspectable distinction from explicit absence.
+- [ ] **SYN-DEC-009 · v1** — Define default values and required/schema-optional parameters with an inspectable distinction among omission, default application, and explicit `null`.
 - [ ] **SYN-DEC-010 · v1** — Define nested declarations and local scope boundaries, if retained after corpus testing.
 - [ ] **SYN-DEC-011 · v2** — Define declaration modifiers and annotations with deterministic ordering, duplication, and conflict rules.
 - [ ] **SYN-DEC-012 · v2** — Decide whether declaration aliases exist and how alias origin remains distinguishable from authoritative identity.
 
 ## 5. Type and schema notation
 
-- [ ] **SYN-TYP-001 · v0** — Define syntax for the minimal scalar types and their exact value domains.
+- [ ] **SYN-TYP-001 · v0** — Define the primitive scalar set as `num`, `string`, and `bool`; define `null` as a nullable-position literal and `int`/`uint`/`float` as automatically selected numeric representations.
 - [ ] **SYN-TYP-002 · v0** — Define record/structured-value type syntax, field names, field order, and duplicate-field diagnostics.
 - [ ] **SYN-TYP-003 · v0** — Define homogeneous collection type syntax and whether collection order is part of the type contract.
-- [ ] **SYN-TYP-004 · v0** — Distinguish required, optional, nullable, defaulted, and repeated fields in type notation.
+- [ ] **SYN-TYP-004 · v0** — Distinguish required, nullable, defaulted, and repeated fields in source notation, and document schema-owned omission without an `absent` value.
 - [ ] **SYN-TYP-005 · v0** — Define named type and schema references with vocabulary/package qualification.
 - [ ] **SYN-TYP-006 · v0** — Define opaque domain-owned types that remain inspectable and versioned without exposing consumer semantics.
 - [ ] **SYN-TYP-007 · v1** — Define tagged-alternative/union syntax with exhaustive tag identity and unknown-tag behavior.
@@ -107,7 +107,7 @@ accepts one example.
 - [ ] **SYN-VAL-001 · v0** — Define scalar literal construction and overflow, precision, and invalid-literal diagnostics.
 - [ ] **SYN-VAL-002 · v0** — Define record value construction, field association, trailing separators, and duplicate fields.
 - [ ] **SYN-VAL-003 · v0** — Define ordered collection value construction and empty-collection type disambiguation.
-- [ ] **SYN-VAL-004 · v0** — Define explicit absence separately from null and from an unavailable/deferred result.
+- [ ] **SYN-VAL-004 · v0** — Define `null` as the only explicit source null/empty literal and distinguish it from structural omission/default application and unavailable/deferred results.
 - [ ] **SYN-VAL-005 · v0** — Define symbolic reference values as syntax distinct from ordinary text.
 - [ ] **SYN-VAL-006 · v0** — Define qualified tagged/enum value construction without relying on unscoped strings.
 - [ ] **SYN-VAL-007 · v0** — Define domain-owned typed value construction and schema-linked diagnostics.
@@ -154,7 +154,7 @@ accepts one example.
 - [ ] **SYN-EXP-003 · v1** — Define call/application syntax and named versus positional argument policy.
 - [ ] **SYN-EXP-004 · v1** — Define grouping and precedence so no expression meaning depends on parser folklore.
 - [ ] **SYN-EXP-005 · v1** — Define boolean, comparison, and conditional-expression forms together with owning behavior contracts.
-- [ ] **SYN-EXP-006 · v1** — Define how known, deferred, absent, failed, and indeterminate values can be distinguished where a vocabulary supports them.
+- [ ] **SYN-EXP-006 · v1** — Define how known, `null`, deferred, unavailable, failed, and indeterminate values can be distinguished where a vocabulary supports them.
 - [ ] **SYN-EXP-007 · v1** — Define explicit references to earlier/domain-produced results without claiming the result exists at compile time.
 - [ ] **SYN-EXP-008 · v1** — Define the syntax boundary between compiler-evaluable pure core operations and consumer-evaluated domain operations.
 - [ ] **SYN-EXP-009 · v2** — Define short-circuit behavior notation or make it entirely part of an identified operation contract.

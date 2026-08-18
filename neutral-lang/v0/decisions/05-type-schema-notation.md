@@ -8,27 +8,30 @@ Answers: `SYN-TYP-001` through `SYN-TYP-006`
 
 | Type | Domain |
 | --- | --- |
-| `Bool` | `true` or `false` |
-| `Int` | Exact integer within resource limits |
-| `Decimal` | Exact normalized base-10 numeric value within limits |
-| `Text` | Finite Unicode scalar sequence |
-| `Null` | The sole value `null` |
+| `bool` | `true` or `false` |
+| `num` | Exact source number, automatically represented as compatible `int`, `uint`, or `float` |
+| `string` | Finite Unicode scalar sequence |
 
-There is no implicit scalar conversion. `Int` does not become `Decimal`,
-text does not become a number, and `null` does not inhabit every type.
+Numeric conversion among contract-required `int`, `uint`, and `float`
+representations is automatic when it preserves value and range. Lossy,
+overflowing, or invalid-sign conversion is rejected. `string` does not become a
+number, and `null` inhabits only declarations or fields marked nullable.
 
 `Ref<T>` is a predeclared typed symbolic link to a declaration of type/kind
 `T`; only `ref(...)` constructs it. `SecretRef` is a separate opaque
 reference type, is not a scalar, and has no literal value. Only
 `secret_ref(...)` constructs it under the security rules in section 12.
 
+Thus the primitive scalar set is exactly `num`, `string`, and `bool`; `null` is
+a literal admitted by nullable positions, not a fourth declared scalar type.
+
 ## SYN-TYP-002 — Nominal records
 
 ```neu
 record ImageConfig {
-    image: Text,
-    note?: Text,
-    labels: List<Text> = [],
+    string image,
+    string note?,
+    List<string> labels = [],
 }
 ```
 
@@ -40,7 +43,7 @@ but does not affect logical type equality. v0 has no anonymous structural type.
 
 `List<T>` is the only v0 collection. It is homogeneous and ordered; duplicates
 are allowed. `T` may itself be a scalar, named record, qualified domain type,
-nullable type, reference type, or list, within nesting limits.
+reference type, or list, within nesting limits.
 
 Maps, sets, tuples, and heterogeneous lists are deferred. A domain can use a
 named entry record inside a list in v0.
@@ -49,15 +52,15 @@ named entry record inside a list in v0.
 
 | Meaning | Syntax |
 | --- | --- |
-| Required | `name: T` |
-| Optional | `name?: T` |
-| Nullable | `name: Nullable<T>` |
-| Defaulted | `name: T = value` |
-| Repeated/ordered | `name: List<T>` |
+| Required | `T name` |
+| Nullable | `T name?` |
+| Defaulted | `T name = value` |
+| Repeated/ordered | `List<T> name` |
 
-`Nullable<T>` adds `null` but not omission. Optionality adds omission but
-not null unless combined with `Nullable<T>`. Defaults apply only to omitted
-fields. v0 rejects optional fields with defaults as redundant/ambiguous.
+`?` adds `null` but not omission. A nullable field remains required unless it
+has a default. v0 has no optional-field marker, `Nullable<T>` spelling,
+standalone null type, or `absent` value. Defaults apply only when a field has no
+source entry; structural omission is not another source value.
 Repetition is a type, not a modifier.
 
 ## SYN-TYP-005 — Named references
@@ -65,10 +68,9 @@ Repetition is a type, not a modifier.
 Type references are identifiers or qualified names:
 
 ```neu
-let local: ImageConfig =
-    ImageConfig { image: "x", labels: [] };
-let shared: acme::common::ImageConfig =
-    acme::common::ImageConfig { image: "x", labels: [] };
+ImageConfig local = ImageConfig { image: "x", labels: [] }
+acme::common::ImageConfig shared =
+    acme::common::ImageConfig { image: "x", labels: [] }
 ```
 
 Resolution produces typed identity, not retained name text. Unknown, ambiguous,
@@ -91,6 +93,6 @@ provenance, and required-feature support. Unknown required types fail closed.
 
 ## Required evidence
 
-Fixtures MUST cover scalars, no implicit conversion, nominal mismatch,
-duplicates, every optional/null/default combination, empty/nested lists,
+Fixtures MUST cover scalars, automatic numeric conversions and their failures,
+nominal mismatch, duplicates, every null/default combination, empty/nested lists,
 wrong-kind type references, and unsupported required domain types.

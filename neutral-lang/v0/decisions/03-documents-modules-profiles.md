@@ -9,7 +9,7 @@ Answers: `SYN-DOC-001` through `SYN-DOC-004`
 Every source unit MUST begin, after trivia, with:
 
 ```neu
-neu "0.1";
+neu "0.1"
 ```
 
 The value is an exact language-behavior version, not a range. Every unit states
@@ -31,7 +31,8 @@ vocabulary requirements*
 declaration*
 ```
 
-Arbitrary values cannot appear at root; a root value must be named by `let`.
+Arbitrary values cannot appear at root; a root value must use an explicit
+type-first declaration such as `num retries = 3`.
 Vocabulary requirements precede declarations. Declaration order is presentation
 order, not execution order or precedence. The root is not an implicit Flow
 pipeline or Neux script.
@@ -66,7 +67,7 @@ alias in a v0 unit.
 Every unit declares one logical module:
 
 ```neu
-module acme::delivery;
+module acme::delivery
 ```
 
 A module is one or more identifiers joined by `::`. It is a logical name, not
