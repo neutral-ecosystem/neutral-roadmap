@@ -7,9 +7,12 @@ Answers: `SYN-VAL-001` through `SYN-VAL-008`
 ## SYN-VAL-001 — Scalar construction
 
 Scalar forms follow `SYN-LEX-007` and `SYN-LEX-008` and are checked against
-an explicit expected type. `num` automatically converts to a captured
-contract's `int`, `uint`, or `float` representation when value and range are
-preserved. Host-machine widths and overflow rules never participate.
+an explicit expected type. Source `num` is an exact arbitrary-precision base-10
+rational within configured digit/scale limits. Integer and decimal targets
+require exact conversion. A named IEEE binary target requires the vocabulary
+contract to select exact conversion or deterministic round-to-nearest,
+ties-to-even; absent policy fails closed. Host-machine numeric types, widths,
+rounding modes, locale, and overflow rules never participate.
 
 Numeric source values are exact within configured digit/scale limits. A
 `string` is a Unicode scalar sequence after escape processing. Invalid spelling,
@@ -60,7 +63,27 @@ modifier. A vocabulary-owned field follows the same rule as a Neutral record
 field: it may be omitted only when its captured schema supplies a default.
 Omission is still not a source value.
 
-## SYN-VAL-005 — Explicit references
+## SYN-VAL-005 — Binding values and identity references
+
+An ordinary binding name in value position reads that binding's immutable
+logical value:
+
+```neu
+string image = "example.invalid/tool:1"
+string image2 = image
+List<string> images = [image, image2]
+
+ImageConfig config = {
+    image: image,
+}
+```
+
+The name may be qualified. It MUST resolve to a value binding, and its declared
+type must be compatible with the expected position. It creates a static
+value-dependency edge, not an identity relationship. Forward value dependencies
+are allowed; every cycle in their graph is rejected before evaluation.
+
+`ref(...)` is deliberately different:
 
 ```neu
 ref(config)
@@ -68,12 +91,11 @@ ref(checks::config)
 ref(acme::delivery::checks::config)
 ```
 
-An identifier in value position is not an implicit reference. The target MUST
-be a value binding. If that binding has declared type `T`, `ref(...)` has type
-`Ref<T>` and lowers to a resolved IR link, never text or the target's copied
-value. Record/type declarations, namespaces, modules, and vocabulary namespaces
-are wrong-kind targets. A reference does not make the link an execution
-dependency.
+If the target binding has declared type `T`, `ref(...)` has type `Ref<T>` and
+lowers to a resolved IR identity link, never text or the target's copied value.
+Record/type declarations, namespaces, modules, and vocabulary namespaces are
+wrong-kind targets for both forms. `image` means value reuse; `ref(image)` means
+declaration identity. Neither form creates execution ordering.
 
 ## SYN-VAL-006 — Qualified vocabulary static values
 
@@ -106,14 +128,17 @@ execute code or perform lookup.
 
 ## SYN-VAL-008 — Record shorthand
 
-v0 rejects record shorthand. Authors write `image: ref(image)` rather than an
-isolated `image`. Explicit association prevents confusion between local
-bindings and fields and improves source maps/migrations.
+v0 rejects record shorthand. Authors write `image: image` for ordinary value
+reuse or `input: ref(input)` for an identity link rather than an isolated field
+name. Explicit field association prevents confusion between field selection and
+binding resolution and improves source maps/migrations.
 
 ## Required evidence
 
-Fixtures MUST cover scalar mismatch, automatic numeric conversion boundaries,
+Fixtures MUST cover scalar mismatch, exact and explicitly rounded numeric
+conversion boundaries,
 every contextual-record error including repeated/absent/ambiguous expected
-types, empty/heterogeneous lists, omission/null,
-unresolved/wrong-kind references, unknown enum variants, invalid vocabulary-owned
-values, and shorthand rejection.
+types, binding values inside records/lists, forward value dependencies, static
+value-dependency cycles, empty/heterogeneous lists, omission/null, unresolved
+and wrong-kind value/identity references, unknown enum variants, invalid
+vocabulary-owned values, and shorthand rejection.

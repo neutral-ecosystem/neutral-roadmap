@@ -63,15 +63,15 @@ fixtures, and compatibility/provenance analysis.
 
 Shape similarity alone is insufficient. Similar shapes with different behavior
 remain in separate vocabularies. v0 core syntax is limited to modules,
-namespaces, type-first bindings, nominal records, typed values, explicit
+namespaces, immutable type-first bindings, nominal records, typed values, explicit
 references, vocabulary declarations, and comments.
 
 The union of Flow and Neux keywords is explicitly rejected as a core design.
 
 ## SYN-GOV-004 — Core and vocabulary syntax
 
-Core declarations use unqualified reserved forms such as `record`, `mut`,
-and `namespace`. Vocabulary-owned types use the same type-first binding grammar
+Core declarations use unqualified reserved forms such as `record` and
+`namespace`. Vocabulary-owned types use the same type-first binding grammar
 as core and local types and MUST be namespace-qualified:
 
 ```neu
@@ -116,5 +116,6 @@ A syntax item may be checked only when all of these exist:
 - public IR/consumer conformance evidence where the construct reaches IR.
 
 An implementation or example alone is not a specification. These records answer
-the design questions but do not yet supply implementation and fixtures, so the
-parent checklist remains unchecked.
+the design questions and include an initial fixture set, but do not yet supply
+the implementation or complete conformance corpus, so the parent checklist
+remains unchecked.

@@ -7,11 +7,11 @@ Answers: `SYN-TOL-001` and `SYN-TOL-002`
 ## SYN-TOL-001 — No documentation attachment in v0
 
 v0 has no documentation-comment or documentation-annotation production.
-`//` and `/// ... ///` are non-semantic comments and never attach to a following
+`//` and `/* ... */` are non-semantic comments and never attach to a following
 module, vocabulary `use`, declaration, or field.
 
 ```neu
-/// Configuration note only, not IR documentation. ///
+/* Configuration note only, not IR documentation. */
 record Config {
     // Human-facing label is a domain value, not symbol identity.
     string label,

@@ -13,7 +13,7 @@ Codes use `NL-SYN-<CLASS>-<NUMBER>`:
 | `ENC` | Encoding and invalid bytes |
 | `LEX` | Tokens, literals, comments, delimiters |
 | `PAR` | Malformed or misplaced grammar |
-| `NAM` | Unknown, duplicate, ambiguous, inaccessible names |
+| `NAM` | Unknown, duplicate, ambiguous, inaccessible names and value-dependency cycles |
 | `KND` | Resolved name has wrong kind |
 | `TYP` | Core type/value mismatch |
 | `DOM` | Vocabulary payload or placement |
@@ -70,10 +70,11 @@ If invalid input admits competing recovery trees, emit
 `NL-SYN-PAR-AMBIGUOUS` over the smallest distinguishing span and no
 authoritative IR. Do not silently select the first parser alternative.
 
-The ambiguity corpus covers keyword boundaries, `::` qualified names, `.`
-vocabulary-static selection versus forbidden value member access, negative
-numbers, contextual braced values, postfix nullable types, trailing comments,
-and missing line endings/separators.
+The ambiguity corpus covers keyword boundaries, `::` qualified ordinary value
+uses, `.` vocabulary-static selection versus forbidden value member access,
+ordinary `name` value use versus `ref(name)` identity linking, negative numbers,
+contextual braced values, postfix nullable types, trailing comments, and missing
+line endings/separators.
 
 ## SYN-DIA-006 — Example obligations
 
@@ -81,8 +82,9 @@ Every production needs at least two valid cases, invalid token/structure cases,
 wrong-name/kind/type cases where applicable, a misleading lookalike, empty and
 limit boundaries, exact expected codes/spans, and expected recovery behavior.
 
-Examples are machine-readable fixtures linked from specification. Prose alone
-does not satisfy this item.
+Examples are machine-readable fixtures linked from specification. The initial
+set is indexed in [the fixture README](../fixtures/README.md). Prose alone does
+not satisfy this item.
 
 ## Consumer boundary
 

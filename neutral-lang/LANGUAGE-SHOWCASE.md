@@ -26,10 +26,10 @@ use Flow
 
 // One-line comments are non-semantic trivia.
 
-///
+/*
 Block comments can span lines.
 They do not become documentation or IR data.
-///
+*/
 
 record ToolConfig {
     string image,
@@ -44,7 +44,7 @@ record InvocationInput {
     SecretRef<string> token,
 }
 
-// Immutable bindings are the default.
+// Every binding is immutable.
 bool enabled = true
 num attempts = 3
 num ratio = 0.75
@@ -52,14 +52,18 @@ num grouped = 1_000_000
 string message = "line one\nline two"
 string lambda = "\u{03BB}"
 string? release_note = null
-List<string> stages = ["build", "verify"]
+string build_stage = "build"
+List<string> stages = [build_stage, "verify"]
 List<string?> labels = ["portable", null]
 List<string>? inherited_labels = null
 
 // Contextual construction gets its nominal type from the left-hand side.
 // channel, description, and labels are omitted, so their defaults apply.
+string tool_image = "example.invalid/tool:1"
+string mirror_image = tool_image
+
 ToolConfig base = {
-    image: "example.invalid/tool:1",
+    image: mirror_image,
     note: null,
 }
 
@@ -67,10 +71,6 @@ InvocationInput input = {
     config: ref(base),
     token: secret_ref("ci/signing-token"),
 }
-
-// mut and reassignment are provisional v0 features.
-mut num retry_count = 0
-retry_count = 2
 
 namespace checks {
     bool checks_enabled = true
@@ -97,7 +97,7 @@ Flow::ArtifactRef artifact = {
 ```
 
 There are no trailing semicolons. A newline terminates a complete simple
-declaration or assignment. Commas separate fields and list elements, with a
+declaration. Commas separate fields and list elements, with a
 trailing comma allowed and preferred in multiline forms.
 
 ## Headers, modules, and vocabularies
@@ -206,16 +206,26 @@ The explicit expected type disambiguates an empty list and `null`.
 
 ### Numeric representation
 
-Source uses only `num`. A captured IR or vocabulary contract may require an
-`int`, `uint`, or `float` representation. The compiler converts automatically
-only when value and range are preserved. It rejects overflow, invalid sign,
-narrowing, and precision loss. Text never converts to a number.
+Source uses only `num`, represented before lowering as an exact
+arbitrary-precision coefficient times a base-10 scale. Normalization makes `10`
+and `10.0` logically equal while provenance retains their spellings. Integer and
+decimal contracts require exact conversion. A named IEEE binary contract must
+choose `exact` or deterministic round-to-nearest, ties-to-even. Missing policy,
+overflow, invalid sign, non-finite results, nonzero-to-zero underflow, and
+unspecified precision loss are rejected. Host numeric behavior never
+participates.
 
 ```neu
 num whole = 10
 num fraction = 10.5
 num bad = "10" // Invalid: string is not num.
 ```
+
+`0.1` is rejected for binary32/binary64 under `exact`. Under
+`round_ties_to_even`, its results are fixed as binary32 `0x3dcccccd` and binary64
+`0x3fb999999999999a`. `0.5` is exactly representable. The conversion contract
+also tests `10.0`, `10.5`, overflow, and binary32 values `16_777_216` and
+`16_777_217`.
 
 `NaN`, infinity, exponent notation, and non-decimal numeric literals are not v0
 numeric forms.
@@ -259,28 +269,34 @@ Example value = {
 The right-hand side does not repeat `Example`. Untyped anonymous records and
 field shorthand are not supported.
 
-## Bindings and provisional mutation
+## Immutable bindings and value reuse
 
-Bindings are immutable by default and always state their type:
+All bindings are immutable and always state their type:
 
 ```neu
 num attempts = 3
 string label = "verify"
+string copied_label = label
+List<string> labels = [label, copied_label]
 ```
 
 There is no `let` keyword and no `name: Type` binding syntax.
 
-The proposed `mut` form permits same-type reassignment only within the same
-lexical declaration list and source unit:
+An ordinary binding name uses its immutable value and may appear anywhere a
+compatible value can appear, including contextual fields and lists:
 
 ```neu
-mut num counter = 0
-counter = 1
+ToolConfig config = {
+    image: label,
+    note: null,
+}
 ```
 
-Cross-unit assignment, qualified assignment targets, compound assignment,
-increments, and mutation methods are invalid. `mut` remains provisional; the
-v0 proposal is not normative until it is accepted or removed.
+Forward value reuse is allowed. The compiler builds a static dependency graph
+and rejects cycles, making declaration order non-semantic. `label` uses a value;
+`ref(label)` instead creates a symbolic identity link. v0 has no `mut` or
+reassignment. Mutation remains a future feature only if real Flow and Neux
+evidence shows composition or explicit overriding is insufficient.
 
 ## Namespaces
 
@@ -313,18 +329,20 @@ ref(example::delivery::checks::config)
 
 If the target binding has declared type `T`, the result has type `Ref<T>`.
 References do not copy, evaluate, contain, order, schedule, or snapshot their
-targets. A reference to a mutable binding links its identity, whose emitted
-value is its final valid assignment. Because `ref(...)` resolves identity, it
-may point forward to a mutable or immutable binding. A mutable assignment must
-still occur after that binding's declaration.
+targets. Because `ref(...)` resolves identity, it may point forward to an
+immutable binding and is excluded from the ordinary value-dependency graph.
 
 ```neu
-Selection selected = { config: ref(config), }
-mut Config config = { image: "example.invalid/tool:1", }
+InvocationInput selected = {
+    config: ref(config),
+    token: secret_ref("ci/signing-token"),
+}
+ToolConfig config = { image: image, note: null, }
+string image = "example.invalid/tool:1"
 ```
 
 This is a forward identity link, not a read of `config` at that source position.
-v0 has no ordinary binding-name value expression such as `num a = b`.
+By contrast, `string image2 = image` is an ordinary immutable value dependency.
 
 Only value bindings are legal targets:
 
@@ -334,7 +352,7 @@ ref(checks) // Invalid: namespace.
 ref(Flow) // Invalid: vocabulary namespace.
 ```
 
-Direct value-initialization cycles are invalid. Every nominal recursive record
+Static binding-value dependency cycles are invalid. Every nominal recursive record
 cycle must cross `Ref<T>`; neither `Node?` nor `List<Node>` breaks an embedded
 cycle. `ref(...)` and `Ref<T>` edges are identity links and are ignored by those
 cycle checks, so a reference-only cycle is valid:
@@ -443,19 +461,19 @@ Config config = {
 
 The compiler merges both declaration sets independent of resolver order. Mixed
 language versions, duplicate declarations, cross-package module merging, and
-cross-unit mutation are rejected.
+static value-dependency cycles are rejected.
 
 ## Comments and strings
 
 ```neu
 // Line comment.
 
-/// One-line block comment. ///
+/* One-line block comment. */
 
-///
+/*
 Multiline block comment.
 Block comments do not nest.
-///
+*/
 
 string escaped = "quote: \" slash: \\ newline: \n tab: \t"
 ```
@@ -524,7 +542,7 @@ The current surface intentionally has no:
 - general value member access or indexing;
 - arithmetic, Boolean, or comparison operators;
 - general functions, methods, lambdas, loops, exceptions, or threads;
-- compound assignment or mutation methods;
+- mutation, reassignment, compound assignment, or mutation methods;
 - macros, generated syntax, or executable compiler plugins;
 - environment, filesystem, command, provider, or network evaluation;
 - provider credentials or resolved secret material; or

@@ -73,12 +73,12 @@ accepts one example.
 ## 4. Declarations, bindings, and names
 
 - [ ] **SYN-DEC-001 · v0** — Define the common shape of a named declaration and the distinction between stable machine identity and display name.
-- [ ] **SYN-DEC-002 · v0** — Define variable/binding declaration syntax; keep `mut` provisional, and if retained restrict reassignment to the declaring source unit so merged modules do not acquire cross-file order.
+- [ ] **SYN-DEC-002 · v0** — Define immutable type-first binding declarations; exclude `mut` and every reassignment form from v0, and reconsider mutation only with concrete Flow and Neux evidence that composition or explicit overriding is insufficient.
 - [ ] **SYN-DEC-003 · v0** — Define explicit type/schema annotations and the limited positions, if any, where type inference is permitted.
 - [ ] **SYN-DEC-004 · v0** — Represent vocabulary-owned declarations as ordinary type-first bindings such as `Flow::Pipeline verify = { ... }`, without vocabulary names or a special declaration-kind production in Neutral core.
 - [ ] **SYN-DEC-005 · v0** — Define namespace declaration and qualification syntax.
 - [ ] **SYN-DEC-006 · v0** — Define duplicate declaration and shadowing diagnostics; protect predeclared core names in every scope.
-- [ ] **SYN-DEC-007 · v0** — Allow forward `ref(...)` to mutable and immutable binding identities without implying ordinary value reads; reject assignment before mutable declaration and direct value cycles; require every recursive record cycle to cross `Ref<T>`.
+- [ ] **SYN-DEC-007 · v0** — Allow forward ordinary immutable value uses and forward `ref(...)` identity links; reject static value-dependency cycles while excluding `ref(...)` edges, and require every recursive record cycle to cross `Ref<T>`.
 - [ ] **SYN-DEC-008 · v1** — Define parameter declarations, result declarations, and their ordering and naming rules.
 - [ ] **SYN-DEC-009 · v1** — Define required versus defaulted/omittable parameters independently from nullability, with an inspectable distinction among omission, default application, and explicit `null`.
 - [ ] **SYN-DEC-010 · v1** — Define nested declarations and local scope boundaries, if retained after corpus testing.
@@ -87,7 +87,7 @@ accepts one example.
 
 ## 5. Type and schema notation
 
-- [ ] **SYN-TYP-001 · v0** — Define the primitive scalar set as `num`, `string`, and `bool`; define `null` as a nullable-position literal and `int`/`uint`/`float` as automatically selected numeric representations.
+- [ ] **SYN-TYP-001 · v0** — Define the primitive scalar set as `num`, `string`, and `bool`; represent source `num` as an exact host-independent base-10 rational, and require numeric contracts to define exact or deterministic IEEE rounding behavior.
 - [ ] **SYN-TYP-002 · v0** — Define record/structured-value type syntax, field names, field order, and duplicate-field diagnostics.
 - [ ] **SYN-TYP-003 · v0** — Define homogeneous collection type syntax and whether collection order is part of the type contract.
 - [ ] **SYN-TYP-004 · v0** — Define postfix type nullability (`T?`) including nested positions; make required/defaulted and nullable/non-nullable independent field axes; define omission without an optional-field modifier or `absent` value.
@@ -108,7 +108,7 @@ accepts one example.
 - [ ] **SYN-VAL-002 · v0** — Define contextual record construction (`Type name = { ... }`), require exactly one expected nominal type, and define fields, trailing separators, and duplicate diagnostics.
 - [ ] **SYN-VAL-003 · v0** — Define ordered collection value construction and empty-collection type disambiguation.
 - [ ] **SYN-VAL-004 · v0** — Define `null` as the only explicit source null/empty literal and distinguish it from structural omission/default application and unavailable/deferred results.
-- [ ] **SYN-VAL-005 · v0** — Define symbolic reference values as syntax distinct from ordinary text and restrict targets to value bindings.
+- [ ] **SYN-VAL-005 · v0** — Define ordinary binding names as immutable value uses in compatible value positions and `ref(...)` as a distinct symbolic identity link; restrict both target forms to value bindings.
 - [ ] **SYN-VAL-006 · v0** — Define `.` selection only when its left side resolves to a vocabulary-owned type declaring the named inert static value; exclude user-record statics, unscoped strings, functions, computed properties, and general value member access.
 - [ ] **SYN-VAL-007 · v0** — Apply contextual construction to vocabulary-owned typed values and define schema-linked diagnostics.
 - [ ] **SYN-VAL-008 · v0** — Define whether record-field shorthand exists and prevent it from obscuring the referenced binding.
@@ -220,7 +220,7 @@ accepts one example.
 
 ## 14. Documentation, formatting, and tools
 
-- [ ] **SYN-TOL-001 · v0** — State that `//` and `/// ... ///` are non-semantic comments and that v0 has no documentation-attachment syntax.
+- [ ] **SYN-TOL-001 · v0** — State that `//` and `/* ... */` are non-semantic comments and that v0 has no documentation-attachment syntax.
 - [ ] **SYN-TOL-002 · v0** — Define a single formatter's stable output policy without claiming formatted source is canonical IR identity.
 - [ ] **SYN-TOL-003 · v1** — Define comment preservation and stable placement across formatting and source-to-source migrations without making comments semantic attachments.
 - [ ] **SYN-TOL-004 · v1** — Define syntax-tree ranges and identities needed by editors without exposing compiler-private tree layout as public IR.

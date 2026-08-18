@@ -160,12 +160,13 @@ lifecycle.
   parse heuristically. Types, records, namespaces, modules, and vocabulary
   namespaces are invalid targets.
 - **NL-NAM-004:** Unresolved, ambiguous, inaccessible, and wrong-kind references
-  produce distinct diagnostics; invalid direct initialization cycles are
-  diagnosed separately from valid reference-only cycles.
-- **NL-NAM-004A:** Symbol collection precedes symbolic-reference resolution, so
-  `ref(...)` may target a later mutable or immutable binding without evaluating
-  it. Assignment to a mutable binding remains invalid before its declaration;
-  v0 does not imply an ordinary binding-name value expression.
+  produce distinct diagnostics; static ordinary-value dependency cycles are
+  diagnosed separately from valid identity-reference-only cycles.
+- **NL-NAM-004A:** Symbol collection precedes value and identity-reference
+  resolution. An ordinary binding name uses its immutable logical value in any
+  compatible field, list, or binding position; `ref(...)` instead links the
+  declaration identity. Both may target later immutable bindings, while only
+  ordinary value uses contribute to static dependency-cycle detection.
 - **NL-NAM-005:** References can target value bindings in another captured
   source unit or versioned package without losing the target's immutable
   identity.
@@ -190,6 +191,10 @@ lifecycle.
 - **NL-NAM-012:** Static `.` selection resolves only when its left side is a
   vocabulary-owned type that declares the named inert static value. User-defined
   records cannot acquire static members in v0.
+- **NL-NAM-013:** All v0 bindings are immutable and initialized once. v0 has no
+  mutation or reassignment syntax, and declaration order is non-semantic after
+  required headers. Mutation remains future-only unless real Flow and Neux
+  evidence shows immutable composition or explicit overriding is insufficient.
 
 These capabilities let Flow derive named work and dependency relationships, but
 Neutral does not decide that a declaration is a job or that a reference is a
@@ -214,10 +219,9 @@ readiness edge.
   both their authoring origin and generated IR elements.
 - **NL-STR-008:** Structural traversal is bounded and does not require arbitrary
   code execution or network access.
-- **NL-STR-009:** Direct value-initialization cycles are invalid. The
-  initialization dependency graph ignores `ref(...)` edges, so cycles made
-  exclusively through `Ref<T>` remain structurally valid for consumers to
-  interpret under their own domain rules.
+- **NL-STR-009:** Static ordinary-value dependency cycles are invalid. The graph
+  ignores `ref(...)` edges, so cycles made exclusively through `Ref<T>` remain
+  structurally valid for consumers to interpret under their own domain rules.
 
 ## 7. Values, types, and data contracts
 
@@ -226,9 +230,11 @@ readiness edge.
   omission are recorded separately; omission is not a second source value.
 - **NL-VAL-002:** Values can carry an explicit type or schema identity whose
   owner and version are known. The core source scalar types are `num`, `string`,
-  and `bool`; `null` is admitted only by nullable positions. `int`, `uint`, and
-  `float` are automatically selected numeric representations, not additional
-  author-facing scalar declarations.
+  and `bool`; `null` is admitted only by nullable positions. Source `num` is an
+  exact normalized arbitrary-precision base-10 rational. Integer, decimal, and
+  named IEEE formats are contract-owned lowering targets, not additional
+  author-facing scalar declarations. Logical IR preserves the normalized value
+  losslessly without assuming a host or JSON numeric representation.
 - **NL-VAL-003:** Required/defaulted, nullable/non-nullable, and repeated fields
   are distinguishable even though `null` is the only explicit source null/empty
   literal. A default makes a field omittable; `T?` makes its value nullable.
@@ -241,7 +247,10 @@ readiness edge.
   constructor type on the right-hand side.
 - **NL-VAL-005:** Numeric ranges, precision, text/binary distinction, ordering,
   duplicate-key behavior, and null/omission behavior are not left to an encoding
-  library's defaults.
+  library's defaults. Integer/decimal conversion is exact. A binary vocabulary
+  contract explicitly selects exact conversion or deterministic IEEE
+  round-to-nearest, ties-to-even; missing policy and host-dependent behavior fail
+  closed.
 - **NL-VAL-006:** A value retains its declaration, origin, and transformation
   provenance sufficiently for a consumer diagnostic.
 - **NL-VAL-007:** Sensitive classification and contextually typed generic opaque
@@ -446,6 +455,10 @@ meaning.
   ordinary serializer output is not assumed canonical.
 - **NL-IR-014:** The IR contains no compiler process handles, memory addresses,
   host paths accidentally exposed as portable identity, or resolved credentials.
+- **NL-IR-015:** An ordinary source binding-value use lowers to the target's
+  immutable logical value with provenance for both use and origin; it does not
+  become a `Ref<T>` identity edge. Implementations may share storage internally,
+  but that sharing is not public IR meaning.
 
 ## 14. Compiler and IR API capabilities
 
@@ -717,12 +730,23 @@ the provisional decisions.
 
 ### 1. What is Neutral's smallest cross-domain user journey, independent of Flow?
 
-Prove one small, effect-free vertical slice. It accepts an explicitly captured
-`.neu` source unit; resolves named declarations, structured literal values, and
-a typed reference; validates one explicitly selected data-only vocabulary; and
-emits immutable Neutral IR, diagnostics, a source map, and a derivation manifest.
-An effect-free probe then reads the result only through the public consumer API
-and produces a private summary or source-linked diagnostic.
+Prove one small, effect-free vertical slice in this order:
+
+```text
+.neu -> parser -> semantic analysis -> Neutral IR -> probe consumer
+```
+
+The first implementation accepts one explicitly captured `.neu` source unit and
+one tiny in-memory/captured vocabulary fixture; resolves declarations, immutable
+value dependencies, structured values, and typed identity references; and emits
+the minimum immutable Neutral IR needed by an effect-free probe using only the
+public consumer API. Start with one minimal Flow fixture. Then add one
+independently designed Neux fixture through the same IR API and use disagreements
+to remove accidental Flow assumptions from core.
+
+The complete resolver, provenance, derivation, compatibility, and encoding
+architecture remains the target contract, but the compiler proof does not wait
+for production package acquisition, migration, or canonical-byte machinery.
 
 This journey performs no command execution, scheduling, provider access, secret
 resolution, or domain-condition evaluation. It is complete because it crosses
@@ -842,6 +866,13 @@ Checks requiring Flow or Neux meaning run in that consumer. Executable compiler
 plugins are excluded from the initial design and would require a separate
 security and determinism decision.
 
+Implement this boundary incrementally. The first compiler uses one tiny captured
+vocabulary supplied directly by the test harness; it performs no package
+resolution. Add resolver/version selection, compatibility migration, and richer
+bundle infrastructure only when the next concrete use case needs them. The
+temporary delivery mechanism must not weaken the final rules: no ambient fetch,
+no executable plugin, and unknown required behavior still fails closed.
+
 ### 9. What are the initial structural and diagnostic limits?
 
 Put a versioned resource-budget object in the first compiler and reader APIs.
@@ -870,10 +901,11 @@ belong to a named implementation/deployment profile, as described in
 
 ### 10. Which consumer conformance case proves the boundary without implementing Flow or Neux inside the compiler?
 
-Use two test-only, effect-free probe consumers. A Flow-profile probe and an
-independently designed Neux-profile probe each read only the public IR API,
-validate required vocabulary support, traverse declarations and typed
-references, and emit a deterministic private summary or domain diagnostic.
+Build the probes sequentially. First, a minimal Flow-profile probe proves the
+compiler path. Next, an independently designed Neux-profile probe uses the same
+public IR API. Each probe validates required vocabulary support, traverses
+declarations and typed references, and emits a deterministic private summary or
+domain diagnostic.
 They do not parse `.neu`, evaluate domain operations, share a private model,
 invoke a shell, or contact a CI provider.
 
@@ -888,7 +920,8 @@ separate consumer conformance suites.
 Version checklists may allocate coherent vertical slices from these answers,
 but must retain three open evidence gates:
 
-1. Build the independent Neux corpus before freezing any proposed common core.
+1. Build the minimal Flow vertical slice, then the independent Neux corpus,
+   before freezing any proposed common core.
 2. Measure the resource profile before treating its values as compatibility
    commitments.
 3. Observe real release cadence before extending the provisional compatibility

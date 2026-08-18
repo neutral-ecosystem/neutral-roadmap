@@ -9,13 +9,20 @@ Answers: `SYN-TYP-001` through `SYN-TYP-006`
 | Type | Domain |
 | --- | --- |
 | `bool` | `true` or `false` |
-| `num` | Exact source number, automatically represented as compatible `int`, `uint`, or `float` |
+| `num` | Exact finite base-10 rational represented independently of host numeric types |
 | `string` | Finite Unicode scalar sequence |
 
-Numeric conversion among contract-required `int`, `uint`, and `float`
-representations is automatic when it preserves value and range. Lossy,
-overflowing, or invalid-sign conversion is rejected. `string` does not become a
-number, and `null` inhabits only values whose expected type is `T?`.
+A source number is an arbitrary-precision signed coefficient times a power of
+ten, normalized for logical equality while retaining its source spelling in
+provenance. All zero spellings normalize to coefficient `0`, scale `0`. Logical
+IR preserves this mathematical value losslessly and does not inherit an
+encoder's or host's numeric type. Contract-required integer and decimal
+conversion must be exact.
+Named IEEE binary conversion is either exact or uses the contract's explicit
+deterministic round-to-nearest, ties-to-even permission. An omitted binary
+conversion policy, overflow, invalid sign, non-finite result, nonzero-to-zero
+underflow, or unspecified precision loss is rejected. `string` does not become
+a number, and `null` inhabits only values whose expected type is `T?`.
 
 `Ref<T>` is a predeclared typed symbolic link to a declaration of type/kind
 `T`; only `ref(...)` constructs it. `SecretRef<T>` is a separate opaque
@@ -103,7 +110,8 @@ provenance, and required-feature support. Unknown required types fail closed.
 
 ## Required evidence
 
-Fixtures MUST cover scalars, automatic numeric conversions and their failures,
+Fixtures MUST cover scalars, exact and explicitly rounded numeric conversions
+and their failures,
 nominal mismatch, duplicates, every null/default combination, nullable elements
 versus nullable collections, empty/nested lists, wrong-kind type references,
 generic secret-delivery types, and unsupported required domain types.

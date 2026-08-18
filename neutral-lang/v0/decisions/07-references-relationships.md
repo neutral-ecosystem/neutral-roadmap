@@ -6,7 +6,7 @@ Answers: `SYN-REF-001` through `SYN-REF-004`
 
 ## SYN-REF-001 — Reference form
 
-`ref(qualified-name)` is the only v0 value-binding-reference expression:
+`ref(qualified-name)` is the only v0 symbolic identity-reference expression:
 
 ```neu
 ref(config)
@@ -19,8 +19,9 @@ invalid target kinds. A target binding of declared type `T` produces `Ref<T>`
 and lowers to target document/element identity, expected target kind, and
 provenance.
 
-`string` text equal to a declaration name remains text. References are never inferred
-from strings.
+`string` text equal to a declaration name remains text. Identity references are
+never inferred from strings or ordinary value use. In value position, `config`
+uses an immutable binding value while `ref(config)` links its identity.
 
 ## SYN-REF-002 — Qualification
 
@@ -37,11 +38,10 @@ request/resolver supplies the captured closure. Paths and URLs are illegal in
 Unresolved, ambiguous, inaccessible, wrong-kind, and missing-closure targets
 receive different diagnostics.
 
-`ref(x)` links the identity of binding `x`; it does not evaluate or snapshot the
-value at that source position. If `x` is mutable, the linked identity carries
-the final emitted value after valid assignments are processed. Declaration
-identities are collected first, so `ref(...)` may target a later mutable or
-immutable binding. This does not permit assignment before a mutable declaration.
+`ref(x)` links the identity of immutable binding `x`; it does not evaluate,
+copy, or snapshot the value at that source position. Declaration identities are
+collected first, so `ref(...)` may target a later binding. This forward identity
+resolution is independent from ordinary value-dependency resolution.
 
 ## SYN-REF-003 — Containment versus linking
 
@@ -58,13 +58,12 @@ namespace checks {
 Source proximity/order imply nothing. IR gives containment and reference
 different relationship kinds. Indentation never establishes either.
 
-The direct initialization-cycle check ignores `ref(...)` edges. A cycle made
-entirely from typed references is therefore structurally valid; a cycle that
-requires embedding or evaluating another binding's value is invalid. v0 has no
-ordinary binding-name value expression, so forward `ref(...)` must not be
-described as a forward value read. Every nominal record cycle must cross a
-`Ref<T>` edge; nullability and list containment do not break the cycle. A
-consumer may separately reject a reference cycle under its domain rules.
+The static value-dependency cycle check follows ordinary binding-value uses and
+ignores `ref(...)` edges. A cycle made entirely from typed identity references is
+therefore structurally valid; a cycle that requires reading another binding's
+value is invalid. Every nominal record cycle must cross a `Ref<T>` edge;
+nullability and list containment do not break the cycle. A consumer may
+separately reject an identity-reference cycle under its domain rules.
 
 ## SYN-REF-004 — Typed domain relationships
 
@@ -84,8 +83,7 @@ propagation. Relationship identity and endpoint spans remain in IR.
 
 Fixtures MUST cover every qualification, text/reference distinction, missing
 closure units, types/namespaces/modules/vocabularies as wrong-kind targets,
-ambiguous targets, forward mutable and immutable targets, mutable-target identity
-behavior, assignment-before-declaration rejection, direct initialization cycles
-versus valid reference-only cycles, embedded nullable/list recursion versus
-`Ref<T>` recursion, containment versus linking, and one Flow plus one Neux
-relationship without shared behavior.
+ambiguous targets, forward ordinary-value and identity targets, static value
+cycles versus valid identity-reference-only cycles, embedded nullable/list
+recursion versus `Ref<T>` recursion, containment versus linking, and one Flow
+plus one Neux relationship without shared behavior.

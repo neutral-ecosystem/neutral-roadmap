@@ -39,7 +39,8 @@ declaration*
 Arbitrary values cannot appear at root; a root value must use an explicit
 type-first declaration such as `num retries = 3`.
 `use` declarations precede ordinary declarations. Declaration order is
-presentation order, not execution order or precedence. The root is not an
+presentation order, not execution order or precedence. Relative order among
+`use` declarations and among ordinary declarations has no semantic meaning. The root is not an
 implicit Flow pipeline or Neux script.
 
 ## SYN-DOC-003 — Vocabulary use and policy

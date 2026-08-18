@@ -2,10 +2,6 @@
 
 Status: working v0 authoring proposal
 
-Provisional feature: `mut` and reassignment remain under review. They appear in
-this proposal so their consequences can be tested, but v0 is not normative
-until they are either accepted or removed.
-
 Purpose: show how people and a future GUI write the complete v0 `.neu` surface.
 The [decision records](decisions/README.md), checklist answers, grammar, and
 examples must remain synchronized with this guide.
@@ -15,11 +11,12 @@ examples must remain synchronized with this guide.
 The revised surface follows these preferences:
 
 - declarations are type-first: `num x = 10`;
-- bindings are immutable unless prefixed with `mut`;
+- every binding is immutable and initialized once;
 - `num` is the preferred author-facing numeric type;
 - `int`, `uint`, and `float` representations remain compiler/IR and domain
   contract concerns beneath `num`;
-- checked numeric conversion among those representations is automatic;
+- source `num` is an exact base-10 value; contract-specific numeric lowering is
+  exact unless a binary contract explicitly permits deterministic rounding;
 - text uses `string`;
 - nullability is a postfix type constructor such as `string?`;
 - `null` is the only explicit source null/empty literal; there is no `absent`
@@ -30,13 +27,14 @@ The revised surface follows these preferences:
   member access is not part of v0; and
 - Neutral remains a tool-abstraction language, not a general-purpose language.
 
-Three details need deliberate review:
+Three details are deliberate:
 
-1. `mut` introduces assignment order into a declarative language. It remains a
-   provisional v0 feature until a real Flow and Neux need justifies retaining
-   it.
-2. Automatic numeric conversion is limited to exact or safely widening
-   conversion. Silent precision loss is rejected.
+1. v0 has no mutation or reassignment. A future version may reconsider mutation
+   only after real Flow and independently designed Neux cases prove that
+   immutable composition or explicit overriding is insufficient.
+2. Integer and decimal conversion is exact. IEEE binary conversion requires an
+   explicit vocabulary policy choosing exactness or deterministic
+   round-to-nearest, ties-to-even. Unspecified precision loss is rejected.
 3. `string? label` means nullable, not omittable. A field without a default must
    be supplied; a field with a default may be omitted.
 
@@ -48,21 +46,23 @@ module acme::delivery
 
 use Flow
 
-/// Reusable configuration data. ///
+/* Reusable configuration data. */
 record ToolConfig {
     string image,
     string? note,
     List<string> labels = [],
 }
 
-/// Data containing symbolic references. ///
+/* Data containing symbolic references. */
 record InvocationInput {
     Ref<ToolConfig> config,
     SecretRef<string> token,
 }
 
+string tool_image = "example.invalid/tool:1"
+
 ToolConfig base = {
-    image: "example.invalid/tool:1",
+    image: tool_image,
     note: null,
 }
 
@@ -156,26 +156,25 @@ source alias or selective-use syntax; those are future import-design questions.
 ```neu
 // Line comment.
 
-/// A short block comment. ///
+/* A short block comment. */
 
-///
+/*
 A multiline block comment.
 Block comments do not nest.
-///
+*/
 
 string label = "ordinary declaration"
 ```
 
 `//` begins a line comment and ends immediately before the logical newline.
-The lexer recognizes `///` before `//`: `///` opens a block comment and the next
-`///` closes it. A block may be written on one line or across multiple lines.
-Block comments do not nest because the
-same delimiter closes the current block. An unclosed block comment is a lexical
+`/*` opens a block comment and the next `*/` closes it. A block may be written
+on one line or across multiple lines. Block comments do not nest because the
+first closing delimiter closes the current block. An unclosed block comment is a lexical
 error from its opening delimiter to end of source.
 
 Both forms are non-semantic trivia. v0 has no documentation-attachment syntax;
-adding one requires a distinct future decision rather than giving `///` two
-meanings. Newlines inside a block comment remain visible to logical-line
+adding one requires a distinct future decision rather than overloading comment
+syntax. Newlines inside a block comment remain visible to logical-line
 termination, so a comment cannot join two declarations accidentally.
 
 ## 5. Identifiers and qualification
@@ -224,7 +223,7 @@ Unicode display names belong in `string` values. v0 has no quoted identifiers.
 Reserved core words are:
 
 ```text
-neu module use namespace record mut
+neu module use namespace record
 true false null ref secret_ref
 ```
 
@@ -284,60 +283,53 @@ The declared type remains explicit. The following is invalid:
 x = 10 // No declaration exists.
 ```
 
-## 7. Mutability
+## 7. Immutable value reuse
 
-Bindings are immutable unless prefixed with `mut`:
+All v0 bindings are immutable. There is no `mut` modifier and no reassignment:
 
 ```neu
 num retries = 3
-mut num counter = 0
+retries = 4 // Invalid: v0 has no assignment production.
 ```
 
-Only a mutable binding may be assigned again:
+An ordinary binding name in value position uses its immutable logical value:
 
 ```neu
-counter = 1
+string image = "example.invalid/tool:1"
+string image2 = image
+List<string> images = [image, image2]
 
-// Invalid: retries is immutable.
-retries = 4
-```
-
-The restricted proposal is:
-
-- assignment must appear after the mutable declaration in the same lexical
-  declaration list and source unit;
-- the assignment target is a local identifier, never a `::`-qualified name;
-- an assignment must preserve the declared type;
-- there are no compound assignments, increments, or mutation methods;
-- mutation happens only while compiling source;
-- the final emitted IR value is immutable; and
-- every assignment remains in source provenance.
-
-At the end of the lexical scope, the last valid assignment determines the
-binding's emitted value. `ref(x)` creates a symbolic reference to binding `x`;
-it neither evaluates nor snapshots `x` at the textual position of the
-reference. The referenced identity's emitted value is the binding's final
-assigned value. The compiler collects binding identities before resolving
-`ref(...)`, so a symbolic reference may point forward to either a mutable or
-immutable binding. This does not read or evaluate the target. A mutable binding
-cannot be assigned before its declaration.
-
-For example, this forward identity link is valid even though `config` is
-mutable:
-
-```neu
-Selection selected = {
-    config: ref(config),
-}
-
-mut Config config = {
-    image: "example.invalid/tool:1",
+Config config = {
+    image: image,
 }
 ```
 
-This makes assignment order semantic for mutable bindings, unlike other
-declarations. This is the semantic cost being evaluated while `mut` remains
-provisional.
+The name may be namespace- or module-qualified and must resolve to a value
+binding whose type is compatible with the expected position. It creates a
+static value-dependency edge. It does not create a `Ref<T>` value or preserve an
+identity relationship in IR; provenance still links the use to its source and
+originating binding.
+
+Ordinary value references may point forward because declaration order is
+non-semantic:
+
+```neu
+string image2 = image
+string image = "example.invalid/tool:1"
+```
+
+The compiler collects declarations, resolves ordinary value dependencies from
+binding initializers, contextual fields, list elements, and declared defaults,
+rejects every dependency cycle, and evaluates the remaining graph
+deterministically. Internal topological evaluation order is not source meaning.
+
+`ref(image)` is separate: it creates a symbolic `Ref<string>` link to the
+declaration identity and does not read or copy `image`. Forward `ref(...)`
+resolution is allowed and its edges are excluded from value-cycle detection.
+
+Mutation remains a future question. It may be reconsidered only if concrete
+Flow and independently designed Neux cases demonstrate that immutable
+composition, a derived binding, or an explicit override model is insufficient.
 
 ## 8. The generic numeric type
 
@@ -350,27 +342,38 @@ num negative = -4
 num grouped = 1_000_000
 ```
 
-The source has only `num`; `int`, `uint`, and `float` are not author-facing type
-keywords. A numeric literal is captured exactly, and an expected domain or IR
-contract may require one of those representations. The compiler selects and
-converts the representation automatically rather than requiring a cast in
-source.
+The source has only `num`; `int`, `uint`, decimal widths, and IEEE binary formats
+are not author-facing type keywords. Before lowering, a literal is an exact
+finite base-10 rational represented as an arbitrary-precision signed coefficient
+and non-negative decimal scale: `coefficient × 10^-scale`. Logical values are
+normalized by removing trailing decimal zeroes, so `10` and `10.0` compare equal;
+every zero spelling, including `-0.0`, becomes coefficient `0`, scale `0`. The
+original spelling remains in provenance. Logical IR carries the normalized
+mathematical value, and concrete encoders must preserve it losslessly rather
+than assuming a host or JSON number is sufficient.
 
-Automatic numeric casting follows these rules:
+Contract-specific conversion follows these rules:
 
-- a non-negative whole value may become `uint`, `int`, or `float` when the
-  receiving representation can preserve it;
-- a negative whole value may become `int` or `float` when representable;
-- a fractional value becomes `float` when required by the receiving contract;
-- `int`, `uint`, and `float` representations widen automatically when the
-  destination preserves the value;
-- narrowing, sign-changing, overflow, and precision-losing conversions are
-  rejected with a type diagnostic;
-- a fractional value becomes `int` or `uint` only when it is mathematically
-  integral and within range;
-- text never automatically converts to a number;
-- representation widths and floating-point formats come from the captured
-  domain contract; Neutral never guesses a host-machine width.
+- signed and unsigned integer targets require a mathematically integral value
+  within the declared range;
+- decimal targets require exact representation within declared precision,
+  scale, and range;
+- every IEEE binary target names its format, such as binary32 or binary64, and
+  explicitly chooses `exact` or `round_ties_to_even` conversion;
+- `exact` rejects any conversion whose mathematical result differs;
+- `round_ties_to_even` uses deterministic IEEE 754 round-to-nearest,
+  ties-to-even for that named format;
+- a binary target with no conversion policy fails closed;
+- overflow, invalid sign changes, non-finite results, nonzero-to-zero underflow,
+  and unspecified precision loss are rejected;
+- text never automatically converts to a number; and
+- widths, ranges, intermediate arithmetic, and rounding never come from the
+  host machine.
+
+Here, value-preserving means that interpreting the target representation under
+its declared mathematical model yields exactly the same rational as the source
+`num`. A rounded result is not called value-preserving; it is permitted only by
+the explicit `round_ties_to_even` contract.
 
 Examples:
 
@@ -395,8 +398,13 @@ the representation, are:
 | `-4` | `uint32` | Rejected: invalid sign |
 | `10.0` | `int32` | Accepted automatically because it is integral |
 | `10.5` | `int32` | Rejected: fractional loss |
-| `0.5` | IEEE binary32 | Accepted automatically because it is exact |
-| `16_777_217` | IEEE binary32 | Rejected: precision loss |
+| `0.1` | binary32, `exact` | Rejected: not exactly representable |
+| `0.1` | binary32, `round_ties_to_even` | Accepted as bits `0x3dcccccd` |
+| `0.1` | binary64, `round_ties_to_even` | Accepted as bits `0x3fb999999999999a` |
+| `0.5` | binary32, `exact` | Accepted because it is exact |
+| `16_777_216` | binary32, `exact` | Accepted because it is exact |
+| `16_777_217` | binary32, `exact` | Rejected: precision loss |
+| `16_777_217` | binary32, `round_ties_to_even` | Accepted as `16_777_216` |
 
 v0 numeric literals use decimal digits. Underscores may occur only between
 digits. Leading zeroes other than `0` are invalid. Fractional values require
@@ -507,15 +515,18 @@ record NullableDefaults {
 Fields cannot repeat. Records are nominal: equal field shapes do not make two
 record declarations the same type.
 
-Mutability is not allowed on a record field declaration. Mutability belongs to a
-binding containing the record:
+Record fields and bindings are immutable in v0. Authors construct a new named
+value instead of updating an existing one:
 
 ```neu
-mut Config config = {
+Config config = {
     image: "example.invalid/tool:1",
     note: null,
 }
 ```
+
+v0 has no spread/update syntax. A future composition or explicit override form
+requires its own cross-domain evidence and provenance rules.
 
 ## 13. Constructing record values
 
@@ -564,13 +575,11 @@ The names are `checks::mode` and `checks::internal::enabled`. Namespaces do not
 create files, execution stages, OS namespaces, provider groups, or security
 zones.
 
-Duplicates and shadowing are invalid. Declarations may contain symbolic
-references to bindings declared later, including mutable bindings, because
-`ref(...)` resolves identity rather than reading a value. Direct
-value-initialization cycles are invalid; reference-only cycles are allowed as
-defined below. Declaration order has no meaning for symbolic references.
-Mutable assignments are the only proposed v0 form whose textual order matters,
-and they cannot cross a source-unit boundary.
+Duplicates and shadowing are invalid. Ordinary binding-value uses and symbolic
+`ref(...)` links may target bindings declared later. Ordinary value edges form a
+static dependency graph whose cycles are invalid; `ref(...)` edges link identity
+and are excluded. Declaration order has no meaning after the required language,
+module, and `use` headers.
 
 When a module spans source units, those rules apply to the merged module scope.
 File/request order never breaks a duplicate-name tie or changes resolution.
@@ -598,9 +607,10 @@ Selection selected = {
 }
 ```
 
-A reference is not the target's copied value and does not automatically mean
-containment, execution order, or data dependency. Text containing a name remains
-text.
+A symbolic reference is not the target's copied value and does not automatically
+mean containment, execution order, or data dependency. An ordinary `config` in
+value position uses the immutable value; `ref(config)` links declaration
+identity. Text containing a name remains text.
 
 Only value bindings are legal targets. Record types, other types, namespaces,
 modules, and vocabulary namespaces are wrong-kind errors:
@@ -611,7 +621,7 @@ ref(checks) // Invalid: namespace.
 ref(Flow) // Invalid: vocabulary namespace.
 ```
 
-Direct value-initialization cycles are invalid. Every nominal recursive record
+Static ordinary value-dependency cycles are invalid. Every nominal recursive record
 cycle is also invalid unless each route around the cycle crosses a `Ref<T>`
 edge. Nullability and collection containment do not break an embedded cycle:
 `Node?` and `List<Node>` recursive edges remain invalid, while `Ref<Node>` is an
@@ -747,8 +757,8 @@ its independent OS meaning.
 - `CRLF` and lone `CR` behave as logical `LF` while original bytes remain
   available for identity and source spans.
 - Indentation is not syntax.
-- A physical newline terminates a complete header, simple declaration, or
-  assignment in a source or namespace declaration list.
+- A physical newline terminates a complete header or declaration in a source or
+  namespace declaration list.
 - A trailing `//` comment is trivia before that terminator, so
   `num x = 10 // explanation` is one valid declaration.
 - Newlines inside value constructors, field lists, argument lists, list values,
@@ -833,15 +843,15 @@ v0 still has no:
 - raw, multiline, or interpolated string;
 - arithmetic, boolean, or comparison operators;
 - functions, lambdas, loops, exceptions, or threads;
-- compound assignment or mutation methods;
+- mutation, reassignment, compound assignment, or mutation methods;
 - macros or generated syntax;
 - environment, filesystem, command, or network evaluation;
 - executable vocabulary plugins;
 - provider credentials or resolved secrets; or
 - Flow/Neux runtime lifecycle syntax.
 
-The proposed basic reassignment syntax does not make Neutral a general-purpose
-language.
+Future mutation requires concrete Flow and Neux evidence that immutable
+composition or explicit overriding is insufficient.
 
 ## 25. Quick reference
 
@@ -850,9 +860,8 @@ language.
 | Language version | `neu "0.1"` |
 | Module | `module acme::delivery` |
 | Vocabulary import | `use Flow` |
-| Immutable variable | `num x = 10` |
-| Mutable variable | `mut num x = 10` |
-| Reassignment | `x = 11` |
+| Immutable binding | `num x = 10` |
+| Ordinary value reuse | `num y = x` |
 | `string` | `string name = "value"` |
 | Nullable variable | `string? name = null` |
 | List | `List<string> names = ["one"]` |
@@ -861,14 +870,14 @@ language.
 | Nullable field | `string? note,` |
 | Default field | `List<string> names = [],` |
 | Namespace | `namespace checks { ... }` |
-| Reference | `ref(checks::config)` |
+| Identity reference | `ref(checks::config)` |
 | Reference type | `Ref<Config>` |
 | Secret | `SecretRef<string> token = secret_ref("logical/id")` |
 | Vocabulary-owned declaration | `Flow::Pipeline verify = { ... }` |
 | Vocabulary-owned value | `Flow::ArtifactRef artifact = { ... }` |
 | Domain enum | `Flow::Mode.strict` |
 | Line comment | `// explanation` |
-| Block comment | `/// explanation ///` |
+| Block comment | `/* explanation */` |
 
 ## 26. Compact grammar sketch
 
@@ -880,7 +889,7 @@ semicolon-like production terminator, matching the `.neu` surface.
 source =
     trivia, language_header, module_header,
     { use_declaration },
-    { declaration_or_assignment },
+    { declaration },
     end_of_file
 
 language_header = "neu", string_literal, LINE_END
@@ -889,15 +898,14 @@ module_header = "module", module_name, LINE_END
 use_declaration =
     "use", upper_camel_name, LINE_END
 
-declaration_or_assignment =
+declaration =
       namespace_declaration
     | record_declaration
     | binding_declaration
-    | assignment
 
 namespace_declaration =
     "namespace", snake_name, "{",
-    { declaration_or_assignment },
+    { declaration },
     "}", LINE_END
 
 record_declaration =
@@ -907,10 +915,7 @@ record_field =
     type, snake_name, [ "=", value ], ","
 
 binding_declaration =
-    [ "mut" ], type, snake_name, "=", value, LINE_END
-
-assignment =
-    snake_name, "=", value, LINE_END
+    type, snake_name, "=", value, LINE_END
 
 type =
     primary_type, [ "?" ]
@@ -930,6 +935,7 @@ value =
     | list_value
     | contextual_record_value
     | qualified_static_value
+    | binding_value
     | reference_value
     | secret_reference_value
 
@@ -941,6 +947,9 @@ contextual_record_value =
 
 qualified_static_value =
     qualified_name, ".", snake_name
+
+binding_value =
+    qualified_name
 
 value_field =
     snake_name, ":", value, ","
@@ -974,15 +983,15 @@ the captured lock manifest to one permitted exact vocabulary bundle; derives and
 checks the required feature set from used vocabulary members; enforces
 nullable-only null and one unambiguous expected type for every contextual record;
 requires one underlying expected `SecretRef<T>` for `secret_ref(...)`; restricts
-`ref(...)` targets to value bindings; permits forward identity resolution to
-mutable and immutable bindings while rejecting assignment before a mutable
-declaration; requires the left side of `.` to resolve to a vocabulary-owned type
-that declares the selected static value; rejects direct initialization cycles
-and every nominal record cycle not broken by `Ref<T>` while ignoring reference
-edges for those checks; rejects mixed-version closures,
+ordinary binding values and `ref(...)` targets to value bindings; permits
+forward value and identity resolution; requires compatible expected types for
+ordinary value use; requires the left side of `.` to resolve to a vocabulary-owned type
+that declares the selected static value; rejects every static ordinary-value
+dependency cycle and every nominal record cycle not broken by `Ref<T>` while
+ignoring identity-reference edges for those checks; rejects mixed-version closures,
 cross-package module merging, and duplicate names in merged module scopes;
-rejects immutable assignment; and checks type-preserving mutation, declaration
-uniqueness, name-category casing, and schema-owned vocabulary fields.
+and checks declaration uniqueness, name-category casing, and schema-owned
+vocabulary fields.
 
 `LINE_END` is emitted after a physical newline, including after a trailing line
 comment, when the current source or namespace declaration-list item is complete.
@@ -1006,8 +1015,7 @@ For the current requested style, the central examples are:
 
 ```neu
 num x = 10
-mut num counter = 0
-counter = 1
+num y = x
 string label = "hello"
 string? nullable_label = null
 ```

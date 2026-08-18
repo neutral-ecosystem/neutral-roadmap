@@ -19,7 +19,7 @@ silent replacement of invalid bytes are rejected as non-reproducible.
 
 Space and horizontal tab separate tokens but carry no meaning. Indentation is
 not syntactic. A logical newline terminates a complete header, simple
-declaration, or assignment in a source or namespace declaration list. There is
+declaration in a source or namespace declaration list. There is
 no semicolon token and no backslash line continuation.
 
 A line comment is trivia before its newline, so this is valid:
@@ -48,19 +48,18 @@ MUST NOT infer a separator from indentation or token adjacency.
 ## SYN-LEX-003 — Comments
 
 `//` begins a line comment but does not consume its terminating logical newline.
-The lexer gives the three-slash delimiter priority over the two-slash delimiter:
-`///` opens a block comment and the next `///` closes it. The opening and closing
+`/*` opens a block comment and the next `*/` closes it. The opening and closing
 delimiters may occur on one line or different lines:
 
 ```neu
-/// short block ///
+/* short block */
 
-///
+/*
 multiline block
-///
+*/
 ```
 
-Block comments do not nest: the first subsequent `///` always closes the
+Block comments do not nest: the first subsequent `*/` always closes the
 current block. An unterminated block comment is one error from its opening
 delimiter to end of source. Newlines inside block-comment trivia remain visible
 to logical-line termination. Delimiters inside strings are ordinary characters.
@@ -105,7 +104,7 @@ in the first public contract.
 The v0 reserved words are:
 
 ```text
-neu module use namespace record mut
+neu module use namespace record
 true false null ref secret_ref
 ```
 
@@ -181,7 +180,7 @@ sequence is ordinary text.
 | Category | v0 forms | Logical rule |
 | --- | --- | --- |
 | Boolean | `true`, `false` | Exactly two `bool` values |
-| Number | `0`, `17`, `-4`, `1_000.25` | Exact source number, automatically represented as compatible `int`, `uint`, or `float` |
+| Number | `0`, `17`, `-4`, `1_000.25` | Exact finite base-10 rational, lowered only under an explicit numeric contract |
 | String | `"text"` | Finite Unicode scalar sequence |
 | Null | `null` | The only explicit source null/empty literal; legal only where the expected type is `T?` |
 
@@ -189,18 +188,46 @@ Underscores may occur only between digits. Leading zeroes other than `0` are
 invalid. A decimal needs digits on both sides of the point. v0 has no exponent,
 non-decimal base, `NaN`, or infinity.
 
-`num` is the only source numeric type. The compiler automatically selects or
-converts `int`, `uint`, or `float` representations when an expected captured
-contract requires one. Automatic conversion must preserve value and range;
-overflow, invalid sign conversion, and precision loss are type diagnostics.
-Widths and floating formats come from the contract, never the host machine.
+`num` is the only source numeric type. Before contract-specific lowering, the
+compiler represents it as an arbitrary-precision signed integer coefficient and
+a non-negative decimal scale: `coefficient × 10^-scale`. The semantic pair is
+normalized by removing trailing decimal zeroes; the original lexeme remains in
+provenance. Every zero spelling, including `-0` and `-0.0`, normalizes to
+coefficient `0` and scale `0`. Thus `10` and `10.0` have the same logical numeric
+value. Neutral IR carries this normalized mathematical value; a concrete encoder
+MUST preserve it losslessly and MUST NOT silently route it through a
+host/JSON-number type.
+
+An expected captured contract may request a signed/unsigned integer, decimal,
+or named IEEE 754 binary format. Integer and decimal conversion is accepted only
+when the mathematical value is exactly representable within the declared range,
+precision, and scale. A binary floating-point contract MUST select either
+`exact` or `round_ties_to_even`: `exact` rejects any changed value, while
+`round_ties_to_even` applies deterministic IEEE 754 round-to-nearest,
+ties-to-even for the named format. A binary contract with no conversion policy
+fails closed. Overflow, invalid sign changes, non-finite results, nonzero values
+rounded to zero, and all unspecified precision loss are rejected. No width,
+rounding mode, locale, or intermediate representation may come from the host
+machine.
+
+“Value-preserving” means that interpreting the target representation under its
+declared mathematical model produces exactly the same rational number as the
+normalized source `num`. A rounded result is explicitly not value-preserving;
+it is accepted only under `round_ties_to_even`, never under an implicit notion
+of safe or close-enough conversion.
+
+For example, `0.1` is rejected for binary32 or binary64 under `exact`; under
+`round_ties_to_even` it becomes binary32 bits `0x3dcccccd` or binary64 bits
+`0x3fb999999999999a`. `0.5` is exact in both formats. Conversion fixtures also
+cover integral `10.0`, fractional `10.5`, overflow, and the binary32 boundary
+between `16_777_216` and `16_777_217`.
 
 There is no `absent` token or standalone null type. A field omitted because a
 declared default applies is structural omission, not a second source value.
 
 ## Required evidence
 
-Fixtures MUST cover BOM position, newline forms, nested comments, trailing line
+Fixtures MUST cover BOM position, newline forms, attempted block-comment nesting, trailing line
 comments, every escape, delimiter mismatch, missing line endings/separators,
 numeric conversion boundaries, non-ASCII names, keyword collisions, and inputs
 below/at/above each lexical limit.

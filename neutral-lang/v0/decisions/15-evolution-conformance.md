@@ -19,11 +19,13 @@ value
   | list
   | contextual-record
   | qualified-static-value
-  | reference
+  | binding-value
+  | identity-reference
   | secret-reference
 ```
 
-`::` belongs to qualified-name grammar, `.` selects a vocabulary-owned enum case
+An ordinary qualified binding name is a value use; `ref(...)` is an identity
+link. `::` belongs to qualified-name grammar, `.` selects a vocabulary-owned enum case
 or static member, and leading minus belongs to a numeric literal. General value
 member access is absent. Delimiters determine nesting. Implementations cannot
 invent precedence.
@@ -47,8 +49,9 @@ Each fixture captures source bytes, compilation request, bundle identities,
 resource profile, expected result class, and safe diagnostics. Tests never
 depend on working directory, network, locale, clock, randomness, or hash order.
 
-The corpus includes one Flow and one independently designed Neux profile. This
-tests common shape, not shared domain behavior.
+The corpus first proves one minimal Flow fixture, then adds one independently
+designed Neux profile through the same IR API. This tests common shape, not
+shared domain behavior.
 
 ## SYN-EVO-003 — Source-to-IR and reader conformance
 

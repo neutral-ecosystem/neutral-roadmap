@@ -11,6 +11,9 @@ diagnostic fixtures, source maps, and consumer conformance evidence.
 Editable author-facing synthesis:
 [proposed v0 syntax guide](../proposed-syntax-guide.md).
 
+Initial positive, negative, and numeric cases:
+[v0 fixture index](../fixtures/README.md).
+
 Normative words such as **MUST**, **MUST NOT**, and **MAY** describe the proposed
 contract. Flow and Neux behavior is illustrative only and remains owned by those
 applications.
@@ -49,10 +52,12 @@ record ImageConfig {
 }
 
 ImageConfig base = {
-    image: "example.invalid/tool:1",
+    image: tool_image,
     note: null,
     labels: ["portable"],
 }
+
+string tool_image = "example.invalid/tool:1"
 
 namespace checks {
     Flow::Pipeline verify = {
@@ -67,11 +72,12 @@ the Flow consumer owns its interpretation.
 
 ## Deliberate v0 exclusions
 
-v0 has no unmarked mutation, source-module/package imports, executable macros,
+v0 has no mutation or reassignment, source-module/package imports, executable macros,
 general loops, anonymous functions, implicit network lookup, native plugins,
 shell execution, provider credentials, or runtime lifecycle syntax. Later
 checklists may add composition and symbolic structure, but only through their
 recorded decisions.
 
-Bindings are immutable by default. The explicitly marked, source-unit-local
-`mut` form remains provisional until a cross-domain case justifies retaining it.
+Every binding is immutable. Mutation remains a future question and requires
+concrete Flow and independently designed Neux evidence that immutable
+composition or explicit overriding is insufficient.

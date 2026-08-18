@@ -30,27 +30,21 @@ Type name = value
 ```
 
 There is no `let` keyword and no colon between the name and type. Bindings are
-immutable and initialized once unless explicitly prefixed with `mut`:
+immutable and initialized exactly once by their declaration:
 
 ```neu
-mut num counter = 0
-counter = 1
+num retry_count = 3
+string image = "example.invalid/tool:1"
 ```
 
-Assignment may target only a previously declared mutable local identifier in
-the same lexical declaration list and source unit. Cross-unit assignment is
-invalid even when units merge into the same module, because source-unit order
-cannot define assignment order. A qualified assignment target, compound
-assignment, increment, and mutation method are invalid. Mutation is resolved
-during compilation; issued IR remains immutable.
+v0 has no `mut` modifier and no assignment production. A bare form such as
+`retry_count = 4` is invalid even if a binding already exists. Declaration order
+does not select or update a value.
 
-The last valid assignment in the lexical scope determines the emitted binding
-value. `ref(x)` creates a symbolic reference to binding `x`; it does not evaluate
-or snapshot `x` at the reference's textual position. The referenced identity's
-emitted value is the binding's final assigned value. All assignments remain in
-source provenance. A mutable binding cannot be assigned before its declaration.
-Symbolic `ref(...)` resolution may be forward for mutable and immutable bindings
-because it resolves identity rather than evaluating the target.
+Mutation remains a possible future feature only if concrete Flow and
+independently designed Neux cases show that composition, a new derived binding,
+or an explicit override model cannot express the requirement. Such evidence
+would require a new versioned semantic decision; v0 reserves no mutation syntax.
 
 ## SYN-DEC-003 — Explicit types
 
@@ -106,23 +100,30 @@ identify both conflicting declarations; source order never chooses a winner.
 
 ## SYN-DEC-007 — Forward references
 
-Symbolic references may target later mutable or immutable bindings in the
-captured closure. The compiler collects declaration identities before resolving
-`ref(...)`, so reference source order is not execution order. A mutable
-assignment is processed in source order and cannot occur before its declaration.
-v0 has no ordinary binding-name value expression, so this rule does not imply
-that a form such as `num a = b` exists.
+Both ordinary binding-value references and symbolic identity references may
+target later immutable bindings in the captured closure. The compiler collects
+declarations before resolving either form, so declaration source order is not
+evaluation or execution order.
 
 ```neu
+string image2 = image // Valid forward value dependency.
+string image = "example.invalid/tool:1"
+
 Selection selected = { config: ref(config), } // Valid forward identity link.
-mut Config config = { image: "example.invalid/tool:1", }
+Config config = { image: image, }
 ```
 
-Forward references do not legalize direct value-initialization cycles. The
-compiler constructs an initialization dependency graph from edges that embed or
-need another binding's value and rejects every cycle in that graph. `ref(...)`
-edges are excluded: they link binding identities rather than copying or
-initializing from target values. Cycles made exclusively through `Ref<T>` are
+An ordinary name in value position evaluates to the immutable logical value of
+the target binding and creates a static value-dependency edge. It does not
+create a `Ref<T>` or a public identity relationship. The compiler rejects every
+cycle in the value-dependency graph before evaluation. Acyclic dependencies are
+evaluated in deterministic topological order; this internal order does not make
+source order semantic. The graph includes ordinary value uses in binding
+initializers, contextual record fields, list elements, and declared defaults.
+Type compatibility is checked at every use site.
+
+`ref(...)` edges are excluded from the value-dependency graph because they link
+binding identities rather than reading target values. Reference-only cycles are
 valid. Every nominal recursive record cycle is invalid unless each route around
 the cycle crosses `Ref<T>`. Nullable and collection edges still embed the
 record, so `Node?` and `List<Node>` recursion are invalid; `Ref<Node>` recursion
@@ -131,7 +132,8 @@ static contract prohibits it; Neutral does not infer execution semantics.
 
 ## Required evidence
 
-Fixtures MUST cover every declaration kind, forward references, namespace
+Fixtures MUST cover every declaration kind, forward value and identity
+references, value reuse in records and lists, namespace
 qualification, duplicate cross-kind names, shadowing, case-confusable names,
-direct value cycles, valid reference-only cycles, and
+static value-dependency cycles, valid reference-only cycles, and
 source-name/display-name/IR-identity distinctions.

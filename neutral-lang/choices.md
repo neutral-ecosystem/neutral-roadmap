@@ -67,22 +67,34 @@ all still be wrong.
 | --- | --- | --- |
 | Parse one `.neu` file into an AST | Very small and quick to explore | Tests parser internals, not the public product; proves no consumer boundary |
 | Implement a small Flow pipeline end to end | Immediately recognizable use case | Makes Flow the accidental definition of Neutral; confuses compiler and consumer behavior |
-| Compile a small domain-neutral structure and read it through a public consumer API | Exercises the complete boundary while remaining small | Requires minimal IR, diagnostics, source-map, and profile contracts up front |
+| Compile one tiny Flow fixture, then an independent Neux fixture, through a public consumer API | Exercises the complete boundary and tests proposed common abstractions | Requires minimal IR, diagnostics, source-map, and vocabulary contracts up front |
 | Implement rich language features before any consumer | Leaves room for future expressiveness | High risk of designing unused abstractions and an unstable IR |
 
 ### Recommended decision
 
-The first vertical slice should:
+The first vertical slice should prove this path:
+
+```text
+.neu -> parser -> semantic analysis -> Neutral IR -> probe consumer
+```
+
+It should:
 
 1. accept an explicit, captured `.neu` source unit;
-2. resolve a small set of named declarations, structured literal values, and a
-   typed reference;
-3. validate one explicitly selected, data-only domain vocabulary;
-4. emit immutable Neutral IR, structured diagnostics, a source map, and a
-   derivation manifest;
+2. resolve a small set of named declarations, structured values, ordinary
+   immutable value dependencies, and a typed identity reference;
+3. validate one tiny captured, data-only Flow vocabulary supplied directly by
+   the test harness;
+4. emit immutable Neutral IR, structured diagnostics, and the minimal source
+   map/derivation record needed to trace every fixture value;
 5. read that IR through the public consumer API; and
 6. let an effect-free probe consumer enumerate declarations and either produce
    a small private domain summary or a source-linked diagnostic.
+
+After that Flow proof works, add one independently designed Neux fixture through
+the same public IR API. Use the pair to validate or remove proposed core
+abstractions. Do not require production package resolution, compatibility
+migration, or canonical encoding to finish the first compiler proof.
 
 The slice should not execute commands, schedule jobs, contact a provider,
 evaluate a Flow condition, resolve a secret, or define provider behavior. It is
@@ -419,6 +431,13 @@ an execution boundary.
 Use data-only vocabulary bundles supplied by the compilation request through the
 same explicit resolver model as source dependencies.
 
+This is the target architecture, not the prerequisite for the first parser
+proof. Begin with one tiny data-only vocabulary captured directly by the test
+harness. Add package acquisition, lock resolution, compatibility migration, and
+richer bundle distribution only when a concrete use case exercises them. The
+minimal fixture still performs no ambient fetch, executes no plugin, and fails
+closed on unknown required behavior.
+
 Source introduces a logical vocabulary namespace with the general form
 `use Vocabulary`:
 
@@ -537,13 +556,19 @@ runtime semantics.
 
 ### Recommended decision
 
-Create two test-only, effect-free probe consumers:
+Create two test-only, effect-free probe consumers in sequence:
 
 - a Flow-profile probe that reads IR, validates required vocabulary features,
   enumerates vocabulary-owned typed declarations and references, and emits a deterministic
   private summary or domain diagnostic; and
 - a Neux-profile probe that performs the equivalent task for one independently
   selected OS-domain fixture.
+
+First prove `.neu -> parser -> semantic analysis -> Neutral IR -> probe` using
+the smallest Flow fixture. Only then design the Neux fixture independently and
+run it through the same public IR API. Differences are evidence for removing or
+relocating supposed core abstractions, not reasons to force the domains into one
+private model.
 
 The probes must use only the public IR consumer API. They do not parse `.neu`,
 evaluate domain operations, invoke a shell, contact a CI provider, or share a
@@ -569,9 +594,10 @@ semantics need their own consumer conformance suites.
 The checklists should be built as vertical slices, not by assigning every item
 in [needed-features.md](needed-features.md) to a release.
 
-- A first slice should prove C1, the minimal portion of C3, closure capture from
-  C5, logical IR validation from C6, safe profile loading from C8, bounded APIs
-  from C9, and one probe from C10.
+- A first slice should prove C1, the minimal portion of C3, direct capture of one
+  tiny Flow vocabulary, minimal provenance from C5, logical IR validation from
+  C6, bounded APIs from C9, and the Flow probe from C10. It need not implement a
+  package resolver, compatibility migration, or canonical bytes.
 - A later slice should add cross-unit names and references, the second probe,
   and enough corpus evidence to confirm or reject the C2 candidates.
 - Symbolic computation and composition should enter only with explicit
