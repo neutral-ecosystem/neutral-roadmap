@@ -649,6 +649,8 @@ trade-offs, evidence requirements, and fuller rationale are recorded in
 Neux corpus, resource measurements, and real release cadence still have to test
 the provisional decisions.
 
+---
+
 ### 1. What is Neutral's smallest cross-domain user journey, independent of Flow?
 
 Prove one small, effect-free vertical slice. It accepts an explicitly captured

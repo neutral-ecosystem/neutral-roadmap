@@ -12,6 +12,8 @@ parser example.
 
 ## 1. Governing syntax boundaries
 
+Proposed answers: [governing-boundary decisions](decisions/01-governing-boundaries.md).
+
 - [ ] **SYN-GOV-001 · v0** — Define the boundary between concrete `.neu` syntax, the compiler's private syntax tree, the public logical IR, and consumer-private models.
 - [ ] **SYN-GOV-002 · v0** — Require every accepted surface construct to lower into a documented logical model with source provenance.
 - [ ] **SYN-GOV-003 · v0** — Establish the two-corpus rule before adding a Flow- or Neux-shaped construct to Neutral core syntax.
@@ -20,6 +22,8 @@ parser example.
 - [ ] **SYN-GOV-006 · v0** — Define the normative-specification, examples, invalid-fixture, and diagnostic evidence required to call a syntax decision complete.
 
 ## 2. Lexical and source-text rules
+
+Proposed answers: [lexical and source-text decisions](decisions/02-lexical-source-text.md).
 
 - [ ] **SYN-LEX-001 · v0** — Specify accepted source encodings, byte-order-mark handling, invalid byte behavior, and line-ending normalization.
 - [ ] **SYN-LEX-002 · v0** — Define whitespace, indentation significance or insignificance, statement separation, and permitted line continuation.
@@ -32,12 +36,16 @@ parser example.
 
 ## 3. Documents, modules, imports, and profiles
 
+Proposed answers: [document and profile decisions](decisions/03-documents-modules-profiles.md).
+
 - [ ] **SYN-DOC-001 · v0** — Define how a source unit declares or inherits its `.neu` language-behavior version.
 - [ ] **SYN-DOC-002 · v0** — Define the top-level document shape and whether declarations, values, or both may appear at the root.
 - [ ] **SYN-DOC-003 · v0** — Define how source refers to a domain vocabulary while the compilation request remains authoritative for which profiles are permitted.
 - [ ] **SYN-DOC-004 · v0** — Define module/package names independently from paths, URLs, mutable tags, and display labels.
 
 ## 4. Declarations, bindings, and names
+
+Proposed answers: [declaration and binding decisions](decisions/04-declarations-bindings-names.md).
 
 - [ ] **SYN-DEC-001 · v0** — Define the common shape of a named declaration and the distinction between stable machine identity and display name.
 - [ ] **SYN-DEC-002 · v0** — Define variable/binding declaration syntax and decide that bindings are immutable unless a cross-domain corpus proves mutation is required.
@@ -49,6 +57,8 @@ parser example.
 
 ## 5. Type and schema notation
 
+Proposed answers: [type and schema decisions](decisions/05-type-schema-notation.md).
+
 - [ ] **SYN-TYP-001 · v0** — Define syntax for the minimal scalar types and their exact value domains.
 - [ ] **SYN-TYP-002 · v0** — Define record/structured-value type syntax, field names, field order, and duplicate-field diagnostics.
 - [ ] **SYN-TYP-003 · v0** — Define homogeneous collection type syntax and whether collection order is part of the type contract.
@@ -57,6 +67,8 @@ parser example.
 - [ ] **SYN-TYP-006 · v0** — Define opaque domain-owned types that remain inspectable and versioned without exposing consumer semantics.
 
 ## 6. Literal values and value construction
+
+Proposed answers: [literal and value decisions](decisions/06-literal-values.md).
 
 - [ ] **SYN-VAL-001 · v0** — Define scalar literal construction and overflow, precision, and invalid-literal diagnostics.
 - [ ] **SYN-VAL-002 · v0** — Define record value construction, field association, trailing separators, and duplicate fields.
@@ -69,12 +81,16 @@ parser example.
 
 ## 7. References and structural relationships
 
+Proposed answers: [reference and relationship decisions](decisions/07-references-relationships.md).
+
 - [ ] **SYN-REF-001 · v0** — Define unambiguous reference syntax separate from declaration, text, and path syntax.
 - [ ] **SYN-REF-002 · v0** — Define local, qualified, and cross-source reference forms and how their immutable targets are resolved.
 - [ ] **SYN-REF-003 · v0** — Define containment versus reference syntax so layout is not mistaken for ownership.
 - [ ] **SYN-REF-004 · v0** — Define typed domain relationship declarations without assigning graph or execution meaning in core.
 
 ## 10. Domain vocabulary surface
+
+Proposed answers: [domain-vocabulary decisions](decisions/10-domain-vocabulary.md).
 
 - [ ] **SYN-DOM-001 · v0** — Define namespaced domain declaration syntax driven by a selected data-only vocabulary.
 - [ ] **SYN-DOM-002 · v0** — Define how source states required vocabulary identity, schema version, behavior version, and required features.
@@ -85,6 +101,8 @@ parser example.
 
 ## 12. Security-sensitive syntax
 
+Proposed answers: [security-sensitive syntax decisions](decisions/12-security-sensitive-syntax.md).
+
 - [ ] **SYN-SEC-001 · v0** — Define opaque secret-reference syntax and prohibit resolved secret material from Neutral IR and derivation records.
 - [ ] **SYN-SEC-002 · v0** — Ensure secret references are not ordinary strings that can be interpolated or printed accidentally.
 - [ ] **SYN-SEC-003 · v0** — Prohibit source constructs that execute native code, shell code, provider code, or vocabulary plugins during parsing or validation.
@@ -93,6 +111,8 @@ parser example.
 - [ ] **SYN-SEC-006 · v0** — Define bounded lexical nesting and literal sizes so pathological source fails predictably.
 
 ## 13. Diagnostics and invalid/incomplete syntax
+
+Proposed answers: [diagnostic decisions](decisions/13-diagnostics-invalid-syntax.md).
 
 - [ ] **SYN-DIA-001 · v0** — Assign stable diagnostic categories for invalid tokens, malformed constructs, unresolved names, wrong kinds, and invalid domain payloads.
 - [ ] **SYN-DIA-002 · v0** — Define source-span units and behavior for Unicode, tabs, line endings, and invalid text.
@@ -103,10 +123,14 @@ parser example.
 
 ## 14. Documentation, formatting, and tools
 
+Proposed answers: [documentation and formatter decisions](decisions/14-documentation-formatting-tools.md).
+
 - [ ] **SYN-TOL-001 · v0** — Define documentation-comment or documentation-annotation attachment rules.
 - [ ] **SYN-TOL-002 · v0** — Define a single formatter's stable output policy without claiming formatted source is canonical IR identity.
 
 ## 15. Evolution and conformance
+
+Proposed answers: [evolution and conformance decisions](decisions/15-evolution-conformance.md).
 
 - [ ] **SYN-EVO-001 · v0** — Publish an unambiguous grammar notation and precedence specification independent from one parser implementation.
 - [ ] **SYN-EVO-002 · v0** — Create positive, negative, ambiguity, and resource-limit fixtures for every v0 syntax decision.
@@ -115,4 +139,3 @@ parser example.
 ## Version completion rule
 
 v0 syntax is complete only when every checked decision has normative prose, valid and invalid fixtures, deterministic diagnostics, source-to-IR provenance, and one effect-free consumer case.
-
