@@ -33,7 +33,7 @@ Proposed answers: [lexical and source-text decisions](decisions/02-lexical-sourc
 - [ ] **SYN-LEX-003 · v0** — Define line comments, block comments if present, nesting behavior, and unterminated-comment diagnostics.
 - [ ] **SYN-LEX-004 · v0** — Define identifier spelling, Unicode policy, normalization, case sensitivity, and confusable-character diagnostics.
 - [ ] **SYN-LEX-005 · v0** — Define reserved words, contextual words, qualified names, and the escape mechanism for conflicting names if one exists.
-- [ ] **SYN-LEX-006 · v0** — Define delimiter pairs, separators, optional versus required terminators, and trailing-separator rules.
+- [ ] **SYN-LEX-006 · v0** — Define delimiter pairs, separators, logical-newline and closing-brace termination, and trailing-separator rules; `.neu` has no semicolon terminator.
 - [ ] **SYN-LEX-007 · v0** — Define ordinary text literals, escapes, invalid escape handling, and Unicode scalar behavior.
 - [ ] **SYN-LEX-008 · v0** — Define `num`, `string`, `bool`, and `null` spellings without inheriting host-language range or precision rules; v0 has no second `absent` value.
 

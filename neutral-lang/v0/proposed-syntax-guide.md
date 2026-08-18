@@ -729,69 +729,69 @@ language.
 ## 26. Compact grammar sketch
 
 This is a design sketch, not yet the normative grammar.
-Semicolons in the EBNF block terminate grammar productions; they are notation
-for this document and are not accepted `.neu` source characters.
+Blank lines separate productions in this sketch. It deliberately uses no
+semicolon-like production terminator, matching the `.neu` surface.
 
 ```ebnf
 source =
     trivia, language_header, module_header,
     { vocabulary_requirement },
     { declaration_or_assignment },
-    end_of_file ;
+    end_of_file
 
-language_header = "neu", string_literal, LINE_END ;
-module_header = "module", qualified_name, LINE_END ;
+language_header = "neu", string_literal, LINE_END
+module_header = "module", qualified_name, LINE_END
 
 vocabulary_requirement =
     "requires", "vocabulary", identifier, "{",
     vocabulary_fields,
-    "}", LINE_END ;
+    "}", LINE_END
 
 vocabulary_fields =
-    vocabulary_field, { vocabulary_field } ;
+    vocabulary_field, { vocabulary_field }
 
 vocabulary_field =
       ( "id" | "schema" | "behavior" ), ":", string_literal, ","
     | "features", ":", "[",
       [ string_literal, { ",", string_literal }, [ "," ] ],
-      "]", "," ;
+      "]", ","
 
 declaration_or_assignment =
       namespace_declaration
     | record_declaration
     | binding_declaration
     | assignment
-    | domain_declaration ;
+    | domain_declaration
 
 namespace_declaration =
     "namespace", identifier, "{",
     { declaration_or_assignment },
-    "}", LINE_END ;
+    "}", LINE_END
 
 record_declaration =
-    "record", identifier, "{", { record_field }, "}", LINE_END ;
+    "record", identifier, "{", { record_field }, "}", LINE_END
 
 record_field =
-    type, nullable_name, [ "=", value ], "," ;
+    type, nullable_name, [ "=", value ], ","
 
 binding_declaration =
-    [ "mut" ], type, nullable_name, "=", value, LINE_END ;
+    [ "mut" ], type, nullable_name, "=", value, LINE_END
 
 assignment =
-    identifier, "=", value, LINE_END ;
+    identifier, "=", value, LINE_END
 
 nullable_name =
-    identifier, [ "?" ] ;
+    identifier, [ "?" ]
 
 domain_declaration =
-    vocabulary_member, identifier, "{", { value_field }, "}", LINE_END ;
+    vocabulary_member, identifier, "{", { value_field }, "}", LINE_END
 
 type =
       generic_type
-    | qualified_name ;
+    | qualified_name
 
 generic_type =
-    ( "List" | "Ref" ), "<", type, ">" ;
+    ( "List" | "Ref" ), "<", type, ">"
 
 value =
       boolean_literal
@@ -802,33 +802,33 @@ value =
     | nominal_value
     | qualified_enum_value
     | reference_value
-    | secret_reference_value ;
+    | secret_reference_value
 
 list_value =
-    "[", [ value, { ",", value }, [ "," ] ], "]" ;
+    "[", [ value, { ",", value }, [ "," ] ], "]"
 
 nominal_value =
-    type_name, "{", { value_field }, "}" ;
+    type_name, "{", { value_field }, "}"
 
 qualified_enum_value =
-    qualified_name, ".", identifier ;
+    qualified_name, ".", identifier
 
 value_field =
-    identifier, ":", value, "," ;
+    identifier, ":", value, ","
 
 reference_value =
-    "ref", "(", qualified_name, ")" ;
+    "ref", "(", qualified_name, ")"
 
 secret_reference_value =
-    "secret_ref", "(", string_literal, ")" ;
+    "secret_ref", "(", string_literal, ")"
 
 vocabulary_member =
-    identifier, ".", identifier ;
+    identifier, ".", identifier
 
-type_name = qualified_name ;
+type_name = qualified_name
 
 qualified_name =
-    identifier, { "::", identifier } ;
+    identifier, { "::", identifier }
 ```
 
 Static validation—not grammar alone—enforces exactly one vocabulary `id`,
