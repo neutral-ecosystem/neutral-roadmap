@@ -128,7 +128,7 @@ Proposed answers: [diagnostic decisions](decisions/13-diagnostics-invalid-syntax
 
 Proposed answers: [documentation and formatter decisions](decisions/14-documentation-formatting-tools.md).
 
-- [ ] **SYN-TOL-001 · v0** — Define documentation-comment or documentation-annotation attachment rules.
+- [ ] **SYN-TOL-001 · v0** — State that `//` and `/// ... ///` are non-semantic comments and that v0 has no documentation-attachment syntax.
 - [ ] **SYN-TOL-002 · v0** — Define a single formatter's stable output policy without claiming formatted source is canonical IR identity.
 
 ## 15. Evolution and conformance

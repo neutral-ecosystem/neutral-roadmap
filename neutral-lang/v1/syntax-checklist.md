@@ -104,7 +104,7 @@ parser example.
 
 ## 14. Documentation, formatting, and tools
 
-- [ ] **SYN-TOL-003 · v1** — Define comment preservation and attachment across formatting and source-to-source migrations.
+- [ ] **SYN-TOL-003 · v1** — Define comment preservation and stable placement across formatting and source-to-source migrations without making comments semantic attachments.
 - [ ] **SYN-TOL-004 · v1** — Define syntax-tree ranges and identities needed by editors without exposing compiler-private tree layout as public IR.
 - [ ] **SYN-TOL-005 · v1** — Define completion and hover boundaries for core versus domain-vocabulary constructs.
 - [ ] **SYN-TOL-006 · v1** — Define how a future GUI emits readable `.neu` and preserves only valid, non-authoritative presentation metadata.

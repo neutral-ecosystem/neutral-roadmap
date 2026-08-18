@@ -10,7 +10,7 @@ The ecosystem has four distinct representation contracts:
 
 | Representation | Owner | Public stability | Permitted contents |
 | --- | --- | --- | --- |
-| Concrete `.neu` source | neutral-lang specification | Versioned public contract | Author notation, comments, documentation, vocabulary requests |
+| Concrete `.neu` source | neutral-lang specification | Versioned public contract | Author notation, comments, vocabulary requests |
 | Compiler-private models | neutral-lang implementation | None | Tokens, recovery state, syntax trees, resolution/type state, lowering forms |
 | Neutral IR | neutral-lang IR specification | Independently versioned public contract | Resolved identities, typed structure, vocabulary-owned data, provenance links |
 | Consumer-private model | Flow or Neux | Private to that application | Flow plans or Neux OS models and their domain behavior |
@@ -46,9 +46,8 @@ Every accepted construct MUST have:
 4. an origin chain containing captured source-unit identity and half-open byte
    span.
 
-Comments and formatting are source trivia unless classified as documentation.
-Trivia MAY remain in the private tree but MUST NOT alter logical IR.
-Documentation is optional non-behavioral IR metadata with provenance.
+Comments and formatting are source trivia. Trivia MAY remain in the private tree
+but MUST NOT alter logical IR. v0 has no documentation-attachment syntax.
 
 Generated or normalized IR elements MUST name their originating construct.
 Lowering MUST NOT invent Flow or Neux semantics or discard required domain data.
@@ -65,7 +64,7 @@ fixtures, and compatibility/provenance analysis.
 Shape similarity alone is insufficient. Similar shapes with different behavior
 remain in separate vocabularies. v0 core syntax is limited to modules,
 namespaces, type-first bindings, nominal records, typed values, explicit
-references, vocabulary declarations, and documentation.
+references, vocabulary declarations, and comments.
 
 The union of Flow and Neux keywords is explicitly rejected as a core design.
 

@@ -47,14 +47,14 @@ requires vocabulary flow {
     features: ["pipeline", "typed-reference"],
 }
 
-/// Reusable configuration data.
+/// Reusable configuration data. ///
 record ToolConfig {
     string image,
     string note?,
     List<string> labels = [],
 }
 
-/// Data containing symbolic references.
+/// Data containing symbolic references. ///
 record InvocationInput {
     Ref<ToolConfig> config,
     SecretRef token,
@@ -132,23 +132,32 @@ data-only bundle.
 Field order is not meaningful. The formatter writes `id`, `schema`,
 `behavior`, then `features`. Each appears exactly once.
 
-## 4. Comments and documentation
+## 4. Comments
 
 ```neu
 // Line comment.
 
-/*
- * Nested block comments are allowed.
- * /* Inner comment. */
- */
+/// A short block comment. ///
 
-/// Documentation attached to the next declaration.
-string label = "visible in generated documentation"
+///
+A multiline block comment.
+Block comments do not nest.
+///
+
+string label = "ordinary declaration"
 ```
 
-`//` and `/* ... */` are non-semantic comments. `///` attaches
-documentation to the next declaration or record/domain field. A blank line ends
-the attachment.
+`//` begins a line comment and ends immediately before the logical newline.
+The lexer recognizes `///` before `//`: `///` opens a block comment and the next
+`///` closes it. A block may be written on one line or across multiple lines.
+Block comments do not nest because the
+same delimiter closes the current block. An unclosed block comment is a lexical
+error from its opening delimiter to end of source.
+
+Both forms are non-semantic trivia. v0 has no documentation-attachment syntax;
+adding one requires a distinct future decision rather than giving `///` two
+meanings. Newlines inside a block comment remain visible to logical-line
+termination, so a comment cannot join two declarations accidentally.
 
 ## 5. Identifiers and qualification
 
@@ -724,7 +733,8 @@ language.
 | Domain declaration | `flow.pipeline verify { ... }` |
 | Domain value | `flow::ArtifactRef { ... }` |
 | Domain enum | `flow::Mode.strict` |
-| Documentation | `/// documentation` |
+| Line comment | `// explanation` |
+| Block comment | `/// explanation ///` |
 
 ## 26. Compact grammar sketch
 

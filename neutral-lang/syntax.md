@@ -220,9 +220,9 @@ accepts one example.
 
 ## 14. Documentation, formatting, and tools
 
-- [ ] **SYN-TOL-001 · v0** — Define documentation-comment or documentation-annotation attachment rules.
+- [ ] **SYN-TOL-001 · v0** — State that `//` and `/// ... ///` are non-semantic comments and that v0 has no documentation-attachment syntax.
 - [ ] **SYN-TOL-002 · v0** — Define a single formatter's stable output policy without claiming formatted source is canonical IR identity.
-- [ ] **SYN-TOL-003 · v1** — Define comment preservation and attachment across formatting and source-to-source migrations.
+- [ ] **SYN-TOL-003 · v1** — Define comment preservation and stable placement across formatting and source-to-source migrations without making comments semantic attachments.
 - [ ] **SYN-TOL-004 · v1** — Define syntax-tree ranges and identities needed by editors without exposing compiler-private tree layout as public IR.
 - [ ] **SYN-TOL-005 · v1** — Define completion and hover boundaries for core versus domain-vocabulary constructs.
 - [ ] **SYN-TOL-006 · v1** — Define how a future GUI emits readable `.neu` and preserves only valid, non-authoritative presentation metadata.

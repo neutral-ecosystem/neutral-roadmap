@@ -48,13 +48,25 @@ MUST NOT infer a separator from indentation or token adjacency.
 ## SYN-LEX-003 — Comments
 
 `//` begins a line comment but does not consume its terminating logical newline.
-`/*` and `*/` delimit block comments, and
-block comments may nest. Delimiters inside text are ordinary characters. An
-unterminated block comment is one error from its opening delimiter to end of
-source.
+The lexer gives the three-slash delimiter priority over the two-slash delimiter:
+`///` opens a block comment and the next `///` closes it. The opening and closing
+delimiters may occur on one line or different lines:
 
-`///` is reserved for documentation under `SYN-TOL-001`. Other comments are
-non-semantic trivia. v0 has no shebang or executable comment.
+```neu
+/// short block ///
+
+///
+multiline block
+///
+```
+
+Block comments do not nest: the first subsequent `///` always closes the
+current block. An unterminated block comment is one error from its opening
+delimiter to end of source. Newlines inside block-comment trivia remain visible
+to logical-line termination. Delimiters inside strings are ordinary characters.
+
+Both comment forms are non-semantic trivia. v0 has no documentation attachment,
+shebang, or executable comment.
 
 ## SYN-LEX-004 — Identifiers and Unicode
 
@@ -64,7 +76,7 @@ v0 identifiers are ASCII:
 identifier = [A-Za-z_][A-Za-z0-9_]*
 ```
 
-They are case-sensitive. Unicode is permitted in text and documentation, not in
+They are case-sensitive. Unicode is permitted in strings and comments, not in
 identifiers. Tools SHOULD render a non-ASCII attempted identifier safely and
 MUST NOT normalize it into an accepted name. Human display names belong in
 typed text fields and are separate from symbol identity.
