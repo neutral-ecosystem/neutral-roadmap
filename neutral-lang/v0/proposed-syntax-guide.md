@@ -14,7 +14,7 @@ records remain unchanged until this author-facing syntax is reviewed.
 
 The revised surface follows these preferences:
 
-- declarations are type-first: `num x = 10;`;
+- declarations are type-first: `num x = 10`;
 - bindings are immutable unless prefixed with `mut`;
 - `num` is the preferred author-facing numeric type;
 - integer and decimal primitive representations remain compiler/IR concerns;
@@ -38,8 +38,8 @@ Three details need deliberate review:
 ## 2. Complete example
 
 ```neu
-neu "0.1";
-module acme.delivery;
+neu "0.1"
+module acme.delivery
 
 requires vocabulary flow {
     id: "org.neutral.flow",
@@ -64,12 +64,12 @@ record InvocationInput {
 ToolConfig base = ToolConfig {
     image: "example.invalid/tool:1",
     note: null,
-};
+}
 
 InvocationInput input = InvocationInput {
     config: ref(base),
     token: secret_ref("ci/signing-token"),
-};
+}
 
 namespace checks {
     flow.pipeline verify {
@@ -96,7 +96,7 @@ zero or more declarations
 ### Language version
 
 ```neu
-neu "0.1";
+neu "0.1"
 ```
 
 Every unit states an exact language-behavior version. There is no omitted
@@ -105,7 +105,7 @@ version, `latest`, or range.
 ### Module
 
 ```neu
-module acme.delivery;
+module acme.delivery
 ```
 
 A module name is a dot-qualified logical name. It is not a file path, URL,
@@ -144,7 +144,7 @@ Field order is not meaningful. The formatter writes `id`, `schema`,
  */
 
 /// Documentation attached to the next declaration.
-String label = "visible in generated documentation";
+String label = "visible in generated documentation"
 ```
 
 `//` and `/* ... */` are non-semantic comments. `///` attaches
@@ -162,15 +162,15 @@ v0 identifiers remain ASCII:
 Valid:
 
 ```neu
-String image_2 = "tool";
-String _internal_name = "value";
+String image_2 = "tool"
+String _internal_name = "value"
 ```
 
 Invalid:
 
 ```neu
-String 2image = "tool";
-String naïve = "value";
+String 2image = "tool"
+String naïve = "value"
 ```
 
 Identifiers are case-sensitive. Unicode display names belong in `String`
@@ -200,21 +200,21 @@ point between identifiers.
 
 ## 6. Declaring variables and bindings
 
-The default form is type-first and immutable:
+The default form is type-first, immutable, and terminated by a line ending:
 
 ```neu
-Type name = value;
+Type name = value
 ```
 
 Examples:
 
 ```neu
-bool enabled = true;
-num attempts = 3;
-num ratio = 0.75;
-String label = "build";
-List<String> labels = ["portable", "checked"];
-SecretRef token = secret_ref("ci/token");
+bool enabled = true
+num attempts = 3
+num ratio = 0.75
+String label = "build"
+List<String> labels = ["portable", "checked"]
+SecretRef token = secret_ref("ci/token")
 ```
 
 There is no `let` keyword and no colon between name and type.
@@ -226,7 +226,7 @@ declaration changes its symbolic identity in v0.
 The declared type remains explicit. The following is invalid:
 
 ```neu
-x = 10; // No declaration exists.
+x = 10 // No declaration exists.
 ```
 
 ## 7. Mutability
@@ -234,17 +234,17 @@ x = 10; // No declaration exists.
 Bindings are immutable unless prefixed with `mut`:
 
 ```neu
-num retries = 3;
-mut num counter = 0;
+num retries = 3
+mut num counter = 0
 ```
 
 Only a mutable binding may be assigned again:
 
 ```neu
-counter = 1;
+counter = 1
 
 // Invalid: retries is immutable.
-retries = 4;
+retries = 4
 ```
 
 The restricted proposal is:
@@ -266,10 +266,10 @@ concrete cross-domain use case.
 Authors normally use one type:
 
 ```neu
-num count = 10;
-num ratio = 0.25;
-num negative = -4;
-num grouped = 1_000_000;
+num count = 10
+num ratio = 0.25
+num negative = -4
+num grouped = 1_000_000
 ```
 
 Primitive numeric categories remain inside the compiler and IR: integer and
@@ -292,13 +292,13 @@ Automatic numeric casting follows these rules:
 Examples:
 
 ```neu
-num whole = 10;
-num fraction = 10.5;
+num whole = 10
+num fraction = 10.5
 
 // Invalid numeric values:
-num bad_text = "10";
-num not_supported = NaN;
-num not_supported_either = infinity;
+num bad_text = "10"
+num not_supported = NaN
+num not_supported_either = infinity
 ```
 
 v0 numeric literals use decimal digits. Underscores may occur only between
@@ -325,22 +325,22 @@ records, lists, and references.
 Place `?` after the variable name:
 
 ```neu
-String label? = null;
-num result? = null;
-ToolConfig config? = null;
+String label? = null
+num result? = null
+ToolConfig config? = null
 ```
 
 The same declarations may contain non-null values:
 
 ```neu
-String label? = "build";
-num result? = 42;
+String label? = "build"
+num result? = 42
 ```
 
 Without `?`, null is invalid:
 
 ```neu
-String label = null; // Invalid.
+String label = null // Invalid.
 ```
 
 There is no `Nullable<T>` type, optional declaration marker, or `absent`
@@ -351,10 +351,10 @@ value. Nullability does not mean omission.
 `List<T>` is ordered and homogeneous:
 
 ```neu
-List<String> names = ["build", "test"];
-List<num> values = [1, 2.5, 3];
-List<List<num>> matrix = [[1, 2], [3]];
-List<String> empty = [];
+List<String> names = ["build", "test"]
+List<num> values = [1, 2.5, 3]
+List<List<num>> matrix = [[1, 2], [3]]
+List<String> empty = []
 ```
 
 Order and duplicates are preserved. A trailing comma is allowed. v0 has no map,
@@ -363,7 +363,7 @@ set, tuple, or heterogeneous list.
 A nullable list places `?` after the variable:
 
 ```neu
-List<String> names? = null;
+List<String> names? = null
 ```
 
 ## 12. Declaring record types
@@ -404,7 +404,7 @@ binding containing the record:
 mut Config config = Config {
     image: "example.invalid/tool:1",
     note: null,
-};
+}
 ```
 
 ## 13. Constructing record values
@@ -413,7 +413,7 @@ mut Config config = Config {
 Config config = Config {
     image: "example.invalid/tool:1",
     note: null,
-};
+}
 ```
 
 Fields use `name: value` in construction even though declarations are
@@ -436,10 +436,10 @@ There is no anonymous record value.
 
 ```neu
 namespace checks {
-    String mode = "strict";
+    String mode = "strict"
 
     namespace internal {
-        bool enabled = true;
+        bool enabled = true
     }
 }
 ```
@@ -472,7 +472,7 @@ record Selection {
 
 Selection selected = Selection {
     config: ref(config),
-};
+}
 ```
 
 A reference is not the target's copied value and does not automatically mean
@@ -485,13 +485,13 @@ module in the captured closure. They never fetch it.
 ## 16. Secret references
 
 ```neu
-SecretRef token = secret_ref("ci/signing-token");
+SecretRef token = secret_ref("ci/signing-token")
 ```
 
 `SecretRef` is not `String`:
 
 ```neu
-SecretRef wrong = "ci/signing-token"; // Invalid.
+SecretRef wrong = "ci/signing-token" // Invalid.
 ```
 
 The compiler stores an opaque logical reference, never resolved secret material.
@@ -501,7 +501,7 @@ text, or used to grant authority. Diagnostics redact them by default.
 A nullable secret reference is written:
 
 ```neu
-SecretRef token? = null;
+SecretRef token? = null
 ```
 
 ## 17. Domain declarations
@@ -538,9 +538,9 @@ pipeline verify {} // Invalid: no vocabulary owner.
 ```neu
 flow.ArtifactRef artifact = flow.ArtifactRef {
     value: "sha256:example",
-};
+}
 
-flow.Mode mode = flow.Mode.strict;
+flow.Mode mode = flow.Mode.strict
 ```
 
 The qualified enum value is not a String. The vocabulary bundle defines exact
@@ -571,12 +571,16 @@ its independent OS meaning.
 - `CRLF` and lone `CR` behave as logical `LF` while original bytes remain
   available for identity and source spans.
 - Indentation is not syntax.
-- Newline is whitespace.
-- Simple declarations and assignments end in `;`.
-- Braced declarations do not have a trailing semicolon.
+- A newline at delimiter depth zero terminates a complete simple declaration or
+  assignment.
+- Newlines inside `()`, `[]`, `{}`, and `<>` are ordinary whitespace.
+- A newline after an incomplete token such as `=`, `,`, or `.` continues
+  the construct.
+- A closing brace ends a braced declaration.
 - Fields and list items require commas.
 - A trailing comma is allowed and preferred in multiline forms.
-- There is no automatic semicolon insertion.
+- Semicolons are not part of the proposed source grammar and are rejected.
+- Two simple declarations cannot share one physical line.
 - Braces, brackets, parentheses, and generic angle brackets must match.
 - `.` qualifies names and also appears inside a numeric literal; token context
   disambiguates the two.
@@ -587,8 +591,8 @@ one final newline, double-quoted Strings, and multiline trailing commas.
 ## 21. String literals
 
 ```neu
-String message = "line one\nline two";
-String symbol = "\u{03BB}";
+String message = "line one\nline two"
+String symbol = "\u{03BB}"
 ```
 
 Double-quoted Strings support escaped backslash, quote, newline, carriage
@@ -661,17 +665,17 @@ language.
 
 | Goal | Revised syntax |
 | --- | --- |
-| Language version | `neu "0.1";` |
-| Module | `module acme.delivery;` |
+| Language version | `neu "0.1"` |
+| Module | `module acme.delivery` |
 | Vocabulary | `requires vocabulary flow { ... }` |
-| Immutable variable | `num x = 10;` |
-| Mutable variable | `mut num x = 10;` |
-| Reassignment | `x = 11;` |
-| String | `String name = "value";` |
-| Nullable variable | `String name? = null;` |
-| List | `List<String> names = ["one"];` |
+| Immutable variable | `num x = 10` |
+| Mutable variable | `mut num x = 10` |
+| Reassignment | `x = 11` |
+| String | `String name = "value"` |
+| Nullable variable | `String name? = null` |
+| List | `List<String> names = ["one"]` |
 | Record | `record Config { String name, }` |
-| Record value | `Config config = Config { name: "value", };` |
+| Record value | `Config config = Config { name: "value", }` |
 | Nullable field | `String note?,` |
 | Default field | `List<String> names = [],` |
 | Namespace | `namespace checks { ... }` |
@@ -686,6 +690,8 @@ language.
 ## 26. Compact grammar sketch
 
 This is a design sketch, not yet the normative grammar.
+Semicolons in the EBNF block terminate grammar productions; they are notation
+for this document and are not accepted `.neu` source characters.
 
 ```ebnf
 source =
@@ -694,13 +700,13 @@ source =
     { declaration_or_assignment },
     end_of_file ;
 
-language_header = "neu", string_literal, ";" ;
-module_header = "module", qualified_name, ";" ;
+language_header = "neu", string_literal, LINE_END ;
+module_header = "module", qualified_name, LINE_END ;
 
 vocabulary_requirement =
     "requires", "vocabulary", identifier, "{",
     vocabulary_fields,
-    "}" ;
+    "}", LINE_END ;
 
 vocabulary_fields =
     vocabulary_field, { vocabulary_field } ;
@@ -721,25 +727,25 @@ declaration_or_assignment =
 namespace_declaration =
     "namespace", identifier, "{",
     { declaration_or_assignment },
-    "}" ;
+    "}", LINE_END ;
 
 record_declaration =
-    "record", identifier, "{", { record_field }, "}" ;
+    "record", identifier, "{", { record_field }, "}", LINE_END ;
 
 record_field =
     type, nullable_name, [ "=", value ], "," ;
 
 binding_declaration =
-    [ "mut" ], type, nullable_name, "=", value, ";" ;
+    [ "mut" ], type, nullable_name, "=", value, LINE_END ;
 
 assignment =
-    qualified_name, "=", value, ";" ;
+    qualified_name, "=", value, LINE_END ;
 
 nullable_name =
     identifier, [ "?" ] ;
 
 domain_declaration =
-    vocabulary_member, identifier, "{", { value_field }, "}" ;
+    vocabulary_member, identifier, "{", { value_field }, "}", LINE_END ;
 
 type =
       generic_type
@@ -791,6 +797,11 @@ Static validation—not grammar alone—enforces exactly one vocabulary `id`,
 assignment rejection; type-preserving mutation; declaration uniqueness; and
 schema-owned domain fields.
 
+`LINE_END` is emitted for a physical newline at delimiter depth zero when the
+preceding tokens can complete the current header, declaration, or assignment.
+The lexer also emits a synthetic `LINE_END` before end-of-file when needed.
+It is suppressed inside delimiters and after syntactically incomplete tokens.
+
 ## 27. How to revise this proposal
 
 When changing a form, edit:
@@ -805,11 +816,11 @@ When changing a form, edit:
 For the current requested style, the central examples are:
 
 ```neu
-num x = 10;
-mut num counter = 0;
-counter = 1;
-String label = "hello";
-String nullable_label? = null;
+num x = 10
+mut num counter = 0
+counter = 1
+String label = "hello"
+String nullable_label? = null
 ```
 
 Once these choices are finalized, the v0 decision records and the master/version
