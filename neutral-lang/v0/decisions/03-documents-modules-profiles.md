@@ -16,6 +16,11 @@ The value is an exact language-behavior version, not a range. Every unit states
 it explicitly; v0 does not inherit from a directory, filename, environment, or
 other source. Unsupported versions fail before later declarations are parsed.
 
+Every source unit in one compilation closure MUST declare the same exact
+language-behavior version. A mixed-version closure fails before merged module
+construction, name resolution, or type checking. Cross-version compilation is
+not a v0 compatibility feature.
+
 Language version is independent from compiler API, IR schema, encoding, and
 vocabulary versions. Omitting the header or selecting “latest” is invalid.
 
@@ -68,10 +73,12 @@ bundle. The compiler aggregates and verifies those features instead of treating
 `use Flow` as a request for every present or future feature. It records the
 actual used feature set and exact resolution in IR/derivation.
 
-Use names share the root namespace and are unique. v0 has no source alias,
-selective-use, version-range, or inline vocabulary-identity syntax. Two bundles
-that require the same source name cannot coexist in one v0 unit; supporting that
-case requires the future vocabulary-renaming decision.
+Within one source unit, use names are unique and reserve their name against the
+merged module's root declarations. Repeating the same use name in another unit
+of that module is allowed only under the identical-resolution rule below. v0 has
+no source alias, selective-use, version-range, or inline vocabulary-identity
+syntax. Two bundles that require the same source name cannot coexist in one v0
+closure; supporting that case requires the future vocabulary-renaming decision.
 
 ## SYN-DOC-004 — Module and package names
 
@@ -86,8 +93,17 @@ a path, URL, registry coordinate, mutable tag, package identity, or display
 label.
 
 The request associates each unit with immutable content and package identity.
-The module declaration must agree with that manifest. Two units cannot claim
-the same module name in one closure.
+The module declaration must agree with that manifest. Multiple source units from
+the same captured package identity may declare the same module; their
+declarations form one logical module namespace. Units with different package
+identities cannot merge into one v0 module. Duplicate declaration names across
+merged units are errors, and source-unit or resolver order has no semantic
+meaning.
+
+Vocabulary `use` declarations remain source-unit scoped: every unit that uses a
+vocabulary-qualified name declares the corresponding `use`. Equal use names in
+units of the same module must resolve to the same exact captured bundle. A
+different resolution is a closure-level conflict, not an order-dependent choice.
 
 v0 has no source-module or package imports. The request/resolver may provide a
 closed set of units for qualified references. `use` imports only a captured
@@ -95,8 +111,10 @@ vocabulary namespace; neither module spelling nor `use` searches disk or network
 
 ## Invalid and boundary cases
 
-Missing, duplicate, late, malformed, or unsupported headers; absent or duplicate
-modules; late or duplicate `use` declarations; missing/ambiguous/disallowed lock
+Missing, duplicate, late, malformed, or unsupported headers; mixed closure
+versions; absent modules; cross-package module-name collisions; duplicate names
+in a merged module; conflicting cross-unit vocabulary resolutions; late or
+duplicate `use` declarations within one unit; missing/ambiguous/disallowed lock
 mappings; version or digest mismatch; unsupported used features; and namespace
 collisions each receive distinct diagnostics.
 

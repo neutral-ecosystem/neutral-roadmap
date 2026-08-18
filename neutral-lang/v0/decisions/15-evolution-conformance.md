@@ -18,14 +18,15 @@ value
   = scalar
   | list
   | contextual-record
-  | qualified-enum-value
+  | qualified-static-value
   | reference
   | secret-reference
 ```
 
-`::` belongs to qualified-name grammar, `.` selects a member or enum case, and
-leading minus belongs to a numeric literal. Delimiters determine nesting.
-Implementations cannot invent precedence.
+`::` belongs to qualified-name grammar, `.` selects a vocabulary-owned enum case
+or static member, and leading minus belongs to a numeric literal. General value
+member access is absent. Delimiters determine nesting. Implementations cannot
+invent precedence.
 
 The specification records grammar version, definitions, Unicode/encoding
 assumptions, and a machine-readable fixture manifest.

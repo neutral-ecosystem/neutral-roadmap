@@ -61,27 +61,32 @@ Source cannot select a local shared library, network endpoint, filesystem path,
 credential, trust root, or “latest” version. If policy and source disagree,
 compilation fails before domain payload validation.
 
-## SYN-DOM-004 — Behavioral data and metadata
+## SYN-DOM-004 — Field presence, nullability, and behavior
 
-The bundle, not the source author, classifies each field/feature as:
+Vocabulary schemas use the same field model as Neutral records. Each known
+field independently declares:
 
-- required behavioral data;
-- optional behavioral data that still requires explicit feature understanding;
-  or
-- optional non-behavioral metadata that may be ignored or preserved under the
-  declared round-trip policy.
+- presence: required, or defaulted and therefore omittable;
+- type nullability: non-nullable or nullable; and
+- interpretation: behavioral data or non-behavioral metadata.
 
-All three use ordinary schema-named fields in v0; there is no universal
+There is no second vocabulary-only notion of an “optional field.” A nullable
+field without a default is still required. A defaulted non-nullable field may be
+omitted. The compiler records omission/default application separately from an
+explicit `null`.
+
+All fields use ordinary schema-named forms in v0; there is no universal
 `extensions` or `metadata` bag. An author cannot relabel behavioral data as
-metadata. Unknown behavioral fields fail closed. Unknown optional metadata is
-accepted only if its envelope is explicitly declared by a supported schema
-feature; otherwise unknown fields are errors.
+metadata. Unknown behavioral fields fail closed. Unknown non-behavioral metadata
+is accepted only when a supported schema feature explicitly defines its bounded
+envelope and ignore/preserve policy; otherwise unknown fields are errors.
 
 ## SYN-DOM-005 — Typed fields rather than extension maps
 
 Vocabulary-owned contextual bodies use core scalar, record, list, null,
 reference, secret-reference, enum, and other qualified vocabulary-owned value
-forms. Every field has a schema identity and expected type.
+forms. Every field has a schema identity, expected type, presence/default rule,
+nullability, and behavioral classification.
 
 The following design is rejected:
 

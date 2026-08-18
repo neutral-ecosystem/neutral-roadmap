@@ -35,7 +35,7 @@ parser example.
 
 - [ ] **SYN-VAL-014 · v2** — Define update/copy construction for immutable values and its provenance behavior.
 - [ ] **SYN-VAL-015 · v2** — Decide whether comprehensions exist or whether bounded expansion syntax fully replaces them.
-- [ ] **SYN-VAL-016 · v2** — Define source rendering for unknown or opaque optional values without pretending the compiler understands them.
+- [ ] **SYN-VAL-016 · v2** — Define source rendering for unknown or opaque schema-designated ignorable non-behavioral values without pretending the compiler understands them.
 
 ## 7. References and structural relationships
 
@@ -91,4 +91,3 @@ parser example.
 ## Version completion rule
 
 v2 syntax is complete only when the full union has a published compatibility promise, migration evidence, adversarial conformance coverage, and independent Flow and Neux justification for every core abstraction.
-

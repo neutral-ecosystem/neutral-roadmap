@@ -104,15 +104,15 @@ acme::delivery::config
 Flow::Mode
 ```
 
-`.` selects a member or enum case rather than extending a qualification path:
+`.` selects a vocabulary-owned enum case or static member rather than extending
+a qualification path:
 
 ```neu
 Flow::Mode.strict
 ```
 
-A future namespace-owned free function is `Flow::run()`, while a member call is
-`runner.run()`. General calls are not otherwise part of v0. Built-in calls
-remain `ref(...)` and `secret_ref(...)`.
+General value member access such as `config.image` and general calls are not part
+of v0. Built-in call-shaped forms remain `ref(...)` and `secret_ref(...)`.
 
 v0 has no escaped identifiers. Every vocabulary use name must be a legal
 identifier. A collision between a vocabulary namespace and another root name is
@@ -134,7 +134,8 @@ Separators are `,`, `:`, `=`, `?`, `::`, `.`, and logical newline:
 - `=` introduces a binding value or field default;
 - `?` after a complete type marks that type nullable;
 - `::` resolves names through module/namespace scopes;
-- `.` selects a member or enum case; and
+- `.` selects a vocabulary-owned enum case or static member; general value
+  member access is not part of v0; and
 - logical newline terminates complete declaration-list items.
 
 `-` is recognized only as the immediately adjacent leading sign of a numeric

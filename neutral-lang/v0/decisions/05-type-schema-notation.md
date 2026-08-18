@@ -55,16 +55,18 @@ named entry record inside a list in v0.
 
 | Meaning | Syntax |
 | --- | --- |
-| Required | `T name` |
-| Nullable | `T? name` |
-| Defaulted | `T name = value` |
+| Required, non-nullable | `T name` |
+| Required, nullable | `T? name` |
+| Defaulted, non-nullable | `T name = value` |
+| Defaulted, nullable | `T? name = null` |
 | Repeated/ordered | `List<T> name` |
 
 `?` is a postfix type constructor that adds `null` but not omission. A nullable
-field remains required unless it
-has a default. v0 has no optional-field marker, `Nullable<T>` spelling,
-standalone null type, or `absent` value. Defaults apply only when a field has no
-source entry; structural omission is not another source value.
+field remains required unless it has a default. There is no explicit
+optional-field modifier. Required/defaulted and nullable/non-nullable are
+independent axes for both Neutral records and vocabulary schemas. Defaults apply
+only when a field has no source entry; structural omission is not another source
+value. v0 has no `Nullable<T>` spelling, standalone null type, or `absent` value.
 Repetition is a type, not a modifier.
 
 ## SYN-TYP-005 — Named references

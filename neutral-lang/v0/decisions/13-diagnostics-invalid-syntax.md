@@ -71,8 +71,9 @@ If invalid input admits competing recovery trees, emit
 authoritative IR. Do not silently select the first parser alternative.
 
 The ambiguity corpus covers keyword boundaries, `::` qualified names, `.`
-member/enum-case access, negative numbers, contextual braced values, postfix
-nullable types, trailing comments, and missing line endings/separators.
+vocabulary-static selection versus forbidden value member access, negative
+numbers, contextual braced values, postfix nullable types, trailing comments,
+and missing line endings/separators.
 
 ## SYN-DIA-006 — Example obligations
 

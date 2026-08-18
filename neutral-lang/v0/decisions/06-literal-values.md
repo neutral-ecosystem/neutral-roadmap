@@ -56,8 +56,9 @@ behavior, flattening, heterogeneous element type, or comma elision.
 
 The compiler preserves structural omission/default application versus explicit
 `null` in provenance and IR. v0 has no `absent` token and no optional-field
-marker. Domain-owned optional fields may be omitted only when their captured
-schema permits it; omission is still not a source value.
+modifier. A vocabulary-owned field follows the same rule as a Neutral record
+field: it may be omitted only when its captured schema supplies a default.
+Omission is still not a source value.
 
 ## SYN-VAL-005 — Explicit references
 
@@ -67,22 +68,27 @@ ref(checks::config)
 ref(acme::delivery::checks::config)
 ```
 
-An identifier in value position is not an implicit reference. If the target has
-type/kind `T`, `ref(...)` has type `Ref<T>` and lowers to a resolved IR
-link, never text or the target's copied value. It does not make the link an
-execution dependency.
+An identifier in value position is not an implicit reference. The target MUST
+be a value binding. If that binding has declared type `T`, `ref(...)` has type
+`Ref<T>` and lowers to a resolved IR link, never text or the target's copied
+value. Record/type declarations, namespaces, modules, and vocabulary namespaces
+are wrong-kind targets. A reference does not make the link an execution
+dependency.
 
-## SYN-VAL-006 — Qualified enum values
+## SYN-VAL-006 — Qualified vocabulary static values
 
-v0 core has no enum declaration, but a vocabulary may expose a closed enum/tag:
+v0 core has no enum declaration, but a data-only vocabulary may expose a typed
+static value such as a closed enum/tag case:
 
 ```neu
 Flow::Mode.strict
 ```
 
-The bundle defines type, variants, behavior version, and unknown policy.
-Unqualified `strict` and text `"strict"` are not substitutes. General core
-tagged alternatives remain deferred.
+The bundle defines the owning type, value identity, behavior version, and
+unknown policy. Unqualified `strict` and text `"strict"` are not substitutes.
+A static member is an inert declared value, not a function, computed property,
+or general member lookup on a runtime value. General core tagged alternatives
+remain deferred.
 
 ## SYN-VAL-007 — Domain-owned typed values
 

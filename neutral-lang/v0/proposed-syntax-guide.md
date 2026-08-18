@@ -1,6 +1,10 @@
 # Proposed Neutral language v0 authoring guide
 
-Status: working v0 authoring decision
+Status: working v0 authoring proposal
+
+Provisional feature: `mut` and reassignment remain under review. They appear in
+this proposal so their consequences can be tested, but v0 is not normative
+until they are either accepted or removed.
 
 Purpose: show how people and a future GUI write the complete v0 `.neu` surface.
 The [decision records](decisions/README.md), checklist answers, grammar, and
@@ -22,18 +26,19 @@ The revised surface follows these preferences:
   token;
 - `::` resolves a name through module or namespace scopes, including a
   vocabulary namespace introduced by `use`;
-- `.` selects a member or enum case; and
+- `.` selects a vocabulary-owned enum case or static member; general value
+  member access is not part of v0; and
 - Neutral remains a tool-abstraction language, not a general-purpose language.
 
 Three details need deliberate review:
 
-1. `mut` introduces assignment order into a declarative language. This guide
-   shows a restricted design, but mutation should be removed from v0 unless a
-   real Flow and Neux need justifies it.
+1. `mut` introduces assignment order into a declarative language. It remains a
+   provisional v0 feature until a real Flow and Neux need justifies retaining
+   it.
 2. Automatic numeric conversion is limited to exact or safely widening
    conversion. Silent precision loss is rejected.
-3. `string? label` means nullable, not optional. A record field must still be
-   supplied unless it has a default.
+3. `string? label` means nullable, not omittable. A field without a default must
+   be supplied; a field with a default may be omitted.
 
 ## 2. Complete example
 
@@ -95,7 +100,9 @@ neu "0.1"
 ```
 
 Every unit states an exact language-behavior version. There is no omitted
-version, `latest`, or range.
+version, `latest`, or range. Every unit in one compilation closure must declare
+the same exact version; mixed-version closures are rejected before name or type
+resolution.
 
 ### Module
 
@@ -105,6 +112,14 @@ module acme::delivery
 
 A module name is a `::`-qualified logical name. It is not a file path, URL,
 package download instruction, or mutable version tag.
+
+One logical module may span multiple source units from the same captured package
+identity. Their declarations merge into one module namespace; duplicate names
+are errors and source-unit order has no semantic meaning. Units from different
+packages cannot contribute to the same module in v0. A vocabulary `use` remains
+source-unit scoped: each unit that spells `Flow::...` must contain `use Flow`.
+Equal use names in units of the same module must resolve to the same captured
+bundle or compilation fails.
 
 v0 has no source-module or package import statement. `use` introduces only a
 captured vocabulary namespace; the compiler request supplies the source closure.
@@ -204,17 +219,18 @@ acme::delivery::checks::config
 Flow::Mode
 ```
 
-Use `.` only when selecting a member or enum case from a resolved value/type:
+Use `.` only when selecting a vocabulary-owned enum case or static member from
+a resolved qualified type:
 
 ```neu
 Flow::Mode.strict
 ```
 
-This keeps static ownership paths distinct from member access. A future
-namespace-owned free function is qualified as `Flow::run()`, while a member call
-is `runner.run()`. Calls themselves remain outside v0 except for the core forms
-`ref(...)` and `secret_ref(...)`. A decimal point occurs only between digits in
-a numeric literal, so it cannot be confused with `::` qualification.
+General value member access such as `config.image` and general calls are not part
+of v0. The only call-shaped core forms are `ref(...)` and `secret_ref(...)`.
+A decimal point occurs only between digits in a numeric literal or after a
+qualified vocabulary type/static-member path, so it cannot be confused with
+`::` qualification.
 
 ## 6. Declaring variables and bindings
 
@@ -268,7 +284,7 @@ retries = 4
 The restricted proposal is:
 
 - assignment must appear after the mutable declaration in the same lexical
-  scope;
+  declaration list and source unit;
 - the assignment target is a local identifier, never a `::`-qualified name;
 - an assignment must preserve the declared type;
 - there are no compound assignments, increments, or mutation methods;
@@ -277,10 +293,10 @@ The restricted proposal is:
 - every assignment remains in source provenance.
 
 At the end of the lexical scope, the last valid assignment determines the
-binding's emitted value. Every `ref(...)` resolves to the binding identity and
-therefore observes that final emitted value; references are not value snapshots
-at their textual position. Reading a mutable binding before its declaration is
-invalid.
+binding's emitted value. `ref(x)` creates a symbolic reference to binding `x`;
+it neither evaluates nor snapshots `x` at the textual position of the
+reference. The referenced identity's emitted value is the binding's final
+assigned value. Reading a mutable binding before its declaration is invalid.
 
 This makes assignment order semantic for mutable bindings, unlike other
 declarations. That cost is why `mut` is not recommended for v0 without a
@@ -325,8 +341,10 @@ Examples:
 num whole = 10
 num fraction = 10.5
 
-// Invalid numeric values:
+// Invalid: type mismatch because string is not num.
 num bad_text = "10"
+
+// Unsupported numeric literals/values:
 num not_supported = NaN
 num not_supported_either = infinity
 ```
@@ -435,11 +453,13 @@ record Config {
 | --- | --- |
 | `string name,` | Required and non-null |
 | `string? name,` | Required and nullable |
-| `string name = "default",` | Required field with omission default |
+| `string name = "default",` | Omittable through a non-null default |
+| `string? name = null,` | Omittable through a nullable default |
 | `List<string> names,` | Ordered repeated values |
 
-There is no optional field. A nullable field must still be supplied unless it
-has a default:
+There is no explicit optional-field modifier. A field without a default must be
+supplied; a field with a default may be omitted. Nullability and omission are
+independent:
 
 ```neu
 record NullableDefaults {
@@ -508,13 +528,17 @@ create files, execution stages, OS namespaces, provider groups, or security
 zones.
 
 Duplicates and shadowing are invalid. Immutable declarations may reference
-later immutable declarations, but cyclic initialization is invalid. Their
-declaration order has no meaning. Mutable assignments are the only proposed v0
-form whose textual order matters.
+later immutable declarations, but direct value-initialization cycles are
+invalid; reference-only cycles are allowed as defined below. Their declaration
+order has no meaning. Mutable assignments are the only proposed v0 form whose
+textual order matters, and they cannot cross a source-unit boundary.
+
+When a module spans source units, those rules apply to the merged module scope.
+File/request order never breaks a duplicate-name tie or changes resolution.
 
 ## 15. Symbolic references
 
-Use `ref(...)` to link to a declaration:
+Use `ref(...)` to link to a value binding:
 
 ```neu
 ref(config)
@@ -522,7 +546,8 @@ ref(checks::config)
 ref(acme::delivery::checks::config)
 ```
 
-If the target has type/kind `T`, the reference has type `Ref<T>`:
+If the target value binding has declared type `T`, the reference has type
+`Ref<T>`:
 
 ```neu
 record Selection {
@@ -538,6 +563,28 @@ A reference is not the target's copied value and does not automatically mean
 containment, execution order, or data dependency. Text containing a name remains
 text.
 
+Only value bindings are legal targets. Record types, other types, namespaces,
+modules, and vocabulary namespaces are wrong-kind errors:
+
+```neu
+ref(Config) // Invalid: record type.
+ref(checks) // Invalid: namespace.
+ref(Flow) // Invalid: vocabulary namespace.
+```
+
+Direct value-initialization and directly embedded record-type cycles are invalid.
+Their dependency graphs ignore every `ref(...)`/`Ref<T>` edge because a
+reference links identities rather than embedding or copying the target value.
+Cycles made exclusively of reference edges are therefore valid:
+
+```neu
+record A { Ref<B> b, }
+record B { Ref<A> a, }
+
+A a = { b: ref(b), }
+B b = { a: ref(a), }
+```
+
 Module-qualified references work only when the compiler request supplied the
 module in the captured closure. They never fetch it.
 
@@ -546,6 +593,11 @@ module in the captured closure. They never fetch it.
 ```neu
 SecretRef<string> token = secret_ref("ci/signing-token")
 ```
+
+`secret_ref("id")` is contextually typed and does not determine `T` itself.
+The use site must supply exactly one expected `SecretRef<T>` type, optionally
+under the nullable wrapper `SecretRef<T>?`. A root value with no expected type,
+a non-secret expected type, or an ambiguous expected secret type is invalid.
 
 `SecretRef<string>` is not `string`:
 
@@ -601,7 +653,7 @@ An unknown or unqualified domain type is invalid:
 Pipeline verify = {} // Invalid: no vocabulary owner.
 ```
 
-## 18. Domain-owned types and enums
+## 18. Domain-owned types and static values
 
 ```neu
 Flow::ArtifactRef artifact = {
@@ -611,13 +663,15 @@ Flow::ArtifactRef artifact = {
 Flow::Mode mode = Flow::Mode.strict
 ```
 
-The qualified enum value is not a `string`. The vocabulary bundle defines exact
-schema and behavior versions, allowed variants, and must-understand behavior.
-Domain-owned values remain bounded data and cannot execute code.
+The qualified static value is not a `string`. The data-only vocabulary bundle
+defines its exact owning type, value identity, schema and behavior versions, and
+must-understand behavior. An enum case is the primary v0 example. Static members
+are inert declared values, not functions, computed properties, or general member
+lookup on a runtime value.
 
-The bundle—not the author—classifies fields as required behavior or optional
-non-behavioral metadata. Unknown required behavior fails closed. v0 has no
-untyped `extensions` bag through which behavioral data can be hidden.
+The bundle—not the author—independently classifies field presence/default,
+nullability, and behavioral meaning. Unknown required behavior fails closed. v0
+has no untyped `extensions` bag through which behavioral data can be hidden.
 
 ## 19. Domain-owned relationships
 
@@ -654,8 +708,9 @@ its independent OS meaning.
 - Semicolons are not part of the source grammar and are rejected.
 - Two simple declarations cannot share one physical line.
 - Braces, brackets, parentheses, and generic angle brackets must match.
-- `::` qualifies names. `.` selects a member or enum case and also appears inside
-  numeric literals; a numeric dot is the dot directly between decimal digits.
+- `::` qualifies names. `.` selects a vocabulary-owned enum case or static
+  member and also appears inside numeric literals; general value member access
+  is not part of v0.
 
 The formatter uses four spaces, a default width of 100 columns, UTF-8, `LF`,
 one final newline, double-quoted strings, and multiline trailing commas.
@@ -706,9 +761,10 @@ Diagnostic prefixes remain:
 | `NL-SYN-LIM` | Resource limit |
 | `NL-SYN-INT` | Compiler/bundle defect |
 
-Initial measurement limits remain 2 MiB per unit, 256 units, 16 MiB closure,
-depth 128, 200 diagnostics plus one truncation record, 10 seconds and 512 MiB on
-named benchmark hardware.
+Initial structural measurement limits remain 2 MiB per unit, 256 units, 16 MiB
+per closure, depth 128, and 200 diagnostics plus one truncation record. Deadline
+and memory ceilings are implementation/deployment policy, not language
+semantics; see [implementation resource budgets](../docs/implementation-resource-budgets.md).
 
 Recovered syntax never produces authoritative IR.
 
@@ -819,7 +875,7 @@ value =
     | "null"
     | list_value
     | contextual_record_value
-    | qualified_enum_value
+    | qualified_static_value
     | reference_value
     | secret_reference_value
 
@@ -829,7 +885,7 @@ list_value =
 contextual_record_value =
     "{", { value_field }, "}"
 
-qualified_enum_value =
+qualified_static_value =
     qualified_name, ".", identifier
 
 value_field =
@@ -849,6 +905,10 @@ Static validation—not grammar alone—requires every `use` name to resolve thr
 the captured lock manifest to one permitted exact vocabulary bundle; derives and
 checks the required feature set from used vocabulary members; enforces
 nullable-only null and one unambiguous expected type for every contextual record;
+requires one underlying expected `SecretRef<T>` for `secret_ref(...)`; restricts
+`ref(...)` targets to value bindings; rejects direct initialization cycles while
+ignoring reference edges for that check; rejects mixed-version closures,
+cross-package module merging, and duplicate names in merged module scopes;
 rejects immutable assignment; and checks type-preserving mutation, declaration
 uniqueness, and schema-owned vocabulary fields.
 

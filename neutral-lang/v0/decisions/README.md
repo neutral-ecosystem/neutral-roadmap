@@ -73,5 +73,5 @@ shell execution, provider credentials, or runtime lifecycle syntax. Later
 checklists may add composition and symbolic structure, but only through their
 recorded decisions.
 
-Bindings are immutable by default. The explicitly marked, local-only `mut`
-form remains provisional until a cross-domain case justifies retaining it.
+Bindings are immutable by default. The explicitly marked, source-unit-local
+`mut` form remains provisional until a cross-domain case justifies retaining it.

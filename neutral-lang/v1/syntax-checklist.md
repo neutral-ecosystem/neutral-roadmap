@@ -27,7 +27,7 @@ parser example.
 ## 4. Declarations, bindings, and names
 
 - [ ] **SYN-DEC-008 · v1** — Define parameter declarations, result declarations, and their ordering and naming rules.
-- [ ] **SYN-DEC-009 · v1** — Define default values and required/schema-optional parameters with an inspectable distinction among omission, default application, and explicit `null`.
+- [ ] **SYN-DEC-009 · v1** — Define required versus defaulted/omittable parameters independently from nullability, with an inspectable distinction among omission, default application, and explicit `null`.
 - [ ] **SYN-DEC-010 · v1** — Define nested declarations and local scope boundaries, if retained after corpus testing.
 
 ## 5. Type and schema notation
@@ -78,7 +78,7 @@ parser example.
 
 - [ ] **SYN-DOM-007 · v1** — Define domain operation construction/invocation without granting it compiler execution authority.
 - [ ] **SYN-DOM-008 · v1** — Define vocabulary-qualified relationships, annotations, and result shapes.
-- [ ] **SYN-DOM-009 · v1** — Define explicit opaque optional payload preservation, if supported, and prohibit opaque required behavior.
+- [ ] **SYN-DOM-009 · v1** — Define preservation of explicitly ignorable opaque non-behavioral payloads, if supported, and prohibit opaque required behavior.
 - [ ] **SYN-DOM-010 · v1** — Define vocabulary dependency and compatibility declarations without implicit network resolution.
 
 ## 11. Contracts, capabilities, and effects

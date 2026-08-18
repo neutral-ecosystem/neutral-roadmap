@@ -140,6 +140,12 @@ lifecycle.
   manifest.
 - **NL-SRC-009:** An editor or GUI may supply unsaved in-memory source units
   through the same resolver abstraction without changing compiler meaning.
+- **NL-SRC-010:** Every unit in one v0 compilation closure declares the same
+  exact language-behavior version. Multiple units may merge into one logical
+  module deterministically only within one captured package identity; duplicate
+  names are errors and unit order has no semantic meaning. Vocabulary uses
+  remain unit-scoped, and equal use names in units of the same module must
+  resolve to the same captured bundle.
 
 ## 5. Names, scopes, declarations, and references
 
@@ -147,13 +153,18 @@ lifecycle.
   stable identities independent of display labels.
 - **NL-NAM-002:** Scope, visibility, qualification, shadowing, and collision
   rules are deterministic. In source, `::` is reserved for module/namespace
-  qualification and `.` for member or enum-case access.
-- **NL-NAM-003:** References are represented as resolved symbolic links or
-  typed identities, never as strings a consumer must parse heuristically.
-- **NL-NAM-004:** Unresolved, ambiguous, inaccessible, cyclic, and wrong-kind
-  references produce distinct diagnostics.
-- **NL-NAM-005:** References can target declarations in another captured source
-  unit or versioned package without losing the target's immutable identity.
+  or vocabulary qualification; v0 `.` selects only a vocabulary-owned enum case
+  or static member and is not general value member access.
+- **NL-NAM-003:** `ref(...)` targets only value bindings and is represented as a
+  resolved symbolic link to binding identity, never as text a consumer must
+  parse heuristically. Types, records, namespaces, modules, and vocabulary
+  namespaces are invalid targets.
+- **NL-NAM-004:** Unresolved, ambiguous, inaccessible, and wrong-kind references
+  produce distinct diagnostics; invalid direct initialization cycles are
+  diagnosed separately from valid reference-only cycles.
+- **NL-NAM-005:** References can target value bindings in another captured
+  source unit or versioned package without losing the target's immutable
+  identity.
 - **NL-NAM-006:** Renaming and aliasing preserve an inspectable origin and never
   create two authoritative identities accidentally.
 - **NL-NAM-007:** Consumers can enumerate declarations and relationships without
@@ -184,6 +195,10 @@ readiness edge.
   both their authoring origin and generated IR elements.
 - **NL-STR-008:** Structural traversal is bounded and does not require arbitrary
   code execution or network access.
+- **NL-STR-009:** Direct value-initialization cycles are invalid. The
+  initialization dependency graph ignores `ref(...)` edges, so cycles made
+  exclusively through `Ref<T>` remain structurally valid for consumers to
+  interpret under their own domain rules.
 
 ## 7. Values, types, and data contracts
 
@@ -195,10 +210,11 @@ readiness edge.
   and `bool`; `null` is admitted only by nullable positions. `int`, `uint`, and
   `float` are automatically selected numeric representations, not additional
   author-facing scalar declarations.
-- **NL-VAL-003:** Required, schema-optional, defaulted, nullable, and repeated
-  fields are distinguishable even though `null` is the only explicit source
-  null/empty literal. Source nullability is a postfix type constructor `T?`, so
-  nullable containers and containers of nullable elements remain distinct.
+- **NL-VAL-003:** Required/defaulted, nullable/non-nullable, and repeated fields
+  are distinguishable even though `null` is the only explicit source null/empty
+  literal. A default makes a field omittable; `T?` makes its value nullable.
+  Those axes are independent, and nullable containers remain distinct from
+  containers of nullable elements. There is no separate optional-field modifier.
 - **NL-VAL-004:** Records, collections, tagged alternatives, and opaque
   domain-owned values are representable without embedding application keywords
   in the Neutral core. Braced records are contextual values that require exactly
@@ -209,9 +225,11 @@ readiness edge.
   library's defaults.
 - **NL-VAL-006:** A value retains its declaration, origin, and transformation
   provenance sufficiently for a consumer diagnostic.
-- **NL-VAL-007:** Sensitive classification and generic opaque `SecretRef<T>`
-  values can represent a requested delivery shape without containing resolved
-  secret material or claiming the compiler verified that material.
+- **NL-VAL-007:** Sensitive classification and contextually typed generic opaque
+  `SecretRef<T>` values can represent a requested delivery shape without
+  containing resolved secret material or claiming the compiler verified that
+  material. `secret_ref("id")` obtains exactly one `T` from its expected type;
+  the identifier text never determines `T`.
 - **NL-VAL-008:** Unknown or unsupported domain value kinds fail according to
   must-understand rules; they are not coerced silently.
 - **NL-VAL-009:** Constraints that can be checked without application state are
@@ -320,6 +338,10 @@ Extensibility must not become unversioned arbitrary compiler plugins.
   portable IR contract unless registered through the extension mechanism.
 - **NL-DOM-012:** Installing a vocabulary grants no execution, filesystem,
   network, credential, signing, or provider authority.
+- **NL-DOM-013:** Vocabulary fields use the same independent axes as Neutral
+  record fields: required/defaulted, nullable/non-nullable, and
+  behavioral/non-behavioral. A vocabulary cannot invent a second field-presence
+  notion called “optional.”
 
 ## 11. Contracts, capabilities, and effects
 
@@ -379,16 +401,18 @@ meaning.
   manifest identity.
 - **NL-IR-002:** The logical data model is specified independently from any JSON,
   binary, database, or in-memory encoding.
-- **NL-IR-003:** Required fields, optional fields, defaults, unknown fields,
-  ordering, duplicates, and invalid encodings have normative behavior.
+- **NL-IR-003:** Required fields, defaulted/omittable fields, nullable fields,
+  unknown fields, ordering, duplicates, and invalid encodings have normative
+  behavior; omission and explicit `null` remain distinct.
 - **NL-IR-004:** The IR is immutable after issuance. Transformations produce a
   new IR document with an explicit derivation link.
 - **NL-IR-005:** All internal references are validated for target existence,
   target kind, scope, and document/package boundary.
 - **NL-IR-006:** Consumers can reject unsupported required features before
   interpreting domain behavior.
-- **NL-IR-007:** Optional non-behavioral data can be preserved through a
-  read/write round trip where the compatibility policy promises preservation.
+- **NL-IR-007:** Schema-designated ignorable non-behavioral data can be preserved
+  through a read/write round trip where the compatibility policy promises
+  preservation.
 - **NL-IR-008:** Unknown behavioral data is never dropped, defaulted, or treated
   as metadata silently.
 - **NL-IR-009:** Documents are self-describing enough to choose a compatible
@@ -437,8 +461,9 @@ The API is a language boundary, not just a serializer library.
   values, references, expressions, provenance, and domain payloads.
 - **NL-API-012:** Provide indexed lookup and bounded traversal without requiring
   consumers to depend on storage layout or field ordering.
-- **NL-API-013:** Preserve opaque optional data only under documented round-trip
-  rules and prevent consumers from accidentally treating it as understood.
+- **NL-API-013:** Preserve opaque schema-designated ignorable non-behavioral data
+  only under documented round-trip rules and prevent consumers from accidentally
+  treating it as understood.
 - **NL-API-014:** Let consumers create diagnostics against IR elements using the
   standard source-map mechanism.
 - **NL-API-015:** Distinguish malformed encoding, invalid core IR, unsupported
@@ -551,9 +576,9 @@ The API is a language boundary, not just a serializer library.
   diagnostics, logical IR projection, and derivation manifest.
 - **NL-CON-003:** Determinism tests compare defined logical or canonical
   projections, not incidental map ordering or pretty-print layout.
-- **NL-CON-004:** Consumer fixtures include unknown optional data, unknown
-  required behavior, malformed payloads, incompatible versions, dangling
-  references, and adversarial resource use.
+- **NL-CON-004:** Consumer fixtures include unknown schema-designated ignorable
+  data, unknown required behavior, malformed payloads, incompatible versions,
+  dangling references, and adversarial resource use.
 - **NL-CON-005:** Cross-language library bindings, if offered, pass the same
   logical conformance corpus.
 - **NL-CON-006:** Flow and Neux maintain separate consumer conformance suites.
@@ -712,9 +737,10 @@ resource limits, and safe extension framing.
 The Flow vocabulary owns the `Pipeline` type, dependency meaning, operation
 contracts, conditions, outputs, requirements, and other CI/CD behavior. Neux
 owns OS- and command-specific declarations. Every domain item identifies its
-vocabulary, owner assertion, schema version, behavior version, and whether it is
-required or optional. Unknown required behavior fails closed; only explicitly
-non-behavioral optional metadata may be skipped or preserved opaquely.
+vocabulary, owner assertion, schema version, behavior version, and
+must-understand classification. Unknown required behavior fails closed; only
+explicitly ignorable non-behavioral metadata may be skipped or preserved
+opaquely.
 
 A Flow normalized definition or logical plan remains a private Flow record. It
 is not Neutral IR and does not belong to `neutral-lang`.
@@ -797,7 +823,7 @@ Checks requiring Flow or Neux meaning run in that consumer. Executable compiler
 plugins are excluded from the initial design and would require a separate
 security and determinism decision.
 
-### 9. What are the initial size, expansion, latency, memory, and diagnostic limits?
+### 9. What are the initial structural and diagnostic limits?
 
 Put a versioned resource-budget object in the first compiler and reader APIs.
 Named safe baselines apply by default; callers may choose stricter limits and a
@@ -817,12 +843,11 @@ Use these only as initial desktop/CI measurement values, not stable promises:
 | Expanded IR elements | 10,000 |
 | Decoded IR size | 32 MiB |
 | Emitted diagnostics | 200, then one truncation diagnostic |
-| Compilation deadline | 10 seconds on a named reference benchmark host |
-| Process memory | 512 MiB on a named reference benchmark host |
 
 Before any stable release, replace or confirm the numbers using representative,
-near-limit, and adversarial Flow and Neux corpora. Any latency claim must name
-hardware, compiler build, cache state, input class, and percentile.
+near-limit, and adversarial Flow and Neux corpora. Wall-clock and memory ceilings
+belong to a named implementation/deployment profile, as described in
+[implementation resource budgets](docs/implementation-resource-budgets.md).
 
 ### 10. Which consumer conformance case proves the boundary without implementing Flow or Neux inside the compiler?
 
@@ -834,7 +859,7 @@ They do not parse `.neu`, evaluate domain operations, share a private model,
 invoke a shell, or contact a CI provider.
 
 The cases must cover successful reading, rejection of unknown required
-behavior, safe handling of optional non-behavioral metadata, typed traversal,
+behavior, safe handling of ignorable non-behavioral metadata, typed traversal,
 mapping a consumer diagnostic back to `.neu`, bounded malformed-input rejection,
 and deterministic results. Flow graph semantics and Neux OS semantics retain
 separate consumer conformance suites.

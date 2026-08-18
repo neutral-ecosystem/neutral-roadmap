@@ -12,11 +12,16 @@ Secret requests use a dedicated value form:
 SecretRef<string> token = secret_ref("ci/signing-token")
 ```
 
-It produces an opaque value whose expected type is `SecretRef<T>`. The argument
-is a logical identifier, not secret material, a provider credential, or a
-filesystem path. `T` declares the delivery shape requested from the eventual
-secret broker; the compiler does not inspect or guarantee the resolved content.
-Only bindings or fields whose expected type is `SecretRef<T>` accept the value.
+It is a contextually typed opaque value and does not determine `T` from its
+string argument. The use site MUST provide exactly one expected `SecretRef<T>`
+type, optionally under the nullable wrapper `SecretRef<T>?`. No expected type, a
+non-secret expected type, or multiple possible underlying `SecretRef<T>` types
+is an error. The argument is a logical identifier, not secret material, a
+provider credential, or a filesystem path. `T` declares the delivery shape
+requested from the eventual secret broker; the compiler does not inspect or
+guarantee the resolved content. Only bindings or fields with that expected
+secret-reference shape accept the value.
+
 `SecretRef` requires exactly one well-formed Neutral type argument; bare, empty,
 and multi-argument forms are type errors. Consumer/broker support for that
 delivery shape is a later capability decision, not compiler proof.
@@ -81,7 +86,7 @@ source syntax.
 
 ## SYN-SEC-006 — Lexical and structural limits
 
-The initial named desktop/CI profile applies:
+The draft desktop/CI structural measurement baseline is:
 
 | Budget | v0 provisional limit |
 | --- | ---: |
@@ -91,8 +96,6 @@ The initial named desktop/CI profile applies:
 | Import/composition depth | 64 |
 | Structural nesting | 128 |
 | Emitted diagnostics | 200 plus one truncation diagnostic |
-| Compilation deadline | 10 seconds on the named benchmark host |
-| Process memory | 512 MiB on the named benchmark host |
 
 A text or numeric literal is additionally bounded by the containing source-unit
 limit and the configured decoded-node budget. Delimiter, type, and value nesting
@@ -105,9 +108,15 @@ acceptance. Crossing a limit produces one bounded diagnostic and no authoritativ
 IR. A host may impose stricter limits but never silently larger ones than its
 published safety ceiling.
 
+Wall-clock deadlines and memory ceilings depend on implementation, hardware,
+concurrency, and deployment. They belong to named implementation resource
+profiles, not the Neutral language contract. See
+[implementation resource budgets](../../docs/implementation-resource-budgets.md).
+
 ## Required evidence
 
 Tests MUST demonstrate that secret arguments never appear in normal output,
-source cannot trigger any ambient effect, malicious Unicode/control text is
-escaped, missing resolver inputs fail closed, and every limit is tested below,
-at, and above its boundary without unbounded recovery diagnostics.
+missing/non-secret/ambiguous contextual secret types fail, source cannot trigger
+any ambient effect, malicious Unicode/control text is escaped, missing resolver
+inputs fail closed, and every language-level limit is tested below, at, and
+above its boundary without unbounded recovery diagnostics.

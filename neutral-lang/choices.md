@@ -44,7 +44,7 @@ must not be promoted into stable core behavior without the stated evidence.
 | C6 | Standardize logical equality first; keep derivation identity separate; add canonical bytes only for a named need | High |
 | C7 | Use explicit feature negotiation and a rolling current/previous read window before 1.0 | Provisional |
 | C8 | Resolve data-only vocabulary bundles through an explicit resolver; execute no vocabulary plugin | High |
-| C9 | Put resource budgets in the API now, then freeze numeric defaults from measured corpora | Medium |
+| C9 | Put structural budgets in the API now; keep hardware-dependent time and memory ceilings in named implementation profiles | Medium |
 | C10 | Use two thin, effect-free probe consumers to prove the compiler boundary | High |
 
 ---
@@ -188,9 +188,9 @@ conditions, outputs, requirements, and any other CI/CD-specific declaration.
 Neux owns command- and OS-specific declarations.
 
 Each domain item must carry a collision-resistant vocabulary identity, schema
-version, behavior version, owner, and required/optional status. Unknown required
-behavior fails closed. Only explicitly non-behavioral optional metadata may be
-ignored or round-tripped opaquely.
+version, behavior version, owner, and must-understand classification. Unknown
+required behavior fails closed. Only explicitly ignorable non-behavioral
+metadata may be ignored or round-tripped opaquely.
 
 The Flow consumer may lower Neutral IR into a private normalized definition and
 logical plan. Those records are not additional ecosystem-wide IRs and do not
@@ -456,7 +456,8 @@ decision; they are not part of the initial design.
 ### The question
 
 What bounds prevent malicious or accidental source, nesting, imports,
-expansion, and diagnostics from exhausting a compiler or IR reader?
+expansion, and diagnostics from exhausting a compiler or IR reader without
+turning one machine's timing and memory behavior into language semantics?
 
 “Reasonable size” is not a contract. One universal hard-coded number is also a
 poor fit for a CLI, editor, CI validator, and server, which have different
@@ -481,7 +482,7 @@ It should separately bound:
 - nesting, collection sizes, string/binary sizes, and reference count;
 - composition/expansion depth and generated-element count;
 - encoded and decoded IR size;
-- work units or deadline, and peak memory where the host can enforce it; and
+- deterministic work units where the implementation exposes them; and
 - total diagnostics, related locations, and retained source excerpts.
 
 Every entry point gets a safe named baseline; callers may request stricter
@@ -504,13 +505,13 @@ desktop/CI profile for early measurement—not a compatibility promise—is:
 | Expanded IR elements | 10,000 |
 | Decoded IR size | 32 MiB |
 | Emitted diagnostics | 200, followed by one truncation diagnostic |
-| Compilation deadline | 10 seconds on the named reference benchmark host |
-| Process memory budget | 512 MiB on the named reference benchmark host |
 
 These numbers should be replaced before a stable release using measured valid
-workloads, near-limit workloads, and malicious inputs. Latency targets are not
-meaningful unless the reference hardware, compiler build, cache state, input
-class, and percentile are named.
+workloads, near-limit workloads, and malicious inputs. Wall-clock deadlines and
+peak-memory ceilings belong to named implementation/deployment profiles, not the
+language contract. Such profiles must name hardware, compiler build, cache
+state, concurrency, input class, enforcement method, and percentile; see
+[implementation resource budgets](docs/implementation-resource-budgets.md).
 
 ---
 
@@ -552,7 +553,7 @@ The conformance suite should verify:
 
 1. successful compilation and reading for both profiles;
 2. rejection of an unknown required vocabulary feature before interpretation;
-3. preservation or safe skipping of declared optional non-behavioral metadata;
+3. preservation or safe skipping of declared ignorable non-behavioral metadata;
 4. typed reference traversal without string parsing;
 5. a probe-generated diagnostic mapped through the IR source map to `.neu`;
 6. bounded rejection of malformed or adversarial IR; and
