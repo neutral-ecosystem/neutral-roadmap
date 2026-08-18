@@ -17,9 +17,10 @@ Answers: `SYN-TYP-001` through `SYN-TYP-006`
 There is no implicit scalar conversion. `Int` does not become `Decimal`,
 text does not become a number, and `null` does not inhabit every type.
 
-`SecretRef` is also a predeclared opaque reference type, but it is not a
-scalar and has no literal value. Only `secret_ref(...)` constructs it, under
-the security rules in section 12.
+`Ref<T>` is a predeclared typed symbolic link to a declaration of type/kind
+`T`; only `ref(...)` constructs it. `SecretRef` is a separate opaque
+reference type, is not a scalar, and has no literal value. Only
+`secret_ref(...)` constructs it under the security rules in section 12.
 
 ## SYN-TYP-002 — Nominal records
 
@@ -39,7 +40,7 @@ but does not affect logical type equality. v0 has no anonymous structural type.
 
 `List<T>` is the only v0 collection. It is homogeneous and ordered; duplicates
 are allowed. `T` may itself be a scalar, named record, qualified domain type,
-nullable type, or list, within nesting limits.
+nullable type, reference type, or list, within nesting limits.
 
 Maps, sets, tuples, and heterogeneous lists are deferred. A domain can use a
 named entry record inside a list in v0.

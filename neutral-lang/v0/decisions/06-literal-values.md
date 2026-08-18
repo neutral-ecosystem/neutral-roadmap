@@ -62,8 +62,9 @@ ref(checks::config)
 ref(acme::delivery::checks::config)
 ```
 
-An identifier in value position is not an implicit reference. `ref(...)`
-lowers to a resolved typed IR link, never text. It does not make the link an
+An identifier in value position is not an implicit reference. If the target has
+type/kind `T`, `ref(...)` has type `Ref<T>` and lowers to a resolved IR
+link, never text or the target's copied value. It does not make the link an
 execution dependency.
 
 ## SYN-VAL-006 — Qualified enum values

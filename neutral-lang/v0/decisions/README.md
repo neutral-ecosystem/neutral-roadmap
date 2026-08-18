@@ -8,6 +8,9 @@ They define a coherent candidate syntax but do not mark the checklist complete:
 completion still requires review, a normative grammar, implementation,
 diagnostic fixtures, source maps, and consumer conformance evidence.
 
+Editable author-facing synthesis:
+[proposed v0 syntax guide](../proposed-syntax-guide.md).
+
 Normative words such as **MUST**, **MUST NOT**, and **MAY** describe the proposed
 contract. Flow and Neux behavior is illustrative only and remains owned by those
 applications.

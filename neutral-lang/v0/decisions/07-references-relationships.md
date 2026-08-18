@@ -13,8 +13,9 @@ ref(config)
 ```
 
 It is distinct from a declaration, text, module, path, and domain value. It
-accepts one symbolic name, not computed text. It lowers to target document and
-element identity, expected target kind, and provenance.
+accepts one symbolic name, not computed text. A target of type/kind `T`
+produces `Ref<T>` and lowers to target document/element identity, expected
+target kind, and provenance.
 
 Text equal to a declaration name remains text. References are never inferred
 from strings.

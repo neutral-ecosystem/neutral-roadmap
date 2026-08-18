@@ -73,9 +73,9 @@ neu module requires vocabulary namespace record let
 true false null absent ref secret_ref
 ```
 
-`Bool`, `Int`, `Decimal`, `Text`, `Null`, `Nullable`, `List`, and
-`SecretRef` are predeclared core type names and cannot be redeclared in the
-root namespace.
+`Bool`, `Int`, `Decimal`, `Text`, `Null`, `Nullable`, `List`,
+`Ref`, and `SecretRef` are predeclared core type names and cannot be
+redeclared in the root namespace.
 
 `::` joins name segments and qualification is explicit, left-to-right:
 
@@ -96,7 +96,8 @@ Separators are `,`, `:`, `;`, `=`, `?`, and `::`:
 
 - `()` encloses arguments to built-in forms such as `ref(...)`;
 - `[]` constructs ordered lists;
-- `<>` encloses a type argument in `List<T>` and `Nullable<T>` only;
+- `<>` encloses a type argument in `List<T>`, `Nullable<T>`, or
+  `Ref<T>` only;
 - `{}` encloses namespaces, records, domain declarations, and record values;
 - `:` separates a name/type or field/value;
 - `=` introduces a binding value or field default;

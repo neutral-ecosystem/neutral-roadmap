@@ -14,7 +14,7 @@ secret_ref("ci/signing-token")
 
 It produces the opaque core type `SecretRef`. The argument is a logical
 identifier, not secret material, a provider credential, or a filesystem path.
-Only fields whose schema expects `SecretRef` accept it.
+Only bindings or fields whose expected type is `SecretRef` accept it.
 
 IR contains the opaque logical identifier, sensitivity classification, and
 source provenance. It MUST NOT contain resolved value, token, lease, destination

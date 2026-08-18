@@ -6,6 +6,9 @@ Scope: v0 establishes the smallest safe, effect-free authoring surface that can 
 
 Authoritative master: [../syntax.md](../syntax.md)
 
+Editable authoring proposal:
+[proposed v0 syntax guide](proposed-syntax-guide.md).
+
 Checking an item means the syntax question has a normative answer, examples,
 invalid cases, diagnostics, and conformance fixtures—not merely one accepted
 parser example.
