@@ -32,7 +32,7 @@ Proposed answers: [lexical and source-text decisions](decisions/02-lexical-sourc
 - [ ] **SYN-LEX-002 · v0** — Define whitespace, indentation significance or insignificance, statement separation, and permitted line continuation.
 - [ ] **SYN-LEX-003 · v0** — Define line comments, block comments if present, nesting behavior, and unterminated-comment diagnostics.
 - [ ] **SYN-LEX-004 · v0** — Define identifier spelling, Unicode policy, normalization, case sensitivity, and confusable-character diagnostics.
-- [ ] **SYN-LEX-005 · v0** — Define reserved words, contextual words, qualified names, and the escape mechanism for conflicting names if one exists.
+- [ ] **SYN-LEX-005 · v0** — Define reserved/contextual words and give `::` the sole meaning of namespace/module qualification while `.` means member or enum-case access.
 - [ ] **SYN-LEX-006 · v0** — Define delimiter pairs, separators, logical-newline and closing-brace termination, and trailing-separator rules; `.neu` has no semicolon terminator.
 - [ ] **SYN-LEX-007 · v0** — Define ordinary text literals, escapes, invalid escape handling, and Unicode scalar behavior.
 - [ ] **SYN-LEX-008 · v0** — Define `num`, `string`, `bool`, and `null` spellings without inheriting host-language range or precision rules; v0 has no second `absent` value.
@@ -43,7 +43,7 @@ Proposed answers: [document and profile decisions](decisions/03-documents-module
 
 - [ ] **SYN-DOC-001 · v0** — Define how a source unit declares or inherits its `.neu` language-behavior version.
 - [ ] **SYN-DOC-002 · v0** — Define the top-level document shape and whether declarations, values, or both may appear at the root.
-- [ ] **SYN-DOC-003 · v0** — Define how source refers to a domain vocabulary while the compilation request remains authoritative for which profiles are permitted.
+- [ ] **SYN-DOC-003 · v0** — Define `requires vocabulary "identity" as alias { ... }` while the compilation request remains authoritative for permitted vocabularies.
 - [ ] **SYN-DOC-004 · v0** — Define module/package names independently from paths, URLs, mutable tags, and display labels.
 
 ## 4. Declarations, bindings, and names
@@ -53,7 +53,7 @@ Proposed answers: [declaration and binding decisions](decisions/04-declarations-
 - [ ] **SYN-DEC-001 · v0** — Define the common shape of a named declaration and the distinction between stable machine identity and display name.
 - [ ] **SYN-DEC-002 · v0** — Define type-first binding syntax without `let`; bindings are immutable by default and any explicit `mut` form requires cross-domain evidence and deterministic lowering.
 - [ ] **SYN-DEC-003 · v0** — Define explicit type/schema annotations and the limited positions, if any, where type inference is permitted.
-- [ ] **SYN-DEC-004 · v0** — Define domain-owned declaration kinds without adding their names as Neutral core keywords.
+- [ ] **SYN-DEC-004 · v0** — Represent vocabulary-owned declarations as ordinary type-first bindings such as `flow::Pipeline verify = { ... }`, without vocabulary names or a special declaration-kind production in Neutral core.
 - [ ] **SYN-DEC-005 · v0** — Define namespace declaration and qualification syntax.
 - [ ] **SYN-DEC-006 · v0** — Define duplicate declaration, shadowing, and reserved-name diagnostics.
 - [ ] **SYN-DEC-007 · v0** — Define whether references may appear before declarations and ensure source order is not accidental execution order.
@@ -65,21 +65,21 @@ Proposed answers: [type and schema decisions](decisions/05-type-schema-notation.
 - [ ] **SYN-TYP-001 · v0** — Define the primitive scalar set as `num`, `string`, and `bool`; define `null` as a nullable-position literal and `int`/`uint`/`float` as automatically selected numeric representations.
 - [ ] **SYN-TYP-002 · v0** — Define record/structured-value type syntax, field names, field order, and duplicate-field diagnostics.
 - [ ] **SYN-TYP-003 · v0** — Define homogeneous collection type syntax and whether collection order is part of the type contract.
-- [ ] **SYN-TYP-004 · v0** — Distinguish required, nullable, defaulted, and repeated fields in type notation, and document schema-owned omission without adding an `absent` source value.
+- [ ] **SYN-TYP-004 · v0** — Define postfix type nullability (`T?`) including nested positions, distinguish required/defaulted/repeated fields, and document schema-owned omission without an `absent` value.
 - [ ] **SYN-TYP-005 · v0** — Define named type and schema references with vocabulary/package qualification.
-- [ ] **SYN-TYP-006 · v0** — Define opaque domain-owned types that remain inspectable and versioned without exposing consumer semantics.
+- [ ] **SYN-TYP-006 · v0** — Define opaque vocabulary-owned types that remain inspectable and versioned without exposing consumer semantics.
 
 ## 6. Literal values and value construction
 
 Proposed answers: [literal and value decisions](decisions/06-literal-values.md).
 
 - [ ] **SYN-VAL-001 · v0** — Define scalar literal construction and overflow, precision, and invalid-literal diagnostics.
-- [ ] **SYN-VAL-002 · v0** — Define record value construction, field association, trailing separators, and duplicate fields.
+- [ ] **SYN-VAL-002 · v0** — Define contextual record construction (`Type name = { ... }`), require exactly one expected nominal type, and define fields, trailing separators, and duplicate diagnostics.
 - [ ] **SYN-VAL-003 · v0** — Define ordered collection value construction and empty-collection type disambiguation.
 - [ ] **SYN-VAL-004 · v0** — Define `null` as the only explicit source null/empty literal and distinguish it from structural omission/default application and unavailable/deferred results.
 - [ ] **SYN-VAL-005 · v0** — Define symbolic reference values as syntax distinct from ordinary text.
 - [ ] **SYN-VAL-006 · v0** — Define qualified tagged/enum value construction without relying on unscoped strings.
-- [ ] **SYN-VAL-007 · v0** — Define domain-owned typed value construction and schema-linked diagnostics.
+- [ ] **SYN-VAL-007 · v0** — Apply contextual construction to vocabulary-owned typed values and define schema-linked diagnostics.
 - [ ] **SYN-VAL-008 · v0** — Define whether record-field shorthand exists and prevent it from obscuring the referenced binding.
 
 ## 7. References and structural relationships
@@ -95,18 +95,18 @@ Proposed answers: [reference and relationship decisions](decisions/07-references
 
 Proposed answers: [domain-vocabulary decisions](decisions/10-domain-vocabulary.md).
 
-- [ ] **SYN-DOM-001 · v0** — Define namespaced domain declaration syntax driven by a selected data-only vocabulary.
+- [ ] **SYN-DOM-001 · v0** — Define vocabulary-owned declarations through ordinary type-first bindings whose types use an explicit vocabulary namespace alias; do not add a special domain-declaration production.
 - [ ] **SYN-DOM-002 · v0** — Define how source states required vocabulary identity, schema version, behavior version, and required features.
 - [ ] **SYN-DOM-003 · v0** — Separate source requests from caller policy so source cannot activate an unapproved vocabulary.
 - [ ] **SYN-DOM-004 · v0** — Define required behavioral data versus optional non-behavioral metadata in visible syntax or schema rules.
 - [ ] **SYN-DOM-005 · v0** — Define domain fields, nodes, and values using core typed forms rather than a schema-less extension bag.
-- [ ] **SYN-DOM-006 · v0** — Define diagnostics for unknown vocabulary, unsupported required feature, invalid payload, and misplaced domain declaration.
+- [ ] **SYN-DOM-006 · v0** — Define diagnostics for unknown vocabulary aliases/types, unsupported required features, invalid contextual payloads, and types used in disallowed scopes.
 
 ## 12. Security-sensitive syntax
 
 Proposed answers: [security-sensitive syntax decisions](decisions/12-security-sensitive-syntax.md).
 
-- [ ] **SYN-SEC-001 · v0** — Define opaque secret-reference syntax and prohibit resolved secret material from Neutral IR and derivation records.
+- [ ] **SYN-SEC-001 · v0** — Define generic opaque `SecretRef<T>` syntax where `T` is the requested delivery shape, and prohibit resolved secret material from Neutral IR and derivation records.
 - [ ] **SYN-SEC-002 · v0** — Ensure secret references are not ordinary strings that can be interpolated or printed accidentally.
 - [ ] **SYN-SEC-003 · v0** — Prohibit source constructs that execute native code, shell code, provider code, or vocabulary plugins during parsing or validation.
 - [ ] **SYN-SEC-004 · v0** — Make all import/profile acquisition explicit through the supplied resolver; define no ambient network or filesystem include syntax.

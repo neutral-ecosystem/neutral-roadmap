@@ -4,40 +4,42 @@ Status: proposed
 
 Answers: `SYN-DOM-001` through `SYN-DOM-006`
 
-## SYN-DOM-001 — Namespaced domain declarations
+## SYN-DOM-001 — Namespace-qualified vocabulary types
 
-Domain declarations use a vocabulary alias and bundle-defined kind:
+Vocabulary-owned declarations use an explicit alias plus an ordinary qualified
+type-first binding:
 
 ```neu
-flow.pipeline verify {
+flow::Pipeline verify = {
     config: ref(config),
 }
 ```
 
-The surface production is generic; `pipeline` is not in the core grammar's
-keyword set. The selected data-only bundle describes the kind's allowed scope,
-fields, types, references, static constraints, features, and behavioral
-classification.
+`Pipeline` is not in the core grammar's keyword set. There is no separate domain
+declaration production: the selected data-only bundle describes the qualified
+type's allowed scope, fields, references, static constraints, features, and
+behavioral classification.
 
-Neutral parses the generic braced field form and validates the bundle contract.
-It does not implement pipeline or OS behavior. Unknown unqualified declaration
-kinds are syntax errors; unknown qualified kinds are vocabulary diagnostics.
+Neutral parses the contextual braced value using the expected `flow::Pipeline`
+type and validates the bundle contract. It does not implement pipeline or OS
+behavior. Unknown or incorrectly qualified types are name/type diagnostics;
+known vocabulary types with invalid payloads are vocabulary diagnostics.
 
 ## SYN-DOM-002 — Identity and required features
 
 Each used vocabulary is declared before ordinary declarations:
 
 ```neu
-requires vocabulary flow {
-    id: "org.neutral.flow",
+requires vocabulary "org.neutral.flow" as flow {
     schema: "0.1",
     behavior: "0.1",
     features: ["pipeline", "typed-reference"],
 }
 ```
 
-Identity and both versions are exact strings whose canonical forms are defined
-by the vocabulary packaging contract. They are not ranges or mutable tags.
+The header identity and both body versions are exact strings whose canonical
+forms are defined by the vocabulary packaging contract. They are not ranges or
+mutable tags. `as flow` explicitly binds the source-local namespace alias.
 `features` lists every feature the source requires; order is presentation
 only and duplicates are invalid.
 
@@ -76,14 +78,14 @@ feature; otherwise unknown fields are errors.
 
 ## SYN-DOM-005 — Typed fields rather than extension maps
 
-Domain bodies and values use core scalar, record, list, null, reference,
-secret-reference, enum, and qualified domain-value forms. Every field has a
-schema identity and expected type.
+Vocabulary-owned contextual bodies use core scalar, record, list, null,
+reference, secret-reference, enum, and other qualified vocabulary-owned value
+forms. Every field has a schema identity and expected type.
 
 The following design is rejected:
 
 ```neu
-flow.pipeline verify {
+flow::Pipeline verify = {
     extensions: {
         arbitrary_provider_blob: "...",
     },
@@ -104,7 +106,7 @@ Domain failures remain distinguishable:
 | Bundle not provided/permitted | Vocabulary resolution/policy |
 | Schema or behavior version unsupported | Vocabulary compatibility |
 | Required feature unsupported | Required-feature negotiation |
-| Qualified kind/type absent | Unknown vocabulary member |
+| Qualified type absent | Unknown vocabulary member |
 | Field missing, duplicated, unknown, or wrong type | Domain payload validation |
 | Declaration in disallowed scope | Domain placement |
 | Static constraint fails | Domain contract |

@@ -17,14 +17,13 @@ v0 has no infix operators or general precedence. Its value hierarchy is:
 value
   = scalar
   | list
-  | nominal-record
-  | qualified-domain-value
+  | contextual-record
   | qualified-enum-value
   | reference
   | secret-reference
 ```
 
-`::` belongs to qualified-name grammar, `.` selects or invokes a member, and
+`::` belongs to qualified-name grammar, `.` selects a member or enum case, and
 leading minus belongs to a numeric literal. Delimiters determine nesting.
 Implementations cannot invent precedence.
 

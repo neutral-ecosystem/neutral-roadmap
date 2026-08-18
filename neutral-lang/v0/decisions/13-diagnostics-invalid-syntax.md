@@ -45,7 +45,7 @@ Recovery is deterministic and bounded:
 - fields/lists synchronize at comma or matching close;
 - simple declarations synchronize at the next logical line ending or recognized
   declaration starter;
-- braced declarations synchronize at matching close; and
+- braced declarations and contextual values synchronize at matching close; and
 - top level may synchronize at a recognized declaration starter.
 
 Recovery nodes never enter authoritative IR. Any recovered parse is failed
@@ -71,8 +71,8 @@ If invalid input admits competing recovery trees, emit
 authoritative IR. Do not silently select the first parser alternative.
 
 The ambiguity corpus covers keyword boundaries, `::` qualified names, `.`
-member selection/invocation, negative numbers, record/domain bodies, nullable
-markers, trailing comments, and missing line endings/separators.
+member/enum-case access, negative numbers, contextual braced values, postfix
+nullable types, trailing comments, and missing line endings/separators.
 
 ## SYN-DIA-006 — Example obligations
 

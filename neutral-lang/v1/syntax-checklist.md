@@ -41,7 +41,7 @@ parser example.
 ## 6. Literal values and value construction
 
 - [ ] **SYN-VAL-009 · v1** — Define map and set value construction with deterministic duplicate and ordering behavior.
-- [ ] **SYN-VAL-010 · v1** — Define member selection and indexing on structured symbolic values without implying runtime availability.
+- [ ] **SYN-VAL-010 · v1** — Define `.` member selection and indexing on structured symbolic values without reusing `::` or implying runtime availability.
 - [ ] **SYN-VAL-011 · v1** — Define collection/record spread or merge notation together with explicit conflict precedence.
 - [ ] **SYN-VAL-012 · v1** — Define multiline structured values and delimiter elision rules without indentation ambiguity.
 - [ ] **SYN-VAL-013 · v1** — Define duration, timestamp, path, URI, digest, and similar values as typed constructors or domain types rather than ambiguous magic strings.
@@ -66,7 +66,7 @@ parser example.
 ## 9. Structured symbolic expressions
 
 - [ ] **SYN-EXP-001 · v1** — Define expressions as structured syntax that lowers to typed IR nodes, never opaque source strings for reparsing.
-- [ ] **SYN-EXP-002 · v1** — Define qualified operation/function references with vocabulary owner and behavior version.
+- [ ] **SYN-EXP-002 · v1** — Define namespace-owned operation/function references with `::`, member calls with `.`, and captured vocabulary owner/behavior version.
 - [ ] **SYN-EXP-003 · v1** — Define call/application syntax and named versus positional argument policy.
 - [ ] **SYN-EXP-004 · v1** — Define grouping and precedence so no expression meaning depends on parser folklore.
 - [ ] **SYN-EXP-005 · v1** — Define boolean, comparison, and conditional-expression forms together with owning behavior contracts.

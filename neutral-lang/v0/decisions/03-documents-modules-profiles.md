@@ -42,22 +42,21 @@ pipeline or Neux script.
 Source requests a vocabulary with:
 
 ```neu
-requires vocabulary flow {
-    id: "org.neutral.flow",
+requires vocabulary "org.neutral.flow" as flow {
     schema: "0.1",
     behavior: "0.1",
     features: ["pipeline"],
 }
 ```
 
-`flow` is a source-local alias. The fixed header fields hold immutable
-vocabulary identity, exact schema version, exact behavior version, and required
-feature identities. Duplicate features are invalid.
+`"org.neutral.flow"` is the exact vocabulary identity and `flow` is its
+explicit source-local namespace alias. The body holds exact schema and behavior
+versions plus required feature identities. Duplicate features are invalid.
 
 This declaration performs no lookup. The compilation request MUST permit the
 identity/version and its resolver MUST provide the exact captured data-only
 bundle. Source cannot broaden policy, choose mutable “latest,” or activate code.
-A mismatch is reported before validating domain declarations.
+A mismatch is reported before validating vocabulary-owned typed declarations.
 
 Aliases share the root namespace and are unique. One bundle may have only one
 alias in a v0 unit.
@@ -84,8 +83,9 @@ units for qualified references. Module spelling never searches disk or network.
 ## Invalid and boundary cases
 
 Missing, duplicate, late, malformed, or unsupported headers; absent or duplicate
-modules; late vocabulary requirements; missing/disallowed bundles; version or
-digest mismatch; and duplicate aliases each receive distinct diagnostics.
+modules; late vocabulary requirements; malformed identities or missing `as`
+aliases; missing/disallowed bundles; version or digest mismatch; and duplicate
+aliases each receive distinct diagnostics.
 
 All header records and spans enter the derivation manifest. Diagnostics require
 no consumer or vocabulary code execution.

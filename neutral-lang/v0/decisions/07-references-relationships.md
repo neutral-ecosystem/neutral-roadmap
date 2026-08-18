@@ -53,7 +53,7 @@ different relationship kinds. Indentation never establishes either.
 ## SYN-REF-004 — Typed domain relationships
 
 ```neu
-flow.dependency check_after_build {
+flow::Dependency check_after_build = {
     from: ref(build),
     to: ref(check),
 }

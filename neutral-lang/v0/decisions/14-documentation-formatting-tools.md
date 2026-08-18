@@ -30,6 +30,8 @@ The reference formatter uses:
 - UTF-8, logical `LF`, and one final newline;
 - four-space indentation and no indentation tabs;
 - one space around `=` and after `:`/`,` where applicable;
+- postfix `?` attached to its type and one space before the declared name;
+- contextual braced values without a repeated right-hand constructor type;
 - opening brace on the declaration line;
 - one item per line in multiline constructs;
 - trailing commas in multiline fields/lists;
@@ -40,8 +42,8 @@ The reference formatter uses:
 
 Formatting is deterministic and idempotent. v0 refuses to rewrite a file with
 fatal parse errors. Formatting may change source/derivation identity but MUST
-preserve logical IR. It is not canonical IR,
-signature input, or proof of domain equivalence.
+preserve logical IR. It is not canonical IR, signature input, or proof of
+domain equivalence.
 
 ## Required evidence
 

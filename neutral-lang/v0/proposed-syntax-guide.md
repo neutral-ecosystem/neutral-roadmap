@@ -17,11 +17,12 @@ The revised surface follows these preferences:
   contract concerns beneath `num`;
 - checked numeric conversion among those representations is automatic;
 - text uses `string`;
-- nullability uses `?` after the variable or field name;
+- nullability is a postfix type constructor such as `string?`;
 - `null` is the only explicit source null/empty literal; there is no `absent`
   token;
-- `::` qualifies modules, namespaces, types, and symbols;
-- `.` selects or invokes a member; and
+- `::` resolves a name through module or namespace scopes, including a
+  vocabulary alias namespace;
+- `.` selects a member or enum case; and
 - Neutral remains a tool-abstraction language, not a general-purpose language.
 
 Three details need deliberate review:
@@ -31,7 +32,7 @@ Three details need deliberate review:
    real Flow and Neux need justifies it.
 2. Automatic numeric conversion is limited to exact or safely widening
    conversion. Silent precision loss is rejected.
-3. `string label?` means nullable, not optional. A record field must still be
+3. `string? label` means nullable, not optional. A record field must still be
    supplied unless it has a default.
 
 ## 2. Complete example
@@ -40,8 +41,7 @@ Three details need deliberate review:
 neu "0.1"
 module acme::delivery
 
-requires vocabulary flow {
-    id: "org.neutral.flow",
+requires vocabulary "org.neutral.flow" as flow {
     schema: "0.1",
     behavior: "0.1",
     features: ["pipeline", "typed-reference"],
@@ -50,28 +50,28 @@ requires vocabulary flow {
 /// Reusable configuration data. ///
 record ToolConfig {
     string image,
-    string note?,
+    string? note,
     List<string> labels = [],
 }
 
 /// Data containing symbolic references. ///
 record InvocationInput {
     Ref<ToolConfig> config,
-    SecretRef token,
+    SecretRef<string> token,
 }
 
-ToolConfig base = ToolConfig {
+ToolConfig base = {
     image: "example.invalid/tool:1",
     note: null,
 }
 
-InvocationInput input = InvocationInput {
+InvocationInput input = {
     config: ref(base),
     token: secret_ref("ci/signing-token"),
 }
 
 namespace checks {
-    flow.pipeline verify {
+    flow::Pipeline verify = {
         input: ref(acme::delivery::input),
         mode: flow::Mode.strict,
     }
@@ -79,7 +79,7 @@ namespace checks {
 ```
 
 The compiler produces Neutral IR. It does not execute the pipeline, resolve the
-secret, contact a provider, or define `flow.pipeline` behavior.
+secret, contact a provider, or define `flow::Pipeline` behavior.
 
 ## 3. Source-file structure
 
@@ -116,21 +116,20 @@ captured source closure.
 ### Domain vocabulary
 
 ```neu
-requires vocabulary flow {
-    id: "org.neutral.flow",
+requires vocabulary "org.neutral.flow" as flow {
     schema: "0.1",
     behavior: "0.1",
     features: ["pipeline"],
 }
 ```
 
-`flow` is the local alias. The source states exact vocabulary identity,
-schema version, behavior version, and required features. This block performs no
-download and grants no authority. The caller must allow and provide the exact
-data-only bundle.
+The string is the exact vocabulary identity and `flow` is its explicit local
+namespace alias. The source also states the exact schema version, behavior
+version, and required features. This block performs no download and grants no
+authority. The caller must allow and provide the exact data-only bundle.
 
-Field order is not meaningful. The formatter writes `id`, `schema`,
-`behavior`, then `features`. Each appears exactly once.
+Field order is not meaningful. The formatter writes `schema`, `behavior`, then
+`features`. Each appears exactly once; the identity appears only in the header.
 
 ## 4. Comments
 
@@ -187,14 +186,14 @@ values. v0 has no quoted identifiers.
 Reserved core words are:
 
 ```text
-neu module requires vocabulary namespace record mut
+neu module requires vocabulary as namespace record mut
 true false null ref secret_ref
 ```
 
-`bool`, `num`, `string`, `List`, `Ref`, and `SecretRef` are
-predeclared core type names and cannot be redeclared in the root namespace.
+`bool`, `num`, `string`, `List`, `Ref`, and `SecretRef` are predeclared core
+type/type-constructor names and cannot be redeclared in the root namespace.
 
-Use `::` for module, namespace, type, and symbol qualification:
+Use `::` to resolve a name through module or namespace scopes:
 
 ```neu
 checks::config
@@ -202,17 +201,17 @@ acme::delivery::checks::config
 flow::Mode
 ```
 
-Use `.` when selecting a value/member or invoking a vocabulary-owned member:
+Use `.` only when selecting a member or enum case from a resolved value/type:
 
 ```neu
-flow.pipeline verify { }
 flow::Mode.strict
 ```
 
-This keeps static ownership paths distinct from member access. Future calls may
-use forms such as `value.method()`, while ordinary built-ins remain `ref(...)`
-and `secret_ref(...)`. A decimal point occurs only between digits in a numeric
-literal, so it cannot be confused with `::` qualification.
+This keeps static ownership paths distinct from member access. A future
+namespace-owned free function is qualified as `flow::run()`, while a member call
+is `runner.run()`. Calls themselves remain outside v0 except for the core forms
+`ref(...)` and `secret_ref(...)`. A decimal point occurs only between digits in
+a numeric literal, so it cannot be confused with `::` qualification.
 
 ## 6. Declaring variables and bindings
 
@@ -230,7 +229,7 @@ num attempts = 3
 num ratio = 0.75
 string label = "build"
 List<string> labels = ["portable", "checked"]
-SecretRef token = secret_ref("ci/token")
+SecretRef<string> token = secret_ref("ci/token")
 ```
 
 There is no `let` keyword and no colon between name and type.
@@ -352,33 +351,38 @@ digits on both sides of the point. There is no exponent or non-decimal base.
 | `bool` | `true` | Boolean value |
 | `num` | `10.5` | Generic exact numeric value |
 | `string` | `"hello"` | Unicode text |
-| `SecretRef` | `secret_ref("id")` | Opaque secret request; not a primitive scalar |
+| `SecretRef<T>` | `secret_ref("id")` | Opaque request for secret material delivered as `T`; not a primitive scalar |
 
 The primitive scalar types are exactly `num`, `string`, and `bool`. `List<T>`
 and `Ref<T>` are generic core types, named records are nominal types, and
-`SecretRef` is a security-sensitive opaque reference type.
+`SecretRef<T>` is a security-sensitive opaque reference type whose parameter is
+the requested delivery type.
 
-`null` has no standalone declared type. It is accepted only when the
-declaration or field name ends with `?`.
+`SecretRef` always requires exactly one type argument. Bare `SecretRef`, an
+empty argument list, and multiple arguments are invalid.
 
-There are no implicit conversions among `bool`, `string`, `SecretRef`,
+`null` has no standalone declared type. It is accepted only when the expected
+type ends with `?`.
+
+There are no implicit conversions among `bool`, `string`, `SecretRef<T>`,
 records, lists, and references.
 
 ## 10. Nullable variables
 
-Place `?` after the variable name:
+Place `?` after the type. Nullability is part of the type, not the declared
+name:
 
 ```neu
-string label? = null
-num result? = null
-ToolConfig config? = null
+string? label = null
+num? result = null
+ToolConfig? config = null
 ```
 
 The same declarations may contain non-null values:
 
 ```neu
-string label? = "build"
-num result? = 42
+string? label = "build"
+num? result = 42
 ```
 
 Without `?`, null is invalid:
@@ -387,8 +391,8 @@ Without `?`, null is invalid:
 string label = null // Invalid.
 ```
 
-There is no `Nullable<T>` type, optional declaration marker, or `absent`
-value. Nullability does not mean omission.
+There is no `Nullable<T>` spelling, optional declaration marker, or `absent`
+value. `T?` is the nullable type constructor; nullability does not mean omission.
 
 ## 11. Lists
 
@@ -404,10 +408,12 @@ List<string> empty = []
 Order and duplicates are preserved. A trailing comma is allowed. v0 has no map,
 set, tuple, or heterogeneous list.
 
-A nullable list places `?` after the variable:
+A nullable list places `?` after the complete list type. A list with nullable
+elements places it on the element type:
 
 ```neu
-List<string> names? = null
+List<string>? names = null
+List<string?> labels = ["build", null]
 ```
 
 ## 12. Declaring record types
@@ -417,7 +423,7 @@ Record fields are type-first:
 ```neu
 record Config {
     string image,
-    string note?,
+    string? note,
     List<string> labels = [],
 }
 ```
@@ -425,7 +431,7 @@ record Config {
 | Form | Meaning |
 | --- | --- |
 | `string name,` | Required and non-null |
-| `string name?,` | Required and nullable |
+| `string? name,` | Required and nullable |
 | `string name = "default",` | Required field with omission default |
 | `List<string> names,` | Ordered repeated values |
 
@@ -434,7 +440,7 @@ has a default:
 
 ```neu
 record NullableDefaults {
-    string note? = null,
+    string? note = null,
 }
 ```
 
@@ -445,7 +451,7 @@ Mutability is not allowed on a record field declaration. Mutability belongs to a
 binding containing the record:
 
 ```neu
-mut Config config = Config {
+mut Config config = {
     image: "example.invalid/tool:1",
     note: null,
 }
@@ -454,7 +460,7 @@ mut Config config = Config {
 ## 13. Constructing record values
 
 ```neu
-Config config = Config {
+Config config = {
     image: "example.invalid/tool:1",
     note: null,
 }
@@ -464,17 +470,23 @@ Fields use `name: value` in construction even though declarations are
 type-first. Defaults allow omission. Without a default, every field—including a
 nullable field—must appear.
 
-Record shorthand is not supported:
+The declared or schema-provided expected type supplies the record constructor.
+Repeating the type on the right-hand side is invalid:
 
 ```neu
-// Invalid:
-Config { image }
+// Invalid: repeated constructor type.
+Config config = Config { image: "example.invalid/tool:1", note: null, }
 
-// Valid:
-Config { image: "example.invalid/tool:1", note: null, }
+// Invalid: field shorthand.
+Config config = { image }
+
+// Valid.
+Config config = { image: "example.invalid/tool:1", note: null, }
 ```
 
-There is no anonymous record value.
+The braced value is contextual, not an untyped anonymous record. It is accepted
+only where exactly one expected nominal record or vocabulary-owned type is
+known. Ambiguous or absent expected types are errors.
 
 ## 14. Namespaces
 
@@ -514,7 +526,7 @@ record Selection {
     Ref<Config> config,
 }
 
-Selection selected = Selection {
+Selection selected = {
     config: ref(config),
 }
 ```
@@ -529,31 +541,39 @@ module in the captured closure. They never fetch it.
 ## 16. Secret references
 
 ```neu
-SecretRef token = secret_ref("ci/signing-token")
+SecretRef<string> token = secret_ref("ci/signing-token")
 ```
 
-`SecretRef` is not `string`:
+`SecretRef<string>` is not `string`:
 
 ```neu
-SecretRef wrong = "ci/signing-token" // Invalid.
+SecretRef<string> wrong = "ci/signing-token" // Invalid.
 ```
 
 The compiler stores an opaque logical reference, never resolved secret material.
 Secret references cannot be interpolated, concatenated, printed as ordinary
 text, or used to grant authority. Diagnostics redact them by default.
 
-A nullable secret reference is written:
+A nullable secret reference is written by applying `?` to the complete generic
+type:
 
 ```neu
-SecretRef token? = null
+SecretRef<string>? token = null
 ```
 
-## 17. Domain declarations
+The type parameter describes the delivery shape requested from the later secret
+broker. The compiler does not resolve the secret or claim that its eventual
+contents satisfy that shape. The compiler only validates that the type argument
+is a well-formed Neutral type; a consumer or broker separately decides whether
+it supports that delivery shape.
 
-The generic form is:
+## 17. Vocabulary-owned typed declarations
+
+Vocabulary-owned declarations use the same binding form as every other named
+value:
 
 ```text
-vocabulary_alias.declaration_kind name {
+vocabulary_alias::Type name = {
     schema_field: value,
 }
 ```
@@ -561,26 +581,27 @@ vocabulary_alias.declaration_kind name {
 Illustrative Flow-profile source:
 
 ```neu
-flow.pipeline verify {
+flow::Pipeline verify = {
     input: ref(input),
     mode: flow::Mode.strict,
 }
 ```
 
-`pipeline` is not a Neutral keyword. The captured data-only Flow bundle
-defines its fields, types, static constraints, and required features. Neutral
-does not execute it.
+`Pipeline` is not a Neutral keyword or a special grammar production. The
+captured data-only Flow bundle defines the qualified type, its fields, static
+constraints, behavioral classification, and required features. Neutral does
+not execute it.
 
-An unqualified kind is invalid:
+An unknown or unqualified domain type is invalid:
 
 ```neu
-pipeline verify {} // Invalid: no vocabulary owner.
+Pipeline verify = {} // Invalid: no vocabulary owner.
 ```
 
 ## 18. Domain-owned types and enums
 
 ```neu
-flow::ArtifactRef artifact = flow::ArtifactRef {
+flow::ArtifactRef artifact = {
     value: "sha256:example",
 }
 
@@ -598,7 +619,7 @@ untyped `extensions` bag through which behavioral data can be hidden.
 ## 19. Domain-owned relationships
 
 ```neu
-flow.dependency check_after_build {
+flow::Dependency check_after_build = {
     from: ref(build),
     to: ref(check),
 }
@@ -630,7 +651,7 @@ its independent OS meaning.
 - Semicolons are not part of the source grammar and are rejected.
 - Two simple declarations cannot share one physical line.
 - Braces, brackets, parentheses, and generic angle brackets must match.
-- `::` qualifies names. `.` selects or invokes a member and also appears inside
+- `::` qualifies names. `.` selects a member or enum case and also appears inside
   numeric literals; a numeric dot is the dot directly between decimal digits.
 
 The formatter uses four spaces, a default width of 100 columns, UTF-8, `LF`,
@@ -695,7 +716,7 @@ v0 still has no:
 - implicit declaration types;
 - source-level imports;
 - maps, sets, tuples, unions, or core enums;
-- field shorthand or anonymous records;
+- field shorthand or untyped anonymous records;
 - raw, multiline, or interpolated string;
 - arithmetic, boolean, or comparison operators;
 - functions, lambdas, loops, exceptions, or threads;
@@ -715,23 +736,23 @@ language.
 | --- | --- |
 | Language version | `neu "0.1"` |
 | Module | `module acme::delivery` |
-| Vocabulary | `requires vocabulary flow { ... }` |
+| Vocabulary alias | `requires vocabulary "org.neutral.flow" as flow { ... }` |
 | Immutable variable | `num x = 10` |
 | Mutable variable | `mut num x = 10` |
 | Reassignment | `x = 11` |
 | `string` | `string name = "value"` |
-| Nullable variable | `string name? = null` |
+| Nullable variable | `string? name = null` |
 | List | `List<string> names = ["one"]` |
 | Record | `record Config { string name, }` |
-| Record value | `Config config = Config { name: "value", }` |
-| Nullable field | `string note?,` |
+| Contextual record value | `Config config = { name: "value", }` |
+| Nullable field | `string? note,` |
 | Default field | `List<string> names = [],` |
 | Namespace | `namespace checks { ... }` |
 | Reference | `ref(checks::config)` |
 | Reference type | `Ref<Config>` |
-| Secret | `secret_ref("logical/id")` |
-| Domain declaration | `flow.pipeline verify { ... }` |
-| Domain value | `flow::ArtifactRef { ... }` |
+| Secret | `SecretRef<string> token = secret_ref("logical/id")` |
+| Vocabulary-owned declaration | `flow::Pipeline verify = { ... }` |
+| Vocabulary-owned value | `flow::ArtifactRef artifact = { ... }` |
 | Domain enum | `flow::Mode.strict` |
 | Line comment | `// explanation` |
 | Block comment | `/// explanation ///` |
@@ -753,7 +774,7 @@ language_header = "neu", string_literal, LINE_END
 module_header = "module", qualified_name, LINE_END
 
 vocabulary_requirement =
-    "requires", "vocabulary", identifier, "{",
+    "requires", "vocabulary", string_literal, "as", identifier, "{",
     vocabulary_fields,
     "}", LINE_END
 
@@ -761,7 +782,7 @@ vocabulary_fields =
     vocabulary_field, { vocabulary_field }
 
 vocabulary_field =
-      ( "id" | "schema" | "behavior" ), ":", string_literal, ","
+      ( "schema" | "behavior" ), ":", string_literal, ","
     | "features", ":", "[",
       [ string_literal, { ",", string_literal }, [ "," ] ],
       "]", ","
@@ -771,7 +792,6 @@ declaration_or_assignment =
     | record_declaration
     | binding_declaration
     | assignment
-    | domain_declaration
 
 namespace_declaration =
     "namespace", identifier, "{",
@@ -782,26 +802,23 @@ record_declaration =
     "record", identifier, "{", { record_field }, "}", LINE_END
 
 record_field =
-    type, nullable_name, [ "=", value ], ","
+    type, identifier, [ "=", value ], ","
 
 binding_declaration =
-    [ "mut" ], type, nullable_name, "=", value, LINE_END
+    [ "mut" ], type, identifier, "=", value, LINE_END
 
 assignment =
     identifier, "=", value, LINE_END
 
-nullable_name =
-    identifier, [ "?" ]
-
-domain_declaration =
-    vocabulary_member, identifier, "{", { value_field }, "}", LINE_END
-
 type =
+    primary_type, [ "?" ]
+
+primary_type =
       generic_type
     | qualified_name
 
 generic_type =
-    ( "List" | "Ref" ), "<", type, ">"
+    ( "List" | "Ref" | "SecretRef" ), "<", type, ">"
 
 value =
       boolean_literal
@@ -809,7 +826,7 @@ value =
     | string_literal
     | "null"
     | list_value
-    | nominal_value
+    | contextual_record_value
     | qualified_enum_value
     | reference_value
     | secret_reference_value
@@ -817,8 +834,8 @@ value =
 list_value =
     "[", [ value, { ",", value }, [ "," ] ], "]"
 
-nominal_value =
-    type_name, "{", { value_field }, "}"
+contextual_record_value =
+    "{", { value_field }, "}"
 
 qualified_enum_value =
     qualified_name, ".", identifier
@@ -832,19 +849,15 @@ reference_value =
 secret_reference_value =
     "secret_ref", "(", string_literal, ")"
 
-vocabulary_member =
-    identifier, ".", identifier
-
-type_name = qualified_name
-
 qualified_name =
     identifier, { "::", identifier }
 ```
 
-Static validation—not grammar alone—enforces exactly one vocabulary `id`,
-`schema`, `behavior`, and `features` field; nullable-only null; immutable
-assignment rejection; type-preserving mutation; declaration uniqueness; and
-schema-owned domain fields.
+Static validation—not grammar alone—enforces exactly one vocabulary `schema`,
+`behavior`, and `features` field; nullable-only null; one unambiguous expected
+type for every contextual record; immutable assignment rejection;
+type-preserving mutation; declaration uniqueness; and schema-owned vocabulary
+fields.
 
 `LINE_END` is emitted after a physical newline, including after a trailing line
 comment, when the current source or namespace declaration-list item is complete.
@@ -871,8 +884,8 @@ num x = 10
 mut num counter = 0
 counter = 1
 string label = "hello"
-string nullable_label? = null
+string? nullable_label = null
 ```
 
-Once these choices are finalized, the v0 decision records and the master/version
-syntax checklists should be updated together.
+These forms are synchronized with the v0 decision records and the
+master/version syntax checklists.

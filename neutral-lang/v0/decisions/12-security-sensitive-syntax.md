@@ -9,12 +9,17 @@ Answers: `SYN-SEC-001` through `SYN-SEC-006`
 Secret requests use a dedicated value form:
 
 ```neu
-secret_ref("ci/signing-token")
+SecretRef<string> token = secret_ref("ci/signing-token")
 ```
 
-It produces the opaque core type `SecretRef`. The argument is a logical
-identifier, not secret material, a provider credential, or a filesystem path.
-Only bindings or fields whose expected type is `SecretRef` accept it.
+It produces an opaque value whose expected type is `SecretRef<T>`. The argument
+is a logical identifier, not secret material, a provider credential, or a
+filesystem path. `T` declares the delivery shape requested from the eventual
+secret broker; the compiler does not inspect or guarantee the resolved content.
+Only bindings or fields whose expected type is `SecretRef<T>` accept the value.
+`SecretRef` requires exactly one well-formed Neutral type argument; bare, empty,
+and multi-argument forms are type errors. Consumer/broker support for that
+delivery shape is a later capability decision, not compiler proof.
 
 IR contains the opaque logical identifier, sensitivity classification, and
 source provenance. It MUST NOT contain resolved value, token, lease, destination
@@ -22,10 +27,10 @@ credential, or broker response. neutral-lang never resolves the reference.
 
 ## SYN-SEC-002 — Secret references are not text
 
-`SecretRef` is not `string` and has no implicit conversion, interpolation,
+`SecretRef<T>` is not `string` and has no implicit conversion, interpolation,
 concatenation, formatting, equality display, or ordinary serialization as text.
 v0 has no interpolation in any case. A quoted value
-`"ci/signing-token"` is merely text and cannot satisfy `SecretRef`.
+`"ci/signing-token"` is merely text and cannot satisfy `SecretRef<T>`.
 
 Human renderers show a redacted placeholder and safe element identity rather
 than the argument by default. A consumer must use a separate authorized broker
@@ -43,7 +48,7 @@ v0 has no syntax for:
 - network/file reads; or
 - secret resolution.
 
-Domain declarations and raw text are inert typed data. Vocabulary bundles are
+Vocabulary-owned typed declarations and raw text are inert data. Vocabulary bundles are
 data-only. A string that resembles a shell command remains text. Compiler
 constant handling is limited to parsing literal/record/list/reference forms and
 applying declarative static constraints.
@@ -84,15 +89,16 @@ The initial named desktop/CI profile applies:
 | Source units | 256 |
 | Complete closure | 16 MiB |
 | Import/composition depth | 64 |
-| Structural/comment nesting | 128 |
+| Structural nesting | 128 |
 | Emitted diagnostics | 200 plus one truncation diagnostic |
 | Compilation deadline | 10 seconds on the named benchmark host |
 | Process memory | 512 MiB on the named benchmark host |
 
 A text or numeric literal is additionally bounded by the containing source-unit
-limit and the configured decoded-node budget. Delimiter, comment, type, and
-value nesting all consume the same structural depth budget; changing construct
-kind cannot reset it.
+limit and the configured decoded-node budget. Delimiter, type, and value nesting
+all consume the same structural depth budget; changing construct kind cannot
+reset it. Block comments do not nest and are bounded by source-unit size and
+compilation work budgets.
 
 Limits are explicit compiler inputs and recorded in derivation when they affect
 acceptance. Crossing a limit produces one bounded diagnostic and no authoritative

@@ -40,8 +40,7 @@ The decision set uses this shape for examples:
 neu "0.1"
 module acme::delivery
 
-requires vocabulary flow {
-    id: "org.neutral.flow",
+requires vocabulary "org.neutral.flow" as flow {
     schema: "0.1",
     behavior: "0.1",
     features: ["pipeline"],
@@ -49,25 +48,25 @@ requires vocabulary flow {
 
 record ImageConfig {
     string image,
-    string note?,
+    string? note,
     List<string> labels = [],
 }
 
-ImageConfig base = ImageConfig {
+ImageConfig base = {
     image: "example.invalid/tool:1",
     note: null,
     labels: ["portable"],
 }
 
 namespace checks {
-    flow.pipeline verify {
+    flow::Pipeline verify = {
         config: ref(acme::delivery::base),
     }
 }
 ```
 
-This is a language-design fixture, not a claim that `flow.pipeline` has any
-particular CI/CD meaning. The Flow vocabulary owns that declaration kind and
+This is a language-design fixture, not a claim that `flow::Pipeline` has any
+particular CI/CD meaning. The Flow vocabulary owns that type's contract and
 the Flow consumer owns its interpretation.
 
 ## Deliberate v0 exclusions

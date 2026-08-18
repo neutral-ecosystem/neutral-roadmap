@@ -71,20 +71,21 @@ The union of Flow and Neux keywords is explicitly rejected as a core design.
 ## SYN-GOV-004 — Core and vocabulary syntax
 
 Core declarations use unqualified reserved forms such as `record`, `mut`,
-and `namespace`. A domain declaration kind MUST be vocabulary-qualified:
+and `namespace`. Vocabulary-owned types use the same type-first binding grammar
+as core and local types and MUST be namespace-qualified:
 
 ```neu
-flow.pipeline verify {
+flow::Pipeline verify = {
     config: ref(config),
 }
 ```
 
-Here `flow` is an alias declared by `requires vocabulary`; `pipeline` is
-described by the captured bundle. The compiler owns parsing, qualification,
-schema validation, references, bounds, and provenance. Flow owns its CI/CD
-meaning.
+Here `flow` is the explicit alias declared by `requires vocabulary ... as flow`;
+`Pipeline` is a type described by the captured bundle, not a special Neutral
+declaration-kind production. The compiler owns parsing, qualification, schema
+validation, references, bounds, and provenance. Flow owns its CI/CD meaning.
 
-An unqualified unknown declaration kind is invalid. A vocabulary cannot
+An unknown or incorrectly qualified type is invalid. A vocabulary cannot
 redefine core tokens, identifier rules, scoping, identity, or provenance.
 
 ## SYN-GOV-005 — Syntax is not authority

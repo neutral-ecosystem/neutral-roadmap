@@ -89,29 +89,30 @@ in the first public contract.
 The v0 reserved words are:
 
 ```text
-neu module requires vocabulary namespace record mut
+neu module requires vocabulary as namespace record mut
 true false null ref secret_ref
 ```
 
-`bool`, `num`, `string`, `List`, `Ref`, and `SecretRef` are predeclared
-core type names and cannot be redeclared in the root namespace.
+`bool`, `num`, `string`, `List`, `Ref`, and `SecretRef` are predeclared core
+type/type-constructor names and cannot be redeclared in the root namespace.
 
-`::` joins name segments and qualification is explicit, left-to-right:
+`::` resolves a name through module or namespace scopes, including a vocabulary
+alias namespace. Qualification is explicit and left-to-right:
 
 ```neu
 acme::delivery::config
 flow::Mode
 ```
 
-`.` selects or invokes a member rather than extending a qualification path:
+`.` selects a member or enum case rather than extending a qualification path:
 
 ```neu
-flow.pipeline verify { }
 flow::Mode.strict
 ```
 
-Future member calls may use `value.method()`. Built-in calls remain
-`ref(...)` and `secret_ref(...)`.
+A future namespace-owned free function is `flow::run()`, while a member call is
+`runner.run()`. General calls are not otherwise part of v0. Built-in calls
+remain `ref(...)` and `secret_ref(...)`.
 
 v0 has no escaped identifiers. A conflicting name must be renamed, and a
 vocabulary must expose a legal source alias for any external name. Quoted
@@ -125,13 +126,13 @@ Separators are `,`, `:`, `=`, `?`, `::`, `.`, and logical newline:
 
 - `()` encloses arguments to built-in forms such as `ref(...)`;
 - `[]` constructs ordered lists;
-- `<>` encloses a type argument in `List<T>` or `Ref<T>` only;
-- `{}` encloses namespaces, records, domain declarations, and record values;
+- `<>` encloses a type argument in `List<T>`, `Ref<T>`, or `SecretRef<T>`;
+- `{}` encloses namespaces, records, and contextual typed values;
 - `:` separates a field name from its constructed value;
 - `=` introduces a binding value or field default;
-- `?` after a declared variable or field name marks it nullable;
-- `::` qualifies modules, namespaces, types, and symbols;
-- `.` selects or invokes a member; and
+- `?` after a complete type marks that type nullable;
+- `::` resolves names through module/namespace scopes;
+- `.` selects a member or enum case; and
 - logical newline terminates complete declaration-list items.
 
 `-` is recognized only as the immediately adjacent leading sign of a numeric
@@ -163,7 +164,7 @@ sequence is ordinary text.
 | Boolean | `true`, `false` | Exactly two `bool` values |
 | Number | `0`, `17`, `-4`, `1_000.25` | Exact source number, automatically represented as compatible `int`, `uint`, or `float` |
 | String | `"text"` | Finite Unicode scalar sequence |
-| Null | `null` | The only explicit source null/empty literal; legal only in nullable positions |
+| Null | `null` | The only explicit source null/empty literal; legal only where the expected type is `T?` |
 
 Underscores may occur only between digits. Leading zeroes other than `0` are
 invalid. A decimal needs digits on both sides of the point. v0 has no exponent,

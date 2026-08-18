@@ -132,7 +132,8 @@ are:
 - immutable documents and deterministic validation;
 - source provenance, origin chains, and structured diagnostics;
 - required-feature negotiation; and
-- namespaced domain nodes whose behavior remains consumer-owned.
+- namespace-qualified vocabulary-owned typed declarations whose behavior remains
+  consumer-owned.
 
 These are candidates, not a frozen Neutral data model. Flow graphs, jobs,
 conditions, retries, runners, artifacts, deployments, shell commands,
@@ -181,10 +182,10 @@ Adopt a small fixed core plus versioned domain vocabularies.
 
 The core owns document identity, declarations, scopes, references, common value
 forms, provenance, source maps, diagnostics, feature negotiation, resource
-limits, and extension framing. The Flow vocabulary owns pipeline declarations,
-dependency meaning, operation contracts, conditions, outputs, requirements,
-and any other CI/CD-specific declaration. Neux owns command- and OS-specific
-declarations.
+limits, and extension framing. The Flow vocabulary owns the `Pipeline` type,
+the meaning of declarations using it, dependency meaning, operation contracts,
+conditions, outputs, requirements, and any other CI/CD-specific declaration.
+Neux owns command- and OS-specific declarations.
 
 Each domain item must carry a collision-resistant vocabulary identity, schema
 version, behavior version, owner, and required/optional status. Unknown required
@@ -396,7 +397,7 @@ reader rather than keeping every old behavior in the main compiler.
 
 ### The question
 
-How can the compiler discover and validate Flow or Neux vocabulary declarations
+How can the compiler discover and validate Flow or Neux vocabulary contracts
 without giving downloaded extensions compiler-process authority?
 
 A vocabulary needs more than a namespace string: it needs schemas, reference
@@ -417,6 +418,16 @@ an execution boundary.
 
 Use data-only vocabulary bundles supplied by the compilation request through the
 same explicit resolver model as source dependencies.
+
+Source names the requested identity and its local namespace explicitly:
+
+```neu
+requires vocabulary "org.neutral.flow" as flow {
+    schema: "0.1",
+    behavior: "0.1",
+    features: ["pipeline"],
+}
+```
 
 A bundle declares its identity, owner assertion, schema and behavior versions,
 compatibility range, feature dependencies, allowed node/value forms, reference
@@ -524,7 +535,7 @@ runtime semantics.
 Create two test-only, effect-free probe consumers:
 
 - a Flow-profile probe that reads IR, validates required vocabulary features,
-  enumerates domain declarations and references, and emits a deterministic
+  enumerates vocabulary-owned typed declarations and references, and emits a deterministic
   private summary or domain diagnostic; and
 - a Neux-profile probe that performs the equivalent task for one independently
   selected OS-domain fixture.

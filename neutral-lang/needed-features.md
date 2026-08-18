@@ -71,7 +71,7 @@ them. They are not checkboxes and are not assigned to v0, v1, or v2 here.
 - **NL-BND-003:** Build, test, cache, retry, runner, artifact, deploy, shell,
   process, file descriptor, and package-manager behavior are not intrinsic
   Neutral operations.
-- **NL-BND-004:** The compiler preserves domain declarations but does not assign
+- **NL-BND-004:** The compiler preserves vocabulary-owned typed declarations but does not assign
   their application behavior or prove their external effects.
 - **NL-BND-005:** The compiler core and IR inspection perform no CI/CD, OS,
   credential, deployment, or other application effect and make no implicit
@@ -146,7 +146,8 @@ lifecycle.
 - **NL-NAM-001:** Important declarations and generated elements have explicit,
   stable identities independent of display labels.
 - **NL-NAM-002:** Scope, visibility, qualification, shadowing, and collision
-  rules are deterministic.
+  rules are deterministic. In source, `::` is reserved for module/namespace
+  qualification and `.` for member or enum-case access.
 - **NL-NAM-003:** References are represented as resolved symbolic links or
   typed identities, never as strings a consumer must parse heuristically.
 - **NL-NAM-004:** Unresolved, ambiguous, inaccessible, cyclic, and wrong-kind
@@ -196,17 +197,21 @@ readiness edge.
   author-facing scalar declarations.
 - **NL-VAL-003:** Required, schema-optional, defaulted, nullable, and repeated
   fields are distinguishable even though `null` is the only explicit source
-  null/empty literal.
+  null/empty literal. Source nullability is a postfix type constructor `T?`, so
+  nullable containers and containers of nullable elements remain distinct.
 - **NL-VAL-004:** Records, collections, tagged alternatives, and opaque
   domain-owned values are representable without embedding application keywords
-  in the Neutral core.
+  in the Neutral core. Braced records are contextual values that require exactly
+  one expected nominal or vocabulary-owned type; source does not repeat a
+  constructor type on the right-hand side.
 - **NL-VAL-005:** Numeric ranges, precision, text/binary distinction, ordering,
   duplicate-key behavior, and null/omission behavior are not left to an encoding
   library's defaults.
 - **NL-VAL-006:** A value retains its declaration, origin, and transformation
   provenance sufficiently for a consumer diagnostic.
-- **NL-VAL-007:** Sensitive classification and opaque secret references can be
-  represented without containing resolved secret material.
+- **NL-VAL-007:** Sensitive classification and generic opaque `SecretRef<T>`
+  values can represent a requested delivery shape without containing resolved
+  secret material or claiming the compiler verified that material.
 - **NL-VAL-008:** Unknown or unsupported domain value kinds fail according to
   must-understand rules; they are not coerced silently.
 - **NL-VAL-009:** Constraints that can be checked without application state are
@@ -282,11 +287,15 @@ Extensibility must not become unversioned arbitrary compiler plugins.
 - **NL-DOM-001:** Every domain vocabulary has a collision-resistant identity,
   owner, schema version, behavior version, and compatibility range.
 - **NL-DOM-002:** A compilation request explicitly selects permitted domain
-  profiles; source cannot activate an undeclared privileged profile implicitly.
-- **NL-DOM-003:** Domain declarations are described by data contracts that can be
-  loaded and validated without executing provider or application code.
-- **NL-DOM-004:** Core IR carries namespaced domain nodes and values without
-  assigning their external behavior.
+  profiles; source names each requirement as
+  `requires vocabulary "identity" as alias { ... }` but cannot activate an
+  undeclared privileged profile implicitly.
+- **NL-DOM-003:** Vocabulary-owned typed declarations use the same type-first
+  binding and contextual-value grammar as local declarations. Their data
+  contracts can be loaded and validated without executing provider or
+  application code.
+- **NL-DOM-004:** Core IR carries namespace-qualified vocabulary-owned typed
+  declarations and values without assigning their external behavior.
 - **NL-DOM-005:** Required and optional domain features are distinguishable.
   Unknown required behavior fails closed; ignorable metadata must be explicitly
   declared non-behavioral.
@@ -297,8 +306,9 @@ Extensibility must not become unversioned arbitrary compiler plugins.
 - **NL-DOM-008:** Domain vocabulary dependencies are explicit, versioned,
   acyclic under stated rules, and captured in the derivation.
 - **NL-DOM-009:** Flow provider data is not promoted into Neutral core. When
-  authoring explicitly carries a Flow-owned extension declaration, the IR
-  preserves it as Flow-owned domain data for Flow to classify and validate.
+  authoring explicitly carries a value of a Flow-owned extension type through
+  an ordinary binding, the IR preserves it as Flow-owned domain data for Flow
+  to classify and validate.
 - **NL-DOM-010:** Domain schemas can describe declarations, relationships,
   operations, parameters, result shapes, annotations, and capability/effect
   contracts without requiring a new IR encoding.
@@ -571,7 +581,7 @@ without moving Flow behavior into the language.
 | Capabilities, permissions, resources, and effects | Structured domain-owned requirements and provenance | Capability inference, compatibility, authorization, allocation, enforcement |
 | Provider independence and extensions | Namespaced, versioned, must-understand domain data | Binding, extension layers, portability degradation, provider conformance |
 | Events and execution requests | Typed data shapes and references | Ingress authentication, deduplication, causation, run creation |
-| Attempts, retry, timeout, cancellation, and recovery | No core lifecycle feature required; domain declarations may carry requested policy | Durable state machines, fencing, reconciliation, tombstones |
+| Attempts, retry, timeout, cancellation, and recovery | No core lifecycle feature required; vocabulary-owned typed declarations may carry requested policy | Durable state machines, fencing, reconciliation, tombstones |
 | Secrets and trust handover | Opaque references and sensitivity metadata; no secret values | Authorization, brokers, destination credentials, trust-zone policy |
 | Artifacts, evidence, logs, audit, and history | Typed domain values and immutable references | Storage, integrity verification, retention, trust evaluation, observation |
 | Deployment, promotion, gates, and rollback | Domain operation/evidence declarations | Protected effects, approval, exact artifact binding, verification |
@@ -680,8 +690,8 @@ The current provisional candidates are stable declaration identity and names;
 namespaces, scopes, and typed references; typed scalar and structured values;
 containment and typed relationships without execution meaning; immutable
 documents; source provenance; structured diagnostics; required-feature
-negotiation; and namespaced domain nodes. They are not yet a frozen core because
-the Neux corpus has not been established.
+negotiation; and namespace-qualified vocabulary-owned typed declarations. They
+are not yet a frozen core because the Neux corpus has not been established.
 
 Flow graphs, jobs, conditions, retries, runners, artifacts, and deployments stay
 outside core. Neux commands, processes, files, and packages also stay outside
@@ -695,7 +705,7 @@ vocabularies. The core owns document identity, declarations, scopes, references,
 common value forms, provenance, source maps, diagnostics, feature negotiation,
 resource limits, and safe extension framing.
 
-The Flow vocabulary owns pipeline declarations, dependency meaning, operation
+The Flow vocabulary owns the `Pipeline` type, dependency meaning, operation
 contracts, conditions, outputs, requirements, and other CI/CD behavior. Neux
 owns OS- and command-specific declarations. Every domain item identifies its
 vocabulary, owner assertion, schema version, behavior version, and whether it is

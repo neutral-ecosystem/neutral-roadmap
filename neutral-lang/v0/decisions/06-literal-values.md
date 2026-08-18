@@ -18,10 +18,11 @@ diagnostics.
 
 ## SYN-VAL-002 — Record construction
 
-Record values name their nominal type:
+Record values use the expected nominal type supplied by their binding, field,
+list element, or other statically unique context:
 
 ```neu
-ImageConfig {
+ImageConfig config = {
     image: "example.invalid/tool:1",
     labels: ["portable"],
 }
@@ -31,8 +32,10 @@ Fields use `name: value` and appear once. Logical association is by field name,
 not order. Unknown, duplicate, missing required, wrong-type, and inaccessible
 fields are distinct errors.
 
-v0 has no untyped anonymous record literal. A domain declaration body resembles
-a record but obtains its schema from the qualified kind.
+Repeating the type on the right-hand side is invalid. The braced form is not an
+untyped anonymous record: compilation fails when there is no expected type or
+when the expected type is ambiguous. A vocabulary-owned typed declaration uses
+the same contextual construction rule.
 
 ## SYN-VAL-003 — List construction
 
@@ -47,8 +50,8 @@ behavior, flattening, heterogeneous element type, or comma elision.
 ## SYN-VAL-004 — Omission, null, and unavailability
 
 - A field with a default may have no source entry.
-- `null` is the only explicit source null/empty literal and is legal only after a
-  nullable declaration or field name marked with `?`.
+- `null` is the only explicit source null/empty literal and is legal only where
+  the expected type is `T?`.
 - Deferred/unavailable is not constructible in v0.
 
 The compiler preserves structural omission/default application versus explicit
@@ -84,7 +87,7 @@ tagged alternatives remain deferred.
 ## SYN-VAL-007 — Domain-owned typed values
 
 ```neu
-flow::ArtifactRef {
+flow::ArtifactRef artifact = {
     value: "sha256:example",
 }
 ```
@@ -102,6 +105,7 @@ bindings and fields and improves source maps/migrations.
 ## Required evidence
 
 Fixtures MUST cover scalar mismatch, automatic numeric conversion boundaries,
-every record error, empty/heterogeneous lists, omission/null,
-unresolved/wrong-kind references, unknown enum
-variants, invalid domain values, and shorthand rejection.
+every contextual-record error including repeated/absent/ambiguous expected
+types, empty/heterogeneous lists, omission/null,
+unresolved/wrong-kind references, unknown enum variants, invalid vocabulary-owned
+values, and shorthand rejection.

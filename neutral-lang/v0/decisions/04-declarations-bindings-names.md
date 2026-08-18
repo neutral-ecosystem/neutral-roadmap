@@ -49,23 +49,24 @@ does not infer a public declaration type. Domain fields obtain expected types
 from the captured vocabulary schema. Empty lists and `null` require an expected
 type.
 
-## SYN-DEC-004 — Domain declaration kinds
+## SYN-DEC-004 — Vocabulary-owned typed declarations
 
-A domain declaration has:
+Vocabulary-owned declarations use the ordinary type-first binding grammar:
 
 ```text
-vocabulary-alias.schema-kind declaration-name { schema fields }
+vocabulary-alias::Type declaration-name = { schema fields }
 ```
 
 ```neu
-flow.pipeline verify {
+flow::Pipeline verify = {
     config: ref(config),
 }
 ```
 
-`pipeline` is not a core keyword. The data-only bundle defines kind, allowed
-position, fields, target kinds, and behavioral classification. No Flow code runs
-during parsing or static schema validation.
+`Pipeline` is not a core keyword or a special domain-declaration grammar branch.
+The data-only bundle defines the type, allowed position, fields, target kinds,
+and behavioral classification. No Flow code runs during parsing or static
+schema validation.
 
 ## SYN-DEC-005 — Namespaces
 
