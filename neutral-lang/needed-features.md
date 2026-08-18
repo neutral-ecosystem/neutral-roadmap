@@ -287,9 +287,11 @@ Extensibility must not become unversioned arbitrary compiler plugins.
 - **NL-DOM-001:** Every domain vocabulary has a collision-resistant identity,
   owner, schema version, behavior version, and compatibility range.
 - **NL-DOM-002:** A compilation request explicitly selects permitted domain
-  profiles; source names each requirement as
-  `requires vocabulary "identity" as alias { ... }` but cannot activate an
-  undeclared privileged profile implicitly.
+  profiles. Source introduces a logical namespace with `use Vocabulary`, such
+  as `use Flow` or `use Neux`; the captured lock manifest resolves it to one
+  exact identity, digest, schema version, behavior version, and supported
+  feature set. Source cannot activate an undeclared privileged profile
+  implicitly.
 - **NL-DOM-003:** Vocabulary-owned typed declarations use the same type-first
   binding and contextual-value grammar as local declarations. Their data
   contracts can be loaded and validated without executing provider or
@@ -297,8 +299,10 @@ Extensibility must not become unversioned arbitrary compiler plugins.
 - **NL-DOM-004:** Core IR carries namespace-qualified vocabulary-owned typed
   declarations and values without assigning their external behavior.
 - **NL-DOM-005:** Required and optional domain features are distinguishable.
-  Unknown required behavior fails closed; ignorable metadata must be explicitly
-  declared non-behavioral.
+  Each vocabulary member declares its feature dependencies; the compiler
+  derives and records the required set from members actually used. Unknown or
+  unsupported required behavior fails closed, while ignorable metadata must be
+  explicitly declared non-behavioral.
 - **NL-DOM-006:** Domain payloads have bounded size, depth, allowed value kinds,
   and reference targets.
 - **NL-DOM-007:** An extension cannot redefine core identity, scoping, source

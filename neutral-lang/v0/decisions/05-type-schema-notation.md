@@ -82,11 +82,11 @@ inaccessible, wrong-kind, and cyclic references are distinct errors.
 
 ## SYN-TYP-006 — Opaque domain types
 
-A bundle may declare `flow::ArtifactRef` with exact schema/behavior versions,
+A bundle may declare `Flow::ArtifactRef` with exact schema/behavior versions,
 source representation, static constraints, feature, and must-understand status.
 
 ```neu
-flow::ArtifactRef artifact = {
+Flow::ArtifactRef artifact = {
     value: "sha256:example",
 }
 ```

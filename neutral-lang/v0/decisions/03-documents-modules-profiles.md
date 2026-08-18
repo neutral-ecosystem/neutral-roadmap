@@ -22,44 +22,56 @@ vocabulary versions. Omitting the header or selecting “latest” is invalid.
 ## SYN-DOC-002 — Top-level shape
 
 After the language header, a unit contains exactly one `module` header, zero
-or more vocabulary requirements, and declarations:
+or more vocabulary `use` declarations, and ordinary declarations:
 
 ```text
 language header
 module header
-vocabulary requirements*
+use declarations*
 declaration*
 ```
 
 Arbitrary values cannot appear at root; a root value must use an explicit
 type-first declaration such as `num retries = 3`.
-Vocabulary requirements precede declarations. Declaration order is presentation
-order, not execution order or precedence. The root is not an implicit Flow
-pipeline or Neux script.
+`use` declarations precede ordinary declarations. Declaration order is
+presentation order, not execution order or precedence. The root is not an
+implicit Flow pipeline or Neux script.
 
-## SYN-DOC-003 — Vocabulary requests and policy
+## SYN-DOC-003 — Vocabulary use and policy
 
-Source requests a vocabulary with:
+Source introduces a vocabulary namespace with:
 
 ```neu
-requires vocabulary "org.neutral.flow" as flow {
-    schema: "0.1",
-    behavior: "0.1",
-    features: ["pipeline"],
-}
+use Flow
 ```
 
-`"org.neutral.flow"` is the exact vocabulary identity and `flow` is its
-explicit source-local namespace alias. The body holds exact schema and behavior
-versions plus required feature identities. Duplicate features are invalid.
+The general form is `use Vocabulary`; `Flow` is an identifier, not a keyword.
+For example, a future Neux source can say `use Neux`. `Flow` is a source-local
+logical vocabulary name and the namespace used by forms such as
+`Flow::Pipeline`. It is not itself a package identity or mutable version.
+The compilation request's captured lock manifest MUST map it to exactly one
+permitted vocabulary identity, content digest, schema version, behavior version,
+and supported feature set.
 
-This declaration performs no lookup. The compilation request MUST permit the
-identity/version and its resolver MUST provide the exact captured data-only
-bundle. Source cannot broaden policy, choose mutable “latest,” or activate code.
-A mismatch is reported before validating vocabulary-owned typed declarations.
+This declaration performs no ambient lookup. The resolver provides the exact
+captured data-only bundle named by the manifest. Source cannot broaden policy,
+choose mutable “latest,” or activate code. A missing, ambiguous, mutable-only,
+disallowed, or mismatched mapping fails before validating vocabulary-owned typed
+declarations.
 
-Aliases share the root namespace and are unique. One bundle may have only one
-alias in a v0 unit.
+The import exposes members only below the vocabulary namespace. It does not add
+unqualified names to the surrounding scope: `Flow::Pipeline` is valid, while an
+unqualified `Pipeline` is not imported.
+
+Used vocabulary members declare their feature dependencies in the captured
+bundle. The compiler aggregates and verifies those features instead of treating
+`use Flow` as a request for every present or future feature. It records the
+actual used feature set and exact resolution in IR/derivation.
+
+Use names share the root namespace and are unique. v0 has no source alias,
+selective-use, version-range, or inline vocabulary-identity syntax. Two bundles
+that require the same source name cannot coexist in one v0 unit; supporting that
+case requires the future vocabulary-renaming decision.
 
 ## SYN-DOC-004 — Module and package names
 
@@ -77,15 +89,16 @@ The request associates each unit with immutable content and package identity.
 The module declaration must agree with that manifest. Two units cannot claim
 the same module name in one closure.
 
-v0 has no source-level imports. The request/resolver may provide a closed set of
-units for qualified references. Module spelling never searches disk or network.
+v0 has no source-module or package imports. The request/resolver may provide a
+closed set of units for qualified references. `use` imports only a captured
+vocabulary namespace; neither module spelling nor `use` searches disk or network.
 
 ## Invalid and boundary cases
 
 Missing, duplicate, late, malformed, or unsupported headers; absent or duplicate
-modules; late vocabulary requirements; malformed identities or missing `as`
-aliases; missing/disallowed bundles; version or digest mismatch; and duplicate
-aliases each receive distinct diagnostics.
+modules; late or duplicate `use` declarations; missing/ambiguous/disallowed lock
+mappings; version or digest mismatch; unsupported used features; and namespace
+collisions each receive distinct diagnostics.
 
 All header records and spans enter the derivation manifest. Diagnostics require
 no consumer or vocabulary code execution.

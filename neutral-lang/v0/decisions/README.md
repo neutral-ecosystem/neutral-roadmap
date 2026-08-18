@@ -40,11 +40,7 @@ The decision set uses this shape for examples:
 neu "0.1"
 module acme::delivery
 
-requires vocabulary "org.neutral.flow" as flow {
-    schema: "0.1",
-    behavior: "0.1",
-    features: ["pipeline"],
-}
+use Flow
 
 record ImageConfig {
     string image,
@@ -59,19 +55,19 @@ ImageConfig base = {
 }
 
 namespace checks {
-    flow::Pipeline verify = {
+    Flow::Pipeline verify = {
         config: ref(acme::delivery::base),
     }
 }
 ```
 
-This is a language-design fixture, not a claim that `flow::Pipeline` has any
+This is a language-design fixture, not a claim that `Flow::Pipeline` has any
 particular CI/CD meaning. The Flow vocabulary owns that type's contract and
 the Flow consumer owns its interpretation.
 
 ## Deliberate v0 exclusions
 
-v0 has no unmarked mutation, imports written in source, executable macros,
+v0 has no unmarked mutation, source-module/package imports, executable macros,
 general loops, anonymous functions, implicit network lookup, native plugins,
 shell execution, provider credentials, or runtime lifecycle syntax. Later
 checklists may add composition and symbolic structure, but only through their

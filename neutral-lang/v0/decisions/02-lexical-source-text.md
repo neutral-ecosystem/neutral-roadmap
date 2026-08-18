@@ -89,7 +89,7 @@ in the first public contract.
 The v0 reserved words are:
 
 ```text
-neu module requires vocabulary as namespace record mut
+neu module use namespace record mut
 true false null ref secret_ref
 ```
 
@@ -97,27 +97,29 @@ true false null ref secret_ref
 type/type-constructor names and cannot be redeclared in the root namespace.
 
 `::` resolves a name through module or namespace scopes, including a vocabulary
-alias namespace. Qualification is explicit and left-to-right:
+namespace introduced by `use`. Qualification is explicit and left-to-right:
 
 ```neu
 acme::delivery::config
-flow::Mode
+Flow::Mode
 ```
 
 `.` selects a member or enum case rather than extending a qualification path:
 
 ```neu
-flow::Mode.strict
+Flow::Mode.strict
 ```
 
-A future namespace-owned free function is `flow::run()`, while a member call is
+A future namespace-owned free function is `Flow::run()`, while a member call is
 `runner.run()`. General calls are not otherwise part of v0. Built-in calls
 remain `ref(...)` and `secret_ref(...)`.
 
-v0 has no escaped identifiers. A conflicting name must be renamed, and a
-vocabulary must expose a legal source alias for any external name. Quoted
-identifiers are rejected because they create inconsistent identities across
-tools.
+v0 has no escaped identifiers. Every vocabulary use name must be a legal
+identifier. A collision between a vocabulary namespace and another root name is
+an error; the source must choose a non-conflicting declaration name. Vocabulary
+renaming is deferred to a future `use`-syntax decision and cannot happen as a
+lock-manifest side effect. Quoted identifiers are rejected because they create
+inconsistent identities across tools.
 
 ## SYN-LEX-006 — Delimiters and separators
 

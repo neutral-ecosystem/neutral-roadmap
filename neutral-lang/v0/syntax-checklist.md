@@ -43,7 +43,7 @@ Proposed answers: [document and profile decisions](decisions/03-documents-module
 
 - [ ] **SYN-DOC-001 · v0** — Define how a source unit declares or inherits its `.neu` language-behavior version.
 - [ ] **SYN-DOC-002 · v0** — Define the top-level document shape and whether declarations, values, or both may appear at the root.
-- [ ] **SYN-DOC-003 · v0** — Define `requires vocabulary "identity" as alias { ... }` while the compilation request remains authoritative for permitted vocabularies.
+- [ ] **SYN-DOC-003 · v0** — Define `use Vocabulary` (for example, `use Flow`) as a vocabulary namespace import resolved only through the compilation request's exact captured lock manifest.
 - [ ] **SYN-DOC-004 · v0** — Define module/package names independently from paths, URLs, mutable tags, and display labels.
 
 ## 4. Declarations, bindings, and names
@@ -53,7 +53,7 @@ Proposed answers: [declaration and binding decisions](decisions/04-declarations-
 - [ ] **SYN-DEC-001 · v0** — Define the common shape of a named declaration and the distinction between stable machine identity and display name.
 - [ ] **SYN-DEC-002 · v0** — Define type-first binding syntax without `let`; bindings are immutable by default and any explicit `mut` form requires cross-domain evidence and deterministic lowering.
 - [ ] **SYN-DEC-003 · v0** — Define explicit type/schema annotations and the limited positions, if any, where type inference is permitted.
-- [ ] **SYN-DEC-004 · v0** — Represent vocabulary-owned declarations as ordinary type-first bindings such as `flow::Pipeline verify = { ... }`, without vocabulary names or a special declaration-kind production in Neutral core.
+- [ ] **SYN-DEC-004 · v0** — Represent vocabulary-owned declarations as ordinary type-first bindings such as `Flow::Pipeline verify = { ... }`, without vocabulary names or a special declaration-kind production in Neutral core.
 - [ ] **SYN-DEC-005 · v0** — Define namespace declaration and qualification syntax.
 - [ ] **SYN-DEC-006 · v0** — Define duplicate declaration, shadowing, and reserved-name diagnostics.
 - [ ] **SYN-DEC-007 · v0** — Define whether references may appear before declarations and ensure source order is not accidental execution order.
@@ -95,12 +95,12 @@ Proposed answers: [reference and relationship decisions](decisions/07-references
 
 Proposed answers: [domain-vocabulary decisions](decisions/10-domain-vocabulary.md).
 
-- [ ] **SYN-DOM-001 · v0** — Define vocabulary-owned declarations through ordinary type-first bindings whose types use an explicit vocabulary namespace alias; do not add a special domain-declaration production.
-- [ ] **SYN-DOM-002 · v0** — Define how source states required vocabulary identity, schema version, behavior version, and required features.
-- [ ] **SYN-DOM-003 · v0** — Separate source requests from caller policy so source cannot activate an unapproved vocabulary.
+- [ ] **SYN-DOM-001 · v0** — Define vocabulary-owned declarations through ordinary type-first bindings whose types use a namespace introduced by `use`; do not add a special domain-declaration production.
+- [ ] **SYN-DOM-002 · v0** — Define how `use Vocabulary` names a logical vocabulary while the captured lock manifest pins its exact identity, digest, schema version, behavior version, and supported features; derive required features from the vocabulary members actually used.
+- [ ] **SYN-DOM-003 · v0** — Separate `use` requirements from caller lock/policy so source cannot fetch, select “latest,” or activate an unapproved vocabulary.
 - [ ] **SYN-DOM-004 · v0** — Define required behavioral data versus optional non-behavioral metadata in visible syntax or schema rules.
 - [ ] **SYN-DOM-005 · v0** — Define domain fields, nodes, and values using core typed forms rather than a schema-less extension bag.
-- [ ] **SYN-DOM-006 · v0** — Define diagnostics for unknown vocabulary aliases/types, unsupported required features, invalid contextual payloads, and types used in disallowed scopes.
+- [ ] **SYN-DOM-006 · v0** — Define diagnostics for unknown vocabulary use names/types, lock-resolution failures, unsupported used features, invalid contextual payloads, and types used in disallowed scopes.
 
 ## 12. Security-sensitive syntax
 

@@ -54,11 +54,11 @@ type.
 Vocabulary-owned declarations use the ordinary type-first binding grammar:
 
 ```text
-vocabulary-alias::Type declaration-name = { schema fields }
+Vocabulary::Type declaration-name = { schema fields }
 ```
 
 ```neu
-flow::Pipeline verify = {
+Flow::Pipeline verify = {
     config: ref(config),
 }
 ```
@@ -82,8 +82,8 @@ are declarations, not arbitrary values.
 
 ## SYN-DEC-006 — Duplicates and shadowing
 
-Two declarations of any kind cannot share a name in one scope. Vocabulary
-aliases occupy the root namespace. v0 prohibits shadowing outer declarations
+Two declarations of any kind cannot share a name in one scope. Vocabulary use
+names occupy the root namespace. v0 prohibits shadowing outer declarations
 and predeclared core names. Sibling namespaces may contain equal short names.
 
 Case-distinct ASCII names are technically distinct, but tools SHOULD warn when

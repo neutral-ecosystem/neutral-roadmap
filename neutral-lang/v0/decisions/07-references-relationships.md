@@ -28,7 +28,7 @@ from strings.
 | Namespace | `ref(checks::config)` | Named namespace in current module |
 | Module | `ref(acme::common::config)` | Exact module in captured closure |
 
-A module-qualified reference does not fetch. v0 has no imports; the
+A module-qualified reference does not fetch. v0 has no module/package imports; the
 request/resolver supplies the captured closure. Paths and URLs are illegal in
 `ref(...)`. Resolution never searches ambient files or packages.
 
@@ -53,7 +53,7 @@ different relationship kinds. Indentation never establishes either.
 ## SYN-REF-004 — Typed domain relationships
 
 ```neu
-flow::Dependency check_after_build = {
+Flow::Dependency check_after_build = {
     from: ref(build),
     to: ref(check),
 }

@@ -419,15 +419,19 @@ an execution boundary.
 Use data-only vocabulary bundles supplied by the compilation request through the
 same explicit resolver model as source dependencies.
 
-Source names the requested identity and its local namespace explicitly:
+Source introduces a logical vocabulary namespace with the general form
+`use Vocabulary`:
 
 ```neu
-requires vocabulary "org.neutral.flow" as flow {
-    schema: "0.1",
-    behavior: "0.1",
-    features: ["pipeline"],
-}
+use Flow
 ```
+
+`Flow` is an identifier, not a keyword; a future Neux source can say `use Neux`.
+The compilation request's captured lock manifest maps `Flow` to one exact
+permitted vocabulary identity, content digest, schema version, behavior version,
+and supported feature set. `use Flow` never performs ambient lookup or selects
+“latest.” Required features are derived from the vocabulary members actually
+used, so newly added unused features do not change an existing source unit.
 
 A bundle declares its identity, owner assertion, schema and behavior versions,
 compatibility range, feature dependencies, allowed node/value forms, reference

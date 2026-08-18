@@ -21,7 +21,7 @@ The revised surface follows these preferences:
 - `null` is the only explicit source null/empty literal; there is no `absent`
   token;
 - `::` resolves a name through module or namespace scopes, including a
-  vocabulary alias namespace;
+  vocabulary namespace introduced by `use`;
 - `.` selects a member or enum case; and
 - Neutral remains a tool-abstraction language, not a general-purpose language.
 
@@ -41,11 +41,7 @@ Three details need deliberate review:
 neu "0.1"
 module acme::delivery
 
-requires vocabulary "org.neutral.flow" as flow {
-    schema: "0.1",
-    behavior: "0.1",
-    features: ["pipeline", "typed-reference"],
-}
+use Flow
 
 /// Reusable configuration data. ///
 record ToolConfig {
@@ -71,15 +67,15 @@ InvocationInput input = {
 }
 
 namespace checks {
-    flow::Pipeline verify = {
+    Flow::Pipeline verify = {
         input: ref(acme::delivery::input),
-        mode: flow::Mode.strict,
+        mode: Flow::Mode.strict,
     }
 }
 ```
 
 The compiler produces Neutral IR. It does not execute the pipeline, resolve the
-secret, contact a provider, or define `flow::Pipeline` behavior.
+secret, contact a provider, or define `Flow::Pipeline` behavior.
 
 ## 3. Source-file structure
 
@@ -88,7 +84,7 @@ Every source unit has this order:
 ```text
 language version
 module name
-zero or more vocabulary requirements
+zero or more `use` declarations
 zero or more declarations
 ```
 
@@ -110,26 +106,33 @@ module acme::delivery
 A module name is a `::`-qualified logical name. It is not a file path, URL,
 package download instruction, or mutable version tag.
 
-v0 has no source-level import statement. The compiler request supplies the
-captured source closure.
+v0 has no source-module or package import statement. `use` introduces only a
+captured vocabulary namespace; the compiler request supplies the source closure.
 
-### Domain vocabulary
+### Using a vocabulary
 
 ```neu
-requires vocabulary "org.neutral.flow" as flow {
-    schema: "0.1",
-    behavior: "0.1",
-    features: ["pipeline"],
-}
+use Flow
 ```
 
-The string is the exact vocabulary identity and `flow` is its explicit local
-namespace alias. The source also states the exact schema version, behavior
-version, and required features. This block performs no download and grants no
-authority. The caller must allow and provide the exact data-only bundle.
+The general form is `use Vocabulary`; `Flow` is an identifier, not a keyword.
+For example, a future Neux source can say `use Neux`. `use Flow` introduces the
+local vocabulary namespace `Flow`. It is a logical
+import requirement, not an identity, package coordinate, download request, or
+permission grant. The compilation request's captured lock manifest must map
+`Flow` to exactly one permitted vocabulary identity, content digest, schema
+version, behavior version, and supported feature set. Missing, ambiguous, or
+mutable-only mappings fail before declaration validation.
 
-Field order is not meaningful. The formatter writes `schema`, `behavior`, then
-`features`. Each appears exactly once; the identity appears only in the header.
+The import exposes the captured vocabulary only through its namespace. It does
+not inject `Pipeline`, `Mode`, or other members as unqualified names; authors
+write `Flow::Pipeline` and `Flow::Mode.strict`.
+
+`use Flow` does not silently require every feature the vocabulary may ever add.
+Each referenced vocabulary type, member, field, or enum case identifies its
+required features in the captured bundle. The compiler aggregates that used
+feature set, verifies support, and records it in IR and derivation. v0 has no
+source alias or selective-use syntax; those are future import-design questions.
 
 ## 4. Comments
 
@@ -186,7 +189,7 @@ values. v0 has no quoted identifiers.
 Reserved core words are:
 
 ```text
-neu module requires vocabulary as namespace record mut
+neu module use namespace record mut
 true false null ref secret_ref
 ```
 
@@ -198,17 +201,17 @@ Use `::` to resolve a name through module or namespace scopes:
 ```neu
 checks::config
 acme::delivery::checks::config
-flow::Mode
+Flow::Mode
 ```
 
 Use `.` only when selecting a member or enum case from a resolved value/type:
 
 ```neu
-flow::Mode.strict
+Flow::Mode.strict
 ```
 
 This keeps static ownership paths distinct from member access. A future
-namespace-owned free function is qualified as `flow::run()`, while a member call
+namespace-owned free function is qualified as `Flow::run()`, while a member call
 is `runner.run()`. Calls themselves remain outside v0 except for the core forms
 `ref(...)` and `secret_ref(...)`. A decimal point occurs only between digits in
 a numeric literal, so it cannot be confused with `::` qualification.
@@ -573,7 +576,7 @@ Vocabulary-owned declarations use the same binding form as every other named
 value:
 
 ```text
-vocabulary_alias::Type name = {
+Vocabulary::Type name = {
     schema_field: value,
 }
 ```
@@ -581,9 +584,9 @@ vocabulary_alias::Type name = {
 Illustrative Flow-profile source:
 
 ```neu
-flow::Pipeline verify = {
+Flow::Pipeline verify = {
     input: ref(input),
-    mode: flow::Mode.strict,
+    mode: Flow::Mode.strict,
 }
 ```
 
@@ -601,11 +604,11 @@ Pipeline verify = {} // Invalid: no vocabulary owner.
 ## 18. Domain-owned types and enums
 
 ```neu
-flow::ArtifactRef artifact = {
+Flow::ArtifactRef artifact = {
     value: "sha256:example",
 }
 
-flow::Mode mode = flow::Mode.strict
+Flow::Mode mode = Flow::Mode.strict
 ```
 
 The qualified enum value is not a `string`. The vocabulary bundle defines exact
@@ -619,7 +622,7 @@ untyped `extensions` bag through which behavioral data can be hidden.
 ## 19. Domain-owned relationships
 
 ```neu
-flow::Dependency check_after_build = {
+Flow::Dependency check_after_build = {
     from: ref(build),
     to: ref(check),
 }
@@ -714,7 +717,7 @@ Recovered syntax never produces authoritative IR.
 v0 still has no:
 
 - implicit declaration types;
-- source-level imports;
+- source-module or package imports;
 - maps, sets, tuples, unions, or core enums;
 - field shorthand or untyped anonymous records;
 - raw, multiline, or interpolated string;
@@ -736,7 +739,7 @@ language.
 | --- | --- |
 | Language version | `neu "0.1"` |
 | Module | `module acme::delivery` |
-| Vocabulary alias | `requires vocabulary "org.neutral.flow" as flow { ... }` |
+| Vocabulary import | `use Flow` |
 | Immutable variable | `num x = 10` |
 | Mutable variable | `mut num x = 10` |
 | Reassignment | `x = 11` |
@@ -751,9 +754,9 @@ language.
 | Reference | `ref(checks::config)` |
 | Reference type | `Ref<Config>` |
 | Secret | `SecretRef<string> token = secret_ref("logical/id")` |
-| Vocabulary-owned declaration | `flow::Pipeline verify = { ... }` |
-| Vocabulary-owned value | `flow::ArtifactRef artifact = { ... }` |
-| Domain enum | `flow::Mode.strict` |
+| Vocabulary-owned declaration | `Flow::Pipeline verify = { ... }` |
+| Vocabulary-owned value | `Flow::ArtifactRef artifact = { ... }` |
+| Domain enum | `Flow::Mode.strict` |
 | Line comment | `// explanation` |
 | Block comment | `/// explanation ///` |
 
@@ -766,26 +769,15 @@ semicolon-like production terminator, matching the `.neu` surface.
 ```ebnf
 source =
     trivia, language_header, module_header,
-    { vocabulary_requirement },
+    { use_declaration },
     { declaration_or_assignment },
     end_of_file
 
 language_header = "neu", string_literal, LINE_END
 module_header = "module", qualified_name, LINE_END
 
-vocabulary_requirement =
-    "requires", "vocabulary", string_literal, "as", identifier, "{",
-    vocabulary_fields,
-    "}", LINE_END
-
-vocabulary_fields =
-    vocabulary_field, { vocabulary_field }
-
-vocabulary_field =
-      ( "schema" | "behavior" ), ":", string_literal, ","
-    | "features", ":", "[",
-      [ string_literal, { ",", string_literal }, [ "," ] ],
-      "]", ","
+use_declaration =
+    "use", identifier, LINE_END
 
 declaration_or_assignment =
       namespace_declaration
@@ -853,11 +845,12 @@ qualified_name =
     identifier, { "::", identifier }
 ```
 
-Static validation—not grammar alone—enforces exactly one vocabulary `schema`,
-`behavior`, and `features` field; nullable-only null; one unambiguous expected
-type for every contextual record; immutable assignment rejection;
-type-preserving mutation; declaration uniqueness; and schema-owned vocabulary
-fields.
+Static validation—not grammar alone—requires every `use` name to resolve through
+the captured lock manifest to one permitted exact vocabulary bundle; derives and
+checks the required feature set from used vocabulary members; enforces
+nullable-only null and one unambiguous expected type for every contextual record;
+rejects immutable assignment; and checks type-preserving mutation, declaration
+uniqueness, and schema-owned vocabulary fields.
 
 `LINE_END` is emitted after a physical newline, including after a trailing line
 comment, when the current source or namespace declaration-list item is complete.

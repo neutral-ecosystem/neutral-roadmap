@@ -6,11 +6,11 @@ Answers: `SYN-DOM-001` through `SYN-DOM-006`
 
 ## SYN-DOM-001 — Namespace-qualified vocabulary types
 
-Vocabulary-owned declarations use an explicit alias plus an ordinary qualified
-type-first binding:
+Vocabulary-owned declarations use a namespace introduced by `use` plus an
+ordinary qualified type-first binding:
 
 ```neu
-flow::Pipeline verify = {
+Flow::Pipeline verify = {
     config: ref(config),
 }
 ```
@@ -20,40 +20,41 @@ declaration production: the selected data-only bundle describes the qualified
 type's allowed scope, fields, references, static constraints, features, and
 behavioral classification.
 
-Neutral parses the contextual braced value using the expected `flow::Pipeline`
+Neutral parses the contextual braced value using the expected `Flow::Pipeline`
 type and validates the bundle contract. It does not implement pipeline or OS
 behavior. Unknown or incorrectly qualified types are name/type diagnostics;
 known vocabulary types with invalid payloads are vocabulary diagnostics.
 
 ## SYN-DOM-002 — Identity and required features
 
-Each used vocabulary is declared before ordinary declarations:
+Each used vocabulary namespace is declared before ordinary declarations:
 
 ```neu
-requires vocabulary "org.neutral.flow" as flow {
-    schema: "0.1",
-    behavior: "0.1",
-    features: ["pipeline", "typed-reference"],
-}
+use Flow
 ```
 
-The header identity and both body versions are exact strings whose canonical
-forms are defined by the vocabulary packaging contract. They are not ranges or
-mutable tags. `as flow` explicitly binds the source-local namespace alias.
-`features` lists every feature the source requires; order is presentation
-only and duplicates are invalid.
+The general form is `use Vocabulary`; `Flow` is an identifier, not a keyword.
+For example, a future Neux source can say `use Neux`. `Flow` is a source-local
+logical name. The captured lock manifest maps it to the exact vocabulary
+identity, bundle content digest, schema version, behavior version, and supported
+feature set. The mapping is not a range, mutable tag, or ambient registry result.
+The import exposes members only as qualified names such as `Flow::Pipeline`; it
+does not inject an unqualified `Pipeline` into the source scope.
 
-The generated IR records resolved bundle content identity and actual supported
-features, not only these source spellings.
+Every vocabulary member/field declares the features needed to understand it.
+The compiler derives the actually used required-feature set, verifies it against
+the resolved bundle, and records both the exact resolution and used features in
+IR/derivation. Newly added unused features are not imported implicitly.
 
 ## SYN-DOM-003 — Request is not activation
 
-`requires vocabulary` is a requirement assertion, not a package fetch or
-permission grant. Compilation succeeds only when the caller's request:
+`use Flow` is a vocabulary-namespace requirement, not a package fetch or
+permission grant. Compilation succeeds only when the caller's captured manifest
+and policy:
 
 - permits the exact vocabulary and behavior version;
 - provides an exact captured bundle through its resolver;
-- supports every requested required feature; and
+- supports every feature required by the used vocabulary members; and
 - satisfies configured trust/package policy.
 
 Source cannot select a local shared library, network endpoint, filesystem path,
@@ -85,7 +86,7 @@ forms. Every field has a schema identity and expected type.
 The following design is rejected:
 
 ```neu
-flow::Pipeline verify = {
+Flow::Pipeline verify = {
     extensions: {
         arbitrary_provider_blob: "...",
     },
@@ -102,8 +103,9 @@ Domain failures remain distinguishable:
 
 | Condition | Diagnostic class |
 | --- | --- |
-| Alias was never declared | Unknown vocabulary alias |
-| Bundle not provided/permitted | Vocabulary resolution/policy |
+| Use name was never declared | Unknown vocabulary namespace |
+| Lock mapping missing or ambiguous | Vocabulary lock resolution |
+| Bundle not captured/permitted | Vocabulary resolution/policy |
 | Schema or behavior version unsupported | Vocabulary compatibility |
 | Required feature unsupported | Required-feature negotiation |
 | Qualified type absent | Unknown vocabulary member |
@@ -118,6 +120,7 @@ layer, and safe remedy. Bundle code is never executed to render a message.
 ## Required evidence
 
 Use at least one Flow and one Neux data-only bundle fixture. Tests MUST cover
-exact version matching, disallowed policy, every feature state, unknown fields
-by classification, invalid placement, bounded payload rejection, and proof that
-compilation performs no ambient lookup or extension execution.
+exact lock resolution, missing/ambiguous/mutable mappings, disallowed policy,
+used/unused/unsupported feature states, unknown fields by classification,
+invalid placement, bounded payload rejection, and proof that compilation
+performs no ambient lookup or extension execution.

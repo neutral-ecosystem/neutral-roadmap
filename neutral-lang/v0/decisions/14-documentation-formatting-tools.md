@@ -8,7 +8,7 @@ Answers: `SYN-TOL-001` and `SYN-TOL-002`
 
 v0 has no documentation-comment or documentation-annotation production.
 `//` and `/// ... ///` are non-semantic comments and never attach to a following
-module, vocabulary requirement, declaration, or field.
+module, vocabulary `use`, declaration, or field.
 
 ```neu
 /// Configuration note only, not IR documentation. ///

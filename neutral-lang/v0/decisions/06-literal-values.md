@@ -77,7 +77,7 @@ execution dependency.
 v0 core has no enum declaration, but a vocabulary may expose a closed enum/tag:
 
 ```neu
-flow::Mode.strict
+Flow::Mode.strict
 ```
 
 The bundle defines type, variants, behavior version, and unknown policy.
@@ -87,7 +87,7 @@ tagged alternatives remain deferred.
 ## SYN-VAL-007 — Domain-owned typed values
 
 ```neu
-flow::ArtifactRef artifact = {
+Flow::ArtifactRef artifact = {
     value: "sha256:example",
 }
 ```

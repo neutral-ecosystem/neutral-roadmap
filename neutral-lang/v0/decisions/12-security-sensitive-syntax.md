@@ -57,8 +57,8 @@ applying declarative static constraints.
 
 The source language has no `include(path)`, URL import, ambient profile search,
 or home/current-directory expansion. v0 source declares logical modules and
-vocabulary requirements; the compilation request supplies captured source units
-and bundles through one explicit resolver.
+vocabulary `use` requirements; the compilation request supplies captured source
+units and bundles through one explicit resolver.
 
 Resolver credentials and mutable acquisition state never enter source, IR, or
 derivation. The derivation records safe immutable content/results, not secrets.

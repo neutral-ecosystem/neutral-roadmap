@@ -10,7 +10,7 @@ The ecosystem has four distinct representation contracts:
 
 | Representation | Owner | Public stability | Permitted contents |
 | --- | --- | --- | --- |
-| Concrete `.neu` source | neutral-lang specification | Versioned public contract | Author notation, comments, vocabulary requests |
+| Concrete `.neu` source | neutral-lang specification | Versioned public contract | Author notation, comments, vocabulary `use` requirements |
 | Compiler-private models | neutral-lang implementation | None | Tokens, recovery state, syntax trees, resolution/type state, lowering forms |
 | Neutral IR | neutral-lang IR specification | Independently versioned public contract | Resolved identities, typed structure, vocabulary-owned data, provenance links |
 | Consumer-private model | Flow or Neux | Private to that application | Flow plans or Neux OS models and their domain behavior |
@@ -75,15 +75,16 @@ and `namespace`. Vocabulary-owned types use the same type-first binding grammar
 as core and local types and MUST be namespace-qualified:
 
 ```neu
-flow::Pipeline verify = {
+Flow::Pipeline verify = {
     config: ref(config),
 }
 ```
 
-Here `flow` is the explicit alias declared by `requires vocabulary ... as flow`;
-`Pipeline` is a type described by the captured bundle, not a special Neutral
-declaration-kind production. The compiler owns parsing, qualification, schema
-validation, references, bounds, and provenance. Flow owns its CI/CD meaning.
+Here `Flow` is introduced by `use Flow` and resolved through the compilation
+request's captured lock manifest. `Pipeline` is a type described by that exact
+bundle, not a special Neutral declaration-kind production. The compiler owns
+parsing, qualification, schema validation, references, bounds, and provenance.
+Flow owns its CI/CD meaning.
 
 An unknown or incorrectly qualified type is invalid. A vocabulary cannot
 redefine core tokens, identifier rules, scoping, identity, or provenance.
