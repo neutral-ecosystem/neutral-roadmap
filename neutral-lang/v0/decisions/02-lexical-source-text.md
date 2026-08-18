@@ -73,13 +73,25 @@ shebang, or executable comment.
 v0 identifiers are ASCII:
 
 ```text
-identifier = [A-Za-z_][A-Za-z0-9_]*
+identifier     = [A-Za-z_][A-Za-z0-9_]*
+snakeName      = [a-z][a-z0-9]*(_[a-z][a-z0-9]*)*
+upperCamelName = [A-Z][A-Za-z0-9]*
 ```
 
-They are case-sensitive. Unicode is permitted in strings and comments, not in
-identifiers. Tools SHOULD render a non-ASCII attempted identifier safely and
-MUST NOT normalize it into an accepted name. Human display names belong in
-typed text fields and are separate from symbol identity.
+Bindings, fields, namespace names, module segments, and vocabulary-owned static
+values MUST use `snakeName`. Record/type names and vocabulary use names MUST use
+`upperCamelName`. A snake-case underscore separates words; it cannot lead,
+trail, repeat, or introduce a digit-only segment. Predeclared scalar types
+(`num`, `string`, `bool`) and reserved words are explicit lowercase language
+names; generic core types (`List`, `Ref`, `SecretRef`) are explicit
+UpperCamelCase language names.
+
+Case/category violations are name diagnostics rather than silently distinct
+naming styles. Identifiers remain case-sensitive after validation. Unicode is
+permitted in strings and comments, not in identifiers. Tools SHOULD render a
+non-ASCII attempted identifier safely and MUST NOT normalize it into an accepted
+name. Human display names belong in typed text fields and are separate from
+symbol identity.
 
 This conservative choice avoids normalization and confusable identity problems
 in the first public contract.
@@ -114,12 +126,12 @@ Flow::Mode.strict
 General value member access such as `config.image` and general calls are not part
 of v0. Built-in call-shaped forms remain `ref(...)` and `secret_ref(...)`.
 
-v0 has no escaped identifiers. Every vocabulary use name must be a legal
-identifier. A collision between a vocabulary namespace and another root name is
-an error; the source must choose a non-conflicting declaration name. Vocabulary
-renaming is deferred to a future `use`-syntax decision and cannot happen as a
-lock-manifest side effect. Quoted identifiers are rejected because they create
-inconsistent identities across tools.
+v0 has no escaped identifiers. Every vocabulary use name must be an
+UpperCamelCase identifier. A collision between a vocabulary namespace and
+another root name is an error; the source must choose a non-conflicting
+declaration name. Vocabulary renaming is deferred to a future `use`-syntax
+decision and cannot happen as a lock-manifest side effect. Quoted identifiers
+are rejected because they create inconsistent identities across tools.
 
 ## SYN-LEX-006 — Delimiters and separators
 

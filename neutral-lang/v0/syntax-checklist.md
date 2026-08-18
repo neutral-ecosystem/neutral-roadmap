@@ -31,7 +31,7 @@ Proposed answers: [lexical and source-text decisions](decisions/02-lexical-sourc
 - [ ] **SYN-LEX-001 · v0** — Specify accepted source encodings, byte-order-mark handling, invalid byte behavior, and line-ending normalization.
 - [ ] **SYN-LEX-002 · v0** — Define whitespace, indentation significance or insignificance, statement separation, and permitted line continuation.
 - [ ] **SYN-LEX-003 · v0** — Define line comments, block comments if present, nesting behavior, and unterminated-comment diagnostics.
-- [ ] **SYN-LEX-004 · v0** — Define identifier spelling, Unicode policy, normalization, case sensitivity, and confusable-character diagnostics.
+- [ ] **SYN-LEX-004 · v0** — Define ASCII identifiers; require strict `snake_case` for bindings, fields, namespace/module segments, and static values, and `UpperCamelCase` for record/types and vocabulary namespaces; define underscore placement, case, Unicode, and confusable diagnostics.
 - [ ] **SYN-LEX-005 · v0** — Define reserved/contextual words; give `::` the sole meaning of namespace/module/vocabulary qualification and restrict `.` in v0 to vocabulary-owned enum cases or static members, excluding general value member access.
 - [ ] **SYN-LEX-006 · v0** — Define delimiter pairs, separators, logical-newline and closing-brace termination, and trailing-separator rules; `.neu` has no semicolon terminator.
 - [ ] **SYN-LEX-007 · v0** — Define ordinary text literals, escapes, invalid escape handling, and Unicode scalar behavior.

@@ -110,8 +110,9 @@ resolution.
 module acme::delivery
 ```
 
-A module name is a `::`-qualified logical name. It is not a file path, URL,
-package download instruction, or mutable version tag.
+A module name is a `::`-qualified logical name whose segments use `snake_case`.
+It is not a file path, URL, package download instruction, or mutable version
+tag.
 
 One logical module may span multiple source units from the same captured package
 identity. Their declarations merge into one module namespace; duplicate names
@@ -130,13 +131,13 @@ captured vocabulary namespace; the compiler request supplies the source closure.
 use Flow
 ```
 
-The general form is `use Vocabulary`; `Flow` is an identifier, not a keyword.
-For example, a future Neux source can say `use Neux`. `use Flow` introduces the
-local vocabulary namespace `Flow`. It is a logical
-import requirement, not an identity, package coordinate, download request, or
-permission grant. The compilation request's captured lock manifest must map
-`Flow` to exactly one permitted vocabulary identity, content digest, schema
-version, behavior version, and supported feature set. Missing, ambiguous, or
+The general form is `use Vocabulary`; vocabulary names use UpperCamelCase and
+`Flow` is an identifier, not a keyword. For example, a future Neux source can
+say `use Neux`. `use Flow` introduces the local vocabulary namespace `Flow`. It
+is a logical import requirement, not an identity, package coordinate, download
+request, or permission grant. The compilation request's captured lock manifest
+must map `Flow` to exactly one permitted vocabulary identity, content digest,
+schema version, behavior version, and supported feature set. Missing, ambiguous, or
 mutable-only mappings fail before declaration validation.
 
 The import exposes the captured vocabulary only through its namespace. It does
@@ -184,22 +185,37 @@ v0 identifiers remain ASCII:
 [A-Za-z_][A-Za-z0-9_]*
 ```
 
+Names follow two case classes:
+
+- `snake_case` for bindings, fields, namespace/module segments, and
+  vocabulary-owned static values; and
+- `UpperCamelCase` for record/type names and vocabulary namespaces.
+
 Valid:
 
 ```neu
-string image_2 = "tool"
-string _internal_name = "value"
+string image2 = "tool"
+string internal_name = "value"
+record ToolConfig { string image, }
 ```
 
 Invalid:
 
 ```neu
+string imageName = "tool" // Value names use snake_case.
+string _internal = "value" // Leading underscore is not permitted.
+string repeated__word = "value" // Repeated underscore is not permitted.
+string InternalName = "value" // Binding must start lowercase.
+record toolConfig { string image, } // Type must start uppercase.
 string 2image = "tool"
 string naïve = "value"
 ```
 
-Identifiers are case-sensitive. Unicode display names belong in `string`
-values. v0 has no quoted identifiers.
+Value-level source names match
+`[a-z][a-z0-9]*(?:_[a-z][a-z0-9]*)*`; underscores separate words but cannot
+lead, trail, repeat, or introduce a digit-only segment. Type/vocabulary names
+match `[A-Z][A-Za-z0-9]*`. Identifiers are case-sensitive. Unicode display names
+belong in `string` values. v0 has no quoted identifiers.
 
 Reserved core words are:
 
@@ -830,10 +846,10 @@ source =
     end_of_file
 
 language_header = "neu", string_literal, LINE_END
-module_header = "module", qualified_name, LINE_END
+module_header = "module", module_name, LINE_END
 
 use_declaration =
-    "use", identifier, LINE_END
+    "use", upper_camel_name, LINE_END
 
 declaration_or_assignment =
       namespace_declaration
@@ -842,21 +858,21 @@ declaration_or_assignment =
     | assignment
 
 namespace_declaration =
-    "namespace", identifier, "{",
+    "namespace", snake_name, "{",
     { declaration_or_assignment },
     "}", LINE_END
 
 record_declaration =
-    "record", identifier, "{", { record_field }, "}", LINE_END
+    "record", upper_camel_name, "{", { record_field }, "}", LINE_END
 
 record_field =
-    type, identifier, [ "=", value ], ","
+    type, snake_name, [ "=", value ], ","
 
 binding_declaration =
-    [ "mut" ], type, identifier, "=", value, LINE_END
+    [ "mut" ], type, snake_name, "=", value, LINE_END
 
 assignment =
-    identifier, "=", value, LINE_END
+    snake_name, "=", value, LINE_END
 
 type =
     primary_type, [ "?" ]
@@ -886,10 +902,10 @@ contextual_record_value =
     "{", { value_field }, "}"
 
 qualified_static_value =
-    qualified_name, ".", identifier
+    qualified_name, ".", snake_name
 
 value_field =
-    identifier, ":", value, ","
+    snake_name, ":", value, ","
 
 reference_value =
     "ref", "(", qualified_name, ")"
@@ -899,6 +915,20 @@ secret_reference_value =
 
 qualified_name =
     identifier, { "::", identifier }
+
+module_name =
+    snake_name, { "::", snake_name }
+
+identifier =
+      snake_name
+    | upper_camel_name
+
+snake_name =
+    ASCII_LOWER, { ASCII_LOWER | DIGIT },
+    { "_", ASCII_LOWER, { ASCII_LOWER | DIGIT } }
+
+upper_camel_name =
+    ASCII_UPPER, { ASCII_LETTER | DIGIT }
 ```
 
 Static validation—not grammar alone—requires every `use` name to resolve through
@@ -910,7 +940,7 @@ requires one underlying expected `SecretRef<T>` for `secret_ref(...)`; restricts
 ignoring reference edges for that check; rejects mixed-version closures,
 cross-package module merging, and duplicate names in merged module scopes;
 rejects immutable assignment; and checks type-preserving mutation, declaration
-uniqueness, and schema-owned vocabulary fields.
+uniqueness, name-category casing, and schema-owned vocabulary fields.
 
 `LINE_END` is emitted after a physical newline, including after a trailing line
 comment, when the current source or namespace declaration-list item is complete.

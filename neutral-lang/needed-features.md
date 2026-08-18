@@ -171,6 +171,11 @@ lifecycle.
   implementing the language's name-resolution algorithm.
 - **NL-NAM-008:** Human-readable names remain available for diagnostics and
   visualization even when stable machine identities differ.
+- **NL-NAM-009:** Author-facing names use an intentional category split:
+  `snake_case` for bindings, fields, namespace/module segments, and static
+  values; `UpperCamelCase` for record/types and vocabulary namespaces. External
+  display names and immutable package/schema identities are not rewritten to
+  imitate source names.
 
 These capabilities let Flow derive named work and dependency relationships, but
 Neutral does not decide that a declaration is a job or that a reference is a

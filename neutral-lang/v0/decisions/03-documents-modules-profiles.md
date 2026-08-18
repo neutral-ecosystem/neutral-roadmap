@@ -50,10 +50,11 @@ Source introduces a vocabulary namespace with:
 use Flow
 ```
 
-The general form is `use Vocabulary`; `Flow` is an identifier, not a keyword.
-For example, a future Neux source can say `use Neux`. `Flow` is a source-local
-logical vocabulary name and the namespace used by forms such as
-`Flow::Pipeline`. It is not itself a package identity or mutable version.
+The general form is `use Vocabulary`; vocabulary names use UpperCamelCase and
+`Flow` is an identifier, not a keyword. For example, a future Neux source can
+say `use Neux`. `Flow` is a source-local logical vocabulary name and the
+namespace used by forms such as `Flow::Pipeline`. It is not itself a package
+identity or mutable version.
 The compilation request's captured lock manifest MUST map it to exactly one
 permitted vocabulary identity, content digest, schema version, behavior version,
 and supported feature set.
@@ -88,9 +89,9 @@ Every unit declares one logical module:
 module acme::delivery
 ```
 
-A module is one or more identifiers joined by `::`. It is a logical name, not
-a path, URL, registry coordinate, mutable tag, package identity, or display
-label.
+A module is one or more `snake_case` identifiers joined by `::`. It is a
+logical name, not a path, URL, registry coordinate, mutable tag, package
+identity, or display label.
 
 The request associates each unit with immutable content and package identity.
 The module declaration must agree with that manifest. Multiple source units from

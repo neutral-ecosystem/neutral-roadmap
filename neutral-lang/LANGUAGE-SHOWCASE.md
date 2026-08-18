@@ -102,7 +102,8 @@ trailing comma allowed and preferred in multiline forms.
 
 ## Headers, modules, and vocabularies
 
-Every source unit begins with an exact language version and one logical module:
+Every source unit begins with an exact language version and one logical module.
+Module segments use `snake_case`:
 
 ```neu
 neu "0.1"
@@ -120,11 +121,11 @@ A vocabulary is imported by logical name:
 use Flow
 ```
 
-`Flow` is an identifier, not a keyword. The captured lock manifest resolves it
-to one exact permitted vocabulary identity, digest, schema version, behavior
-version, and feature set. `use` performs no download, ambient lookup, or
-permission grant. It exposes only qualified names such as `Flow::Pipeline`; it
-does not inject an unqualified `Pipeline`.
+Vocabulary names use UpperCamelCase. `Flow` is an identifier, not a keyword. The
+captured lock manifest resolves it to one exact permitted vocabulary identity,
+digest, schema version, behavior version, and feature set. `use` performs no
+download, ambient lookup, or permission grant. It exposes only qualified names
+such as `Flow::Pipeline`; it does not inject an unqualified `Pipeline`.
 
 Vocabulary uses are source-unit scoped. Every unit that contains a
 `Flow::...` name declares `use Flow`. Equal uses in units of the same module must
@@ -132,11 +133,25 @@ resolve to the same bundle.
 
 ## Names and qualification
 
-Identifiers are case-sensitive ASCII names matching:
+Identifiers are case-sensitive ASCII names:
 
 ```text
 [A-Za-z_][A-Za-z0-9_]*
 ```
+
+Bindings, fields, namespace/module segments, and vocabulary static values use
+`snake_case`. Record/type names and vocabulary namespaces use `UpperCamelCase`:
+
+```neu
+string release_name = "stable"
+record ReleaseConfig { string image, }
+use Flow
+```
+
+The stricter value-name shape is `[a-z][a-z0-9]*(?:_[a-z][a-z0-9]*)*`:
+underscores separate words but cannot lead, trail, repeat, or introduce a
+digit-only segment. Names such as `_internal`, `release__name`, `releaseName`, a
+lowercase record name, or an uppercase binding name are invalid.
 
 `::` resolves through module, namespace, or vocabulary scopes:
 

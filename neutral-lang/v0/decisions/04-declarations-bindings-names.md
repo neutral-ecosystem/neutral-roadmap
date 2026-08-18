@@ -16,6 +16,11 @@ binds the owning document/derivation, so equal spellings in different captured
 documents are not conflated. Renaming changes identity in v0; durable aliases
 are deferred.
 
+Source names follow the lexical case categories: declarations that introduce
+values use `snake_case`, while record/type declarations use `UpperCamelCase`.
+External immutable identities and human display text are preserved exactly
+rather than rewritten into source casing.
+
 ## SYN-DEC-002 — Type-first bindings
 
 Bindings use:
@@ -91,9 +96,10 @@ Vocabulary use names occupy the root namespace. v0 prohibits shadowing outer
 declarations and predeclared core names. Sibling namespaces may contain equal
 short names. Source-unit order never chooses a winner.
 
-Case-distinct ASCII names are technically distinct, but tools SHOULD warn when
-they differ only by case. Diagnostics identify both conflicting declarations;
-source order never chooses a winner.
+Names that violate their declaration category's case are rejected before they
+can create a symbol. Valid case-distinct names in different categories remain
+distinct, but tools SHOULD warn when they differ only by case. Diagnostics
+identify both conflicting declarations; source order never chooses a winner.
 
 ## SYN-DEC-007 — Forward references
 
