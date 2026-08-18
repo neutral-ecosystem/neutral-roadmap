@@ -45,7 +45,7 @@ accepts one example.
 - [ ] **SYN-LEX-001 · v0** — Specify accepted source encodings, byte-order-mark handling, invalid byte behavior, and line-ending normalization.
 - [ ] **SYN-LEX-002 · v0** — Define whitespace, indentation significance or insignificance, statement separation, and permitted line continuation.
 - [ ] **SYN-LEX-003 · v0** — Define line comments, block comments if present, nesting behavior, and unterminated-comment diagnostics.
-- [ ] **SYN-LEX-004 · v0** — Define ASCII identifiers; require strict `snake_case` for bindings, fields, namespace/module segments, and static values, and `UpperCamelCase` for record/types and vocabulary namespaces; define underscore placement, case, Unicode, and confusable diagnostics.
+- [ ] **SYN-LEX-004 · v0** — Define ASCII identifiers; require strict `snake_case` for bindings, fields, namespace/module segments, and static values; require uppercase-leading names with `UpperCamelCase` as the style for record/types and vocabulary namespaces; define underscore placement, case, Unicode, and confusable diagnostics.
 - [ ] **SYN-LEX-005 · v0** — Define reserved/contextual words; give `::` the sole meaning of namespace/module/vocabulary qualification and restrict `.` in v0 to vocabulary-owned enum cases or static members, excluding general value member access.
 - [ ] **SYN-LEX-006 · v0** — Define delimiter pairs, separators, logical-newline and closing-brace termination, and trailing-separator rules; `.neu` has no semicolon terminator.
 - [ ] **SYN-LEX-007 · v0** — Define ordinary text literals, escapes, invalid escape handling, and Unicode scalar behavior.
@@ -77,8 +77,8 @@ accepts one example.
 - [ ] **SYN-DEC-003 · v0** — Define explicit type/schema annotations and the limited positions, if any, where type inference is permitted.
 - [ ] **SYN-DEC-004 · v0** — Represent vocabulary-owned declarations as ordinary type-first bindings such as `Flow::Pipeline verify = { ... }`, without vocabulary names or a special declaration-kind production in Neutral core.
 - [ ] **SYN-DEC-005 · v0** — Define namespace declaration and qualification syntax.
-- [ ] **SYN-DEC-006 · v0** — Define duplicate declaration, shadowing, and reserved-name diagnostics.
-- [ ] **SYN-DEC-007 · v0** — Define forward references and initialization cycles: reject direct value cycles, allow cycles consisting only of `Ref<T>` links, and ensure source order is not accidental execution order.
+- [ ] **SYN-DEC-006 · v0** — Define duplicate declaration and shadowing diagnostics; protect predeclared core names in every scope.
+- [ ] **SYN-DEC-007 · v0** — Allow forward `ref(...)` to mutable and immutable binding identities without implying ordinary value reads; reject assignment before mutable declaration and direct value cycles; require every recursive record cycle to cross `Ref<T>`.
 - [ ] **SYN-DEC-008 · v1** — Define parameter declarations, result declarations, and their ordering and naming rules.
 - [ ] **SYN-DEC-009 · v1** — Define required versus defaulted/omittable parameters independently from nullability, with an inspectable distinction among omission, default application, and explicit `null`.
 - [ ] **SYN-DEC-010 · v1** — Define nested declarations and local scope boundaries, if retained after corpus testing.
@@ -109,7 +109,7 @@ accepts one example.
 - [ ] **SYN-VAL-003 · v0** — Define ordered collection value construction and empty-collection type disambiguation.
 - [ ] **SYN-VAL-004 · v0** — Define `null` as the only explicit source null/empty literal and distinguish it from structural omission/default application and unavailable/deferred results.
 - [ ] **SYN-VAL-005 · v0** — Define symbolic reference values as syntax distinct from ordinary text and restrict targets to value bindings.
-- [ ] **SYN-VAL-006 · v0** — Define `.` selection of inert vocabulary-owned static values such as enum cases, without unscoped strings, functions, computed properties, or general value member access.
+- [ ] **SYN-VAL-006 · v0** — Define `.` selection only when its left side resolves to a vocabulary-owned type declaring the named inert static value; exclude user-record statics, unscoped strings, functions, computed properties, and general value member access.
 - [ ] **SYN-VAL-007 · v0** — Apply contextual construction to vocabulary-owned typed values and define schema-linked diagnostics.
 - [ ] **SYN-VAL-008 · v0** — Define whether record-field shorthand exists and prevent it from obscuring the referenced binding.
 - [ ] **SYN-VAL-009 · v1** — Define map and set value construction with deterministic duplicate and ordering behavior.

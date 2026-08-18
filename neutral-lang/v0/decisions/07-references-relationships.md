@@ -39,7 +39,9 @@ receive different diagnostics.
 
 `ref(x)` links the identity of binding `x`; it does not evaluate or snapshot the
 value at that source position. If `x` is mutable, the linked identity carries
-the final emitted value after valid assignments are processed.
+the final emitted value after valid assignments are processed. Declaration
+identities are collected first, so `ref(...)` may target a later mutable or
+immutable binding. This does not permit assignment before a mutable declaration.
 
 ## SYN-REF-003 — Containment versus linking
 
@@ -58,8 +60,11 @@ different relationship kinds. Indentation never establishes either.
 
 The direct initialization-cycle check ignores `ref(...)` edges. A cycle made
 entirely from typed references is therefore structurally valid; a cycle that
-requires embedding or evaluating another binding's value is invalid. A consumer
-may separately reject a reference cycle under its domain rules.
+requires embedding or evaluating another binding's value is invalid. v0 has no
+ordinary binding-name value expression, so forward `ref(...)` must not be
+described as a forward value read. Every nominal record cycle must cross a
+`Ref<T>` edge; nullability and list containment do not break the cycle. A
+consumer may separately reject a reference cycle under its domain rules.
 
 ## SYN-REF-004 — Typed domain relationships
 
@@ -79,6 +84,8 @@ propagation. Relationship identity and endpoint spans remain in IR.
 
 Fixtures MUST cover every qualification, text/reference distinction, missing
 closure units, types/namespaces/modules/vocabularies as wrong-kind targets,
-ambiguous targets, mutable-target identity behavior, direct initialization
-cycles versus valid reference-only cycles, containment versus linking, and one
-Flow plus one Neux relationship without shared behavior.
+ambiguous targets, forward mutable and immutable targets, mutable-target identity
+behavior, assignment-before-declaration rejection, direct initialization cycles
+versus valid reference-only cycles, embedded nullable/list recursion versus
+`Ref<T>` recursion, containment versus linking, and one Flow plus one Neux
+relationship without shared behavior.

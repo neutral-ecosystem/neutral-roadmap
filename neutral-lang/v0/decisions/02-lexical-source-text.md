@@ -80,11 +80,15 @@ upperCamelName = [A-Z][A-Za-z0-9]*
 
 Bindings, fields, namespace names, module segments, and vocabulary-owned static
 values MUST use `snakeName`. Record/type names and vocabulary use names MUST use
-`upperCamelName`. A snake-case underscore separates words; it cannot lead,
+`upperCamelName`. The latter denotes the compiler-enforced uppercase-leading
+lexical class. `UpperCamelCase` is the authoring style; the compiler does not
+infer word boundaries, so `ABC`, `Afoo`, `TOOLCONFIG`, and `X123` all satisfy
+the lexical rule even when a style checker recommends a clearer spelling. A
+snake-case underscore separates words; it cannot lead,
 trail, repeat, or introduce a digit-only segment. Predeclared scalar types
 (`num`, `string`, `bool`) and reserved words are explicit lowercase language
 names; generic core types (`List`, `Ref`, `SecretRef`) are explicit
-UpperCamelCase language names.
+uppercase-leading language names styled as `UpperCamelCase`.
 
 Case/category violations are name diagnostics rather than silently distinct
 naming styles. Identifiers remain case-sensitive after validation. Unicode is
@@ -106,7 +110,7 @@ true false null ref secret_ref
 ```
 
 `bool`, `num`, `string`, `List`, `Ref`, and `SecretRef` are predeclared core
-type/type-constructor names and cannot be redeclared in the root namespace.
+type/type-constructor names and cannot be declared or shadowed in any scope.
 
 `::` resolves a name through module or namespace scopes, including a vocabulary
 namespace introduced by `use`. Qualification is explicit and left-to-right:

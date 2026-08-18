@@ -121,8 +121,9 @@ A vocabulary is imported by logical name:
 use Flow
 ```
 
-Vocabulary names use UpperCamelCase. `Flow` is an identifier, not a keyword. The
-captured lock manifest resolves it to one exact permitted vocabulary identity,
+Vocabulary names use an uppercase-leading identifier class and
+`UpperCamelCase` style. `Flow` is an identifier, not a keyword. The captured
+lock manifest resolves it to one exact permitted vocabulary identity,
 digest, schema version, behavior version, and feature set. `use` performs no
 download, ambient lookup, or permission grant. It exposes only qualified names
 such as `Flow::Pipeline`; it does not inject an unqualified `Pipeline`.
@@ -140,7 +141,9 @@ Identifiers are case-sensitive ASCII names:
 ```
 
 Bindings, fields, namespace/module segments, and vocabulary static values use
-`snake_case`. Record/type names and vocabulary namespaces use `UpperCamelCase`:
+`snake_case`. Record/type names and vocabulary namespaces use `UpperCamelCase`
+style; the compiler enforces an uppercase-leading ASCII identifier rather than
+trying to infer word boundaries:
 
 ```neu
 string release_name = "stable"
@@ -168,7 +171,9 @@ Flow::Mode mode = Flow::Mode.strict
 ```
 
 It is not general value member access. Forms such as `config.image`, functions,
-method calls, and computed properties are not part of v0.
+method calls, and computed properties are not part of v0. The left side must
+resolve to a type from the captured vocabulary bundle that declares the selected
+static value; user-defined records cannot have static members.
 
 ## Scalar and collection types
 
@@ -293,7 +298,8 @@ namespace checks {
 
 The resulting names are `checks::image` and `checks::internal::enabled`.
 Namespaces do not create files, pipeline stages, OS namespaces, provider groups,
-or security zones. Duplicate names and shadowing are invalid.
+or security zones. Duplicate names and shadowing are invalid. Predeclared core
+names cannot be declared or shadowed in any scope.
 
 ## Symbolic references
 
@@ -308,7 +314,17 @@ ref(example::delivery::checks::config)
 If the target binding has declared type `T`, the result has type `Ref<T>`.
 References do not copy, evaluate, contain, order, schedule, or snapshot their
 targets. A reference to a mutable binding links its identity, whose emitted
-value is its final valid assignment.
+value is its final valid assignment. Because `ref(...)` resolves identity, it
+may point forward to a mutable or immutable binding. A mutable assignment must
+still occur after that binding's declaration.
+
+```neu
+Selection selected = { config: ref(config), }
+mut Config config = { image: "example.invalid/tool:1", }
+```
+
+This is a forward identity link, not a read of `config` at that source position.
+v0 has no ordinary binding-name value expression such as `num a = b`.
 
 Only value bindings are legal targets:
 
@@ -318,9 +334,10 @@ ref(checks) // Invalid: namespace.
 ref(Flow) // Invalid: vocabulary namespace.
 ```
 
-Direct value-initialization and directly embedded record-type cycles are
-invalid. `ref(...)` and `Ref<T>` edges are identity links and are ignored by
-those cycle checks, so a reference-only cycle is valid:
+Direct value-initialization cycles are invalid. Every nominal recursive record
+cycle must cross `Ref<T>`; neither `Node?` nor `List<Node>` breaks an embedded
+cycle. `ref(...)` and `Ref<T>` edges are identity links and are ignored by those
+cycle checks, so a reference-only cycle is valid:
 
 ```neu
 record A {

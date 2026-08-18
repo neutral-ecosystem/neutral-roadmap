@@ -131,8 +131,9 @@ captured vocabulary namespace; the compiler request supplies the source closure.
 use Flow
 ```
 
-The general form is `use Vocabulary`; vocabulary names use UpperCamelCase and
-`Flow` is an identifier, not a keyword. For example, a future Neux source can
+The general form is `use Vocabulary`; vocabulary names use the uppercase-leading
+identifier class and `UpperCamelCase` authoring style. `Flow` is an identifier,
+not a keyword. For example, a future Neux source can
 say `use Neux`. `use Flow` introduces the local vocabulary namespace `Flow`. It
 is a logical import requirement, not an identity, package coordinate, download
 request, or permission grant. The compilation request's captured lock manifest
@@ -189,7 +190,7 @@ Names follow two case classes:
 
 - `snake_case` for bindings, fields, namespace/module segments, and
   vocabulary-owned static values; and
-- `UpperCamelCase` for record/type names and vocabulary namespaces.
+- `UpperCamelCase` style for record/type names and vocabulary namespaces.
 
 Valid:
 
@@ -214,8 +215,11 @@ string naïve = "value"
 Value-level source names match
 `[a-z][a-z0-9]*(?:_[a-z][a-z0-9]*)*`; underscores separate words but cannot
 lead, trail, repeat, or introduce a digit-only segment. Type/vocabulary names
-match `[A-Z][A-Za-z0-9]*`. Identifiers are case-sensitive. Unicode display names
-belong in `string` values. v0 has no quoted identifiers.
+match `[A-Z][A-Za-z0-9]*`. The compiler enforces this uppercase-leading lexical
+class; `UpperCamelCase` is the authoring style, not a claim that the compiler
+can infer word boundaries. Thus `ABC` and `X123` are lexically valid even when a
+style checker recommends a clearer spelling. Identifiers are case-sensitive.
+Unicode display names belong in `string` values. v0 has no quoted identifiers.
 
 Reserved core words are:
 
@@ -225,7 +229,8 @@ true false null ref secret_ref
 ```
 
 `bool`, `num`, `string`, `List`, `Ref`, and `SecretRef` are predeclared core
-type/type-constructor names and cannot be redeclared in the root namespace.
+type/type-constructor names. Predeclared core names cannot be declared or
+shadowed in any scope.
 
 Use `::` to resolve a name through module or namespace scopes:
 
@@ -312,11 +317,27 @@ At the end of the lexical scope, the last valid assignment determines the
 binding's emitted value. `ref(x)` creates a symbolic reference to binding `x`;
 it neither evaluates nor snapshots `x` at the textual position of the
 reference. The referenced identity's emitted value is the binding's final
-assigned value. Reading a mutable binding before its declaration is invalid.
+assigned value. The compiler collects binding identities before resolving
+`ref(...)`, so a symbolic reference may point forward to either a mutable or
+immutable binding. This does not read or evaluate the target. A mutable binding
+cannot be assigned before its declaration.
+
+For example, this forward identity link is valid even though `config` is
+mutable:
+
+```neu
+Selection selected = {
+    config: ref(config),
+}
+
+mut Config config = {
+    image: "example.invalid/tool:1",
+}
+```
 
 This makes assignment order semantic for mutable bindings, unlike other
-declarations. That cost is why `mut` is not recommended for v0 without a
-concrete cross-domain use case.
+declarations. This is the semantic cost being evaluated while `mut` remains
+provisional.
 
 ## 8. The generic numeric type
 
@@ -543,11 +564,13 @@ The names are `checks::mode` and `checks::internal::enabled`. Namespaces do not
 create files, execution stages, OS namespaces, provider groups, or security
 zones.
 
-Duplicates and shadowing are invalid. Immutable declarations may reference
-later immutable declarations, but direct value-initialization cycles are
-invalid; reference-only cycles are allowed as defined below. Their declaration
-order has no meaning. Mutable assignments are the only proposed v0 form whose
-textual order matters, and they cannot cross a source-unit boundary.
+Duplicates and shadowing are invalid. Declarations may contain symbolic
+references to bindings declared later, including mutable bindings, because
+`ref(...)` resolves identity rather than reading a value. Direct
+value-initialization cycles are invalid; reference-only cycles are allowed as
+defined below. Declaration order has no meaning for symbolic references.
+Mutable assignments are the only proposed v0 form whose textual order matters,
+and they cannot cross a source-unit boundary.
 
 When a module spans source units, those rules apply to the merged module scope.
 File/request order never breaks a duplicate-name tie or changes resolution.
@@ -588,10 +611,20 @@ ref(checks) // Invalid: namespace.
 ref(Flow) // Invalid: vocabulary namespace.
 ```
 
-Direct value-initialization and directly embedded record-type cycles are invalid.
-Their dependency graphs ignore every `ref(...)`/`Ref<T>` edge because a
-reference links identities rather than embedding or copying the target value.
-Cycles made exclusively of reference edges are therefore valid:
+Direct value-initialization cycles are invalid. Every nominal recursive record
+cycle is also invalid unless each route around the cycle crosses a `Ref<T>`
+edge. Nullability and collection containment do not break an embedded cycle:
+`Node?` and `List<Node>` recursive edges remain invalid, while `Ref<Node>` is an
+identity edge and is allowed. These dependency graphs ignore `ref(...)` and
+`Ref<T>` edges because a reference links identities rather than embedding or
+copying the target value. Cycles made exclusively of reference edges are
+therefore valid:
+
+```neu
+record Node { Node? next, } // Invalid: nullable embedding is recursive.
+record Group { List<Group> children, } // Invalid: list embedding is recursive.
+record LinkedNode { Ref<LinkedNode> next, } // Valid: identity edge.
+```
 
 ```neu
 record A { Ref<B> b, }
@@ -684,6 +717,11 @@ defines its exact owning type, value identity, schema and behavior versions, and
 must-understand behavior. An enum case is the primary v0 example. Static members
 are inert declared values, not functions, computed properties, or general member
 lookup on a runtime value.
+
+The left side of `.` must resolve to a vocabulary-owned type that declares the
+named static value. A user-defined record can never acquire or expose static
+members in v0; a qualified path that merely has the right syntactic shape is
+rejected when it does not resolve through the captured vocabulary bundle.
 
 The bundle—not the author—independently classifies field presence/default,
 nullability, and behavioral meaning. Unknown required behavior fails closed. v0
@@ -936,8 +974,12 @@ the captured lock manifest to one permitted exact vocabulary bundle; derives and
 checks the required feature set from used vocabulary members; enforces
 nullable-only null and one unambiguous expected type for every contextual record;
 requires one underlying expected `SecretRef<T>` for `secret_ref(...)`; restricts
-`ref(...)` targets to value bindings; rejects direct initialization cycles while
-ignoring reference edges for that check; rejects mixed-version closures,
+`ref(...)` targets to value bindings; permits forward identity resolution to
+mutable and immutable bindings while rejecting assignment before a mutable
+declaration; requires the left side of `.` to resolve to a vocabulary-owned type
+that declares the selected static value; rejects direct initialization cycles
+and every nominal record cycle not broken by `Ref<T>` while ignoring reference
+edges for those checks; rejects mixed-version closures,
 cross-package module merging, and duplicate names in merged module scopes;
 rejects immutable assignment; and checks type-preserving mutation, declaration
 uniqueness, name-category casing, and schema-owned vocabulary fields.

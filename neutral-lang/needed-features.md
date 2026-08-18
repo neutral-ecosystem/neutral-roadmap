@@ -162,6 +162,10 @@ lifecycle.
 - **NL-NAM-004:** Unresolved, ambiguous, inaccessible, and wrong-kind references
   produce distinct diagnostics; invalid direct initialization cycles are
   diagnosed separately from valid reference-only cycles.
+- **NL-NAM-004A:** Symbol collection precedes symbolic-reference resolution, so
+  `ref(...)` may target a later mutable or immutable binding without evaluating
+  it. Assignment to a mutable binding remains invalid before its declaration;
+  v0 does not imply an ordinary binding-name value expression.
 - **NL-NAM-005:** References can target value bindings in another captured
   source unit or versioned package without losing the target's immutable
   identity.
@@ -173,9 +177,19 @@ lifecycle.
   visualization even when stable machine identities differ.
 - **NL-NAM-009:** Author-facing names use an intentional category split:
   `snake_case` for bindings, fields, namespace/module segments, and static
-  values; `UpperCamelCase` for record/types and vocabulary namespaces. External
+  values; `UpperCamelCase` style for record/types and vocabulary namespaces.
+  The compiler enforces only an uppercase-leading lexical class for the latter,
+  because machine recognition of word boundaries would be subjective. External
   display names and immutable package/schema identities are not rewritten to
   imitate source names.
+- **NL-NAM-010:** Predeclared core type names are protected from declaration or
+  shadowing in every scope.
+- **NL-NAM-011:** Every nominal recursive record cycle is rejected unless each
+  route around the cycle crosses `Ref<T>`; nullable and collection containment
+  do not break recursion.
+- **NL-NAM-012:** Static `.` selection resolves only when its left side is a
+  vocabulary-owned type that declares the named inert static value. User-defined
+  records cannot acquire static members in v0.
 
 These capabilities let Flow derive named work and dependency relationships, but
 Neutral does not decide that a declaration is a job or that a reference is a

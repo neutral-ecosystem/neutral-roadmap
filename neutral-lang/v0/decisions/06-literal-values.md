@@ -87,8 +87,10 @@ Flow::Mode.strict
 The bundle defines the owning type, value identity, behavior version, and
 unknown policy. Unqualified `strict` and text `"strict"` are not substitutes.
 A static member is an inert declared value, not a function, computed property,
-or general member lookup on a runtime value. General core tagged alternatives
-remain deferred.
+or general member lookup on a runtime value. The left side of `.` MUST resolve
+to a vocabulary-owned type that declares the named static value in the captured
+bundle. User-defined records cannot declare or acquire static members in v0.
+General core tagged alternatives remain deferred.
 
 ## SYN-VAL-007 — Domain-owned typed values
 

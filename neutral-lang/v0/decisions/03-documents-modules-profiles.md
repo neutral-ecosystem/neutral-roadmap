@@ -50,8 +50,9 @@ Source introduces a vocabulary namespace with:
 use Flow
 ```
 
-The general form is `use Vocabulary`; vocabulary names use UpperCamelCase and
-`Flow` is an identifier, not a keyword. For example, a future Neux source can
+The general form is `use Vocabulary`; vocabulary names use the uppercase-leading
+identifier class and `UpperCamelCase` authoring style. `Flow` is an identifier,
+not a keyword. For example, a future Neux source can
 say `use Neux`. `Flow` is a source-local logical vocabulary name and the
 namespace used by forms such as `Flow::Pipeline`. It is not itself a package
 identity or mutable version.

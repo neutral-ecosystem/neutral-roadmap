@@ -39,6 +39,10 @@ record ImageConfig {
 Records are nominal: equal fields do not make two record declarations the same
 type. Field names are unique. Declaration order is retained for presentation
 but does not affect logical type equality. v0 has no anonymous structural type.
+Every nominal recursive record cycle is invalid unless the cycle is broken by a
+`Ref<T>` edge. `Node?` and `List<Node>` still embed `Node` and therefore do not
+make recursion valid; `Ref<Node>` links identity without embedding and is
+allowed.
 
 ## SYN-TYP-003 — Homogeneous collections
 

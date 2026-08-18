@@ -48,7 +48,9 @@ The last valid assignment in the lexical scope determines the emitted binding
 value. `ref(x)` creates a symbolic reference to binding `x`; it does not evaluate
 or snapshot `x` at the reference's textual position. The referenced identity's
 emitted value is the binding's final assigned value. All assignments remain in
-source provenance.
+source provenance. A mutable binding cannot be assigned before its declaration.
+Symbolic `ref(...)` resolution may be forward for mutable and immutable bindings
+because it resolves identity rather than evaluating the target.
 
 ## SYN-DEC-003 — Explicit types
 
@@ -93,8 +95,9 @@ are declarations, not arbitrary values.
 Two declarations of any kind cannot share a name in one scope, including when
 the declarations come from different source units merged into one module.
 Vocabulary use names occupy the root namespace. v0 prohibits shadowing outer
-declarations and predeclared core names. Sibling namespaces may contain equal
-short names. Source-unit order never chooses a winner.
+declarations. Predeclared core names (`bool`, `num`, `string`, `List`, `Ref`, and
+`SecretRef`) cannot be declared or shadowed in any scope. Sibling namespaces may
+contain equal short names. Source-unit order never chooses a winner.
 
 Names that violate their declaration category's case are rejected before they
 can create a symbol. Valid case-distinct names in different categories remain
@@ -103,19 +106,27 @@ identify both conflicting declarations; source order never chooses a winner.
 
 ## SYN-DEC-007 — Forward references
 
-Immutable references may target later declarations in the captured closure.
-The compiler collects declarations before resolving/checking immutable values,
-so their source order is not execution order. A mutable assignment is processed
-in source order and cannot be referenced before its declaration.
+Symbolic references may target later mutable or immutable bindings in the
+captured closure. The compiler collects declaration identities before resolving
+`ref(...)`, so reference source order is not execution order. A mutable
+assignment is processed in source order and cannot occur before its declaration.
+v0 has no ordinary binding-name value expression, so this rule does not imply
+that a form such as `num a = b` exists.
+
+```neu
+Selection selected = { config: ref(config), } // Valid forward identity link.
+mut Config config = { image: "example.invalid/tool:1", }
+```
 
 Forward references do not legalize direct value-initialization cycles. The
 compiler constructs an initialization dependency graph from edges that embed or
 need another binding's value and rejects every cycle in that graph. `ref(...)`
 edges are excluded: they link binding identities rather than copying or
 initializing from target values. Cycles made exclusively through `Ref<T>` are
-valid. Directly embedded recursive record types remain invalid, but a record
-type cycle broken entirely by `Ref<T>` is valid for the same identity-link
-reason. A domain relationship cycle is rejected only when the vocabulary's
+valid. Every nominal recursive record cycle is invalid unless each route around
+the cycle crosses `Ref<T>`. Nullable and collection edges still embed the
+record, so `Node?` and `List<Node>` recursion are invalid; `Ref<Node>` recursion
+is allowed. A domain relationship cycle is rejected only when the vocabulary's
 static contract prohibits it; Neutral does not infer execution semantics.
 
 ## Required evidence
