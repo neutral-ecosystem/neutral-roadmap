@@ -485,6 +485,8 @@ v0 is complete only after:
 - [v0/proposed-syntax-guide.md](v0/proposed-syntax-guide.md) is the author-facing
   proposal.
 - [v0/decisions/README.md](v0/decisions/README.md) indexes normative decisions.
+- [v0/ROADMAP.md](v0/ROADMAP.md) orders specification, implementation, and
+  release work without expanding the v0 feature set.
 - [LANGUAGE-SHOWCASE.md](LANGUAGE-SHOWCASE.md) demonstrates the complete v0
   surface.
 - [v0/fixtures/README.md](v0/fixtures/README.md) indexes conformance fixtures.
