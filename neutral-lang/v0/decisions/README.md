@@ -1,79 +1,49 @@
-# Neutral language v0 syntax decisions
+# Neutral language v0 decisions
 
-Status: working v0 decision baseline
+Status: proposed coherent baseline
 
-Editable author-facing synthesis:
-[proposed v0 syntax guide](../proposed-syntax-guide.md).
-
-Initial positive, negative, and numeric cases:
-[v0 fixture index](../fixtures/README.md).
-
-
-Normative words such as **MUST**, **MUST NOT**, and **MAY** describe the proposed
-contract. Flow and Neux behavior is illustrative only and remains owned by those
-applications.
+These decisions specify only the minimum v0 language described by
+[ARCHITECTURE.md](../../ARCHITECTURE.md). They do not plan later versions.
 
 ## Decision files
 
-| Checklist section | Decision record |
-| --- | --- |
-| 1. Governing syntax boundaries | [01-governing-boundaries.md](01-governing-boundaries.md) |
-| 2. Lexical and source-text rules | [02-lexical-source-text.md](02-lexical-source-text.md) |
-| 3. Documents, modules, imports, and profiles | [03-documents-modules-profiles.md](03-documents-modules-profiles.md) |
-| 4. Declarations, bindings, and names | [04-declarations-bindings-names.md](04-declarations-bindings-names.md) |
-| 5. Type and schema notation | [05-type-schema-notation.md](05-type-schema-notation.md) |
-| 6. Literal values and value construction | [06-literal-values.md](06-literal-values.md) |
-| 7. References and structural relationships | [07-references-relationships.md](07-references-relationships.md) |
-| 10. Domain vocabulary surface | [10-domain-vocabulary.md](10-domain-vocabulary.md) |
-| 12. Security-sensitive syntax | [12-security-sensitive-syntax.md](12-security-sensitive-syntax.md) |
-| 13. Diagnostics and invalid/incomplete syntax | [13-diagnostics-invalid-syntax.md](13-diagnostics-invalid-syntax.md) |
-| 14. Documentation, formatting, and tools | [14-documentation-formatting-tools.md](14-documentation-formatting-tools.md) |
-| 15. Evolution and conformance | [15-evolution-conformance.md](15-evolution-conformance.md) |
+1. [Governing boundaries](01-governing-boundaries.md)
+2. [Lexical source text](02-lexical-source-text.md)
+3. [Document shape](03-documents-modules-profiles.md)
+4. [Declarations and names](04-declarations-bindings-names.md)
+5. [Types and records](05-type-schema-notation.md)
+6. [Literal and constructed values](06-literal-values.md)
+7. [Identity references](07-references-relationships.md)
+8. [Minimal vocabulary boundary](10-domain-vocabulary.md)
+9. [Security and limits](12-security-sensitive-syntax.md)
+10. [Diagnostics](13-diagnostics-invalid-syntax.md)
+11. [Formatting](14-documentation-formatting-tools.md)
+12. [Evolution and conformance](15-evolution-conformance.md)
 
-## Coherent v0 surface
+## Complete v0 surface
 
-The decision set uses this shape for examples:
-
-```neu
+```text
 neu "0.1"
-module acme_delivery
+module example
+[use Vocabulary]
 
-use Flow
-
-pub record ImageConfig {
-    string image,
-    string? note,
-    List<string> labels = [],
-}
-
-pub ImageConfig base = {
-    image: tool_image,
-    note: null,
-    labels: ["portable"],
-}
-
-string tool_image = "example.invalid/tool:1"
-
-pub namespace checks {
-    pub Flow::Pipeline verify = {
-        config: ref(base),
-    }
-}
+record Name { ... }
+Type binding = value
 ```
 
-This is a language-design fixture, not a claim that `Flow::Pipeline` has any
-particular CI/CD meaning. The Flow vocabulary owns that type's contract and
-the Flow consumer owns its interpretation.
+Core types are `num`, `string`, `bool`, `T?`, `List<T>`, `Ref<T>`, user
+records, and qualified vocabulary types. Values are scalar/null literals,
+contextual records, lists, ordinary binding reuse, and `ref(name)`.
 
-## Deliberate v0 exclusions
+Every binding is immutable and explicitly typed. One source unit defines one
+module; all declarations are exported.
 
-v0 has no mutation or reassignment, source-module/package imports, executable macros,
-general loops, anonymous functions, implicit network lookup, native plugins,
-shell execution, provider credentials, or runtime lifecycle syntax. Later
-checklists may add composition and symbolic structure, but only through their
-recorded decisions.
+## Excluded from v0
 
-Every binding is immutable. Future work first designs immutable derivation and
-composition, then explicit override with provenance. Actual mutation is
-investigated only if both mechanisms fail concrete Flow and independently
-designed Neux cases.
+v0 has no namespace or visibility syntax, multiple units, imports, secrets,
+static/member selection, operators, functions, control structures, mutation,
+composition, templates, macros, executable plugins, external effects, or
+application-specific declarations.
+
+An excluded feature requires a later independent proposal; these files make no
+promise that it will be added.

@@ -1,145 +1,60 @@
-# Section 4: declarations, bindings, and names
+# Section 4: declarations and names
 
-Status: proposed
-
-Answers: `SYN-DEC-001` through `SYN-DEC-007`
-
-## SYN-DEC-001 — Common declaration identity
-
-Every declaration has a kind, source identifier, lexical namespace, module,
-source span, and IR element identity. The source identifier is machine-facing.
-Human display text is an ordinary typed domain field and never affects
-resolution.
-
-The source-visible symbolic name is `namespace::name` within the current module.
-IR identity separately binds the single module name and owning
-document/derivation, so equal spellings in different documents are not
-conflated. Module identity is never encoded as a source `::` prefix. Renaming
-changes identity in v0; durable aliases are deferred.
-
-Source names follow the lexical case categories: declarations that introduce
-values use `snake_case`, while record/type declarations use `UpperCamelCase`.
-External immutable identities and human display text are preserved exactly
-rather than rewritten into source casing.
-
-## SYN-DEC-002 — Type-first bindings
+## SYN-DEC-001 — Immutable type-first bindings
 
 Bindings use:
 
 ```neu
-[pub] Type name = value
-```
-
-There is no `let` keyword and no colon between the name and type. Bindings are
-immutable and initialized exactly once by their declaration:
-
-```neu
 num retry_count = 3
-string image = "example.invalid/tool:1"
+string label = "sample"
 ```
 
-v0 has no `mut` modifier and no assignment production. A bare form such as
-`retry_count = 4` is invalid even if a binding already exists. Declaration order
-does not select or update a value.
+There is no `let`. Every binding is immutable.
 
-Future design proceeds in order: immutable derivation/composition, explicit
-override with deterministic provenance, and only then investigation of actual
-mutation if both are insufficient. v1 must test the immutable capability using
-real Flow configuration and an independently designed Neux case before choosing
-surface syntax. v0 reserves none of those spellings.
+Each declaration receives module-symbol identity, a separate declaration
+revision/fingerprint, graph-local IR element identity, and source provenance.
+Identity is not derived from array position or parser traversal.
 
-## SYN-DEC-003 — Explicit types
+## SYN-DEC-002 — Explicit types
 
-Every binding and record field states a type. v0 checks contextual literals but
-does not infer a public declaration type. Domain fields obtain expected types
-from the captured vocabulary schema. Empty lists and `null` require an expected
-type.
+Every binding declaration spells its complete type. v0 does not infer a
+declaration type. Context may type an inner list or record literal only after the
+declaration or field supplies the expected type.
 
-## SYN-DEC-004 — Vocabulary-owned typed declarations
-
-Vocabulary-owned declarations use the ordinary type-first binding grammar:
-
-```text
-Vocabulary::Type declaration-name = { schema fields }
-```
+Vocabulary-owned values use the same binding production:
 
 ```neu
-Flow::Pipeline verify = {
-    config: ref(config),
+Fixture::Metadata metadata = {
+    label: "sample",
 }
 ```
 
-`Pipeline` is not a core keyword or a special domain-declaration grammar branch.
-The data-only bundle defines the type, allowed position, fields, target kinds,
-and behavioral classification. No Flow code runs during parsing or static
-schema validation.
+This is an ordinary typed binding, not a special declaration kind.
 
-## SYN-DEC-005 — Namespaces
+## SYN-DEC-003 — No mutation
 
-```neu
-namespace checks {
-    string image = "example.invalid/check:1"
-}
-```
+`mut`, reassignment, compound assignment, override, mutation methods, and
+assignment statements are invalid. `=` occurs only in binding initialization
+and field-default declarations.
 
-Namespaces may nest and create lexical qualification only. They do not create
-files, environments, security zones, stages, or provider groups. Their contents
-are declarations, not arbitrary values.
+## SYN-DEC-004 — Duplicates and protected names
 
-## SYN-DEC-006 — Duplicates and shadowing
+All records and bindings occupy one module scope. Duplicate declarations are
+invalid. Core lexical/type names are protected and cannot be redeclared.
+Vocabulary type names remain inside the imported vocabulary namespace.
 
-Two declarations of any kind cannot share a name in one scope, including when
-the declarations come from different source units merged into one module.
-This includes namespaces: a namespace cannot be reopened by repeating its
-declaration in the same or another source unit.
-Vocabulary use names occupy the root namespace. v0 prohibits shadowing outer
-declarations. Predeclared core names (`bool`, `num`, `string`, `List`, `Ref`, and
-`SecretRef`) cannot be declared or shadowed in any scope. Sibling namespaces may
-contain equal short names. Source-unit order never chooses a winner.
+## SYN-DEC-005 — Forward resolution
 
-Names that violate their declaration category's case are rejected before they
-can create a symbol. Valid case-distinct names in different categories remain
-distinct, but tools SHOULD warn when they differ only by case. Diagnostics
-identify both conflicting declarations; source order never chooses a winner.
+The compiler collects declarations before resolving binding values and
+`ref(...)` targets. Both may point to later bindings.
 
-## SYN-DEC-007 — Forward references
-
-Both ordinary binding-value references and symbolic identity references may
-target later immutable bindings in the current merged module. The compiler collects
-declarations before resolving either form, so declaration source order is not
-evaluation or execution order.
+Ordinary value uses form a static dependency graph. Every cycle in that graph is
+invalid. `ref(...)` identity edges do not evaluate the target and are excluded
+from value-cycle detection.
 
 ```neu
-string image2 = image // Valid forward value dependency.
-string image = "example.invalid/tool:1"
-
-Selection selected = { config: ref(config), } // Valid forward identity link.
-Config config = { image: image, }
+string second = first
+string first = "value"
 ```
 
-An ordinary name in value position evaluates to the immutable logical value of
-the target binding and creates a static value-dependency edge. It does not
-create a `Ref<T>` or a public identity relationship. The compiler rejects every
-cycle in the value-dependency graph before evaluation. Acyclic dependencies are
-evaluated in deterministic topological order; this internal order does not make
-source order semantic. The graph includes ordinary value uses in binding
-initializers, contextual record fields, and list elements. User-record defaults
-are closed constants and add no binding edges. Type compatibility follows the
-exact-match plus outer-nullability widening rule in `SYN-TYP-005`.
-
-`ref(...)` edges are excluded from the value-dependency graph because they link
-binding identities rather than reading target values. Reference-only cycles are
-valid. Every nominal recursive record cycle is invalid unless each route around
-the cycle crosses `Ref<T>`. Nullable and collection edges still embed the
-record, so `Node?` and `List<Node>` recursion are invalid; `Ref<Node>` recursion
-is allowed. A domain relationship cycle is rejected only when the vocabulary's
-static contract prohibits it; Neutral does not infer execution semantics.
-
-## Required evidence
-
-Fixtures MUST cover every declaration kind, private/public declarations,
-misplaced or unreachable `pub`, forward value and identity references, value
-reuse in records and lists, namespace
-qualification, duplicate cross-kind names, shadowing, case-confusable names,
-static value-dependency cycles, valid reference-only cycles, and
-source-name/display-name/IR-identity distinctions.
+The example is valid. Two bindings that use each other's values are invalid.

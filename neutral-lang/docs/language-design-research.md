@@ -4,13 +4,18 @@ Status: research synthesis for Neutral discovery
 
 Last reviewed: 2026-08-17
 
+This is background research, not a language roadmap. Only the features listed in
+[the v0 architecture](../ARCHITECTURE.md) are currently specified. Examples of
+composition, symbolic behavior, migration, or additional consumers below are
+research considerations and create no post-v0 commitment.
+
 ## Research question
 
 What design practices should guide a small, non-general-purpose abstraction
-language whose compiler produces a stable IR for independently released domain
-consumers such as Neutral Flow and Neux?
+language whose compiler produces a stable IR for independently released
+consumers?
 
-The answer is not “copy LLVM,” “copy MLIR,” or “make a CI/CD DSL.” The useful
+The answer is not “copy LLVM,” “copy MLIR,” or imitate an application DSL. The useful
 lesson across the literature is to separate meanings and interfaces, specify
 observable behavior before freezing representation, and grow the design from
 tested domain problems.
@@ -19,9 +24,8 @@ tested domain problems.
 
 1. **Begin with problem corpora, not grammar.** Identify users, decisions,
    invalid cases, and consumer obligations before choosing surface notation.
-2. **Keep the common core smaller than either application domain.** Flow and
-   Neux should define versioned vocabularies over common structural facilities;
-   their union is not the Neutral core.
+2. **Keep the common core smaller than any application domain.** Application
+   schemas belong in captured data vocabularies; their union is not Neutral core.
 3. **Specify abstract behavior independently from syntax and encoding.** A
    pleasant `.neu` form, an AST, Neutral IR, and a compact wire format solve
    different problems.
@@ -57,7 +61,7 @@ abstraction, generation, and portability.
 
 For Neutral this implies:
 
-- Maintain small Flow and Neux corpora containing successful, invalid,
+- Maintain small independent consumer corpora containing successful, invalid,
   ambiguous, and incompatible cases.
 - Write each case first in domain language: what must the user express, what
   must the consumer know, and what must be rejected?
@@ -65,8 +69,8 @@ For Neutral this implies:
   cases need the same behavior.
 - Keep syntax sketches disposable until the abstract obligations settle.
 
-This approach resists two symmetrical mistakes: embedding Flow concepts into
-Neutral, and making Neutral so generic that consumers must reconstruct meaning
+This approach resists two symmetrical mistakes: embedding one application's
+concepts into Neutral, and making Neutral so generic that consumers reconstruct meaning
 from untyped maps and strings.
 
 Primary sources:
@@ -91,17 +95,17 @@ Neutral needs at least these distinct artifacts:
     -> source syntax tree
     -> resolved and checked compiler model
     -> public Neutral IR
-    -> Flow or Neux private normalized model
+    -> consumer-private normalized model
 ```
 
 Each arrow has different invariants and diagnostics. The compiler's convenient
-internal AST should not become the public IR accidentally. Likewise, Flow's
-logical plan is not a second Neutral IR.
+internal AST should not become the public IR accidentally. Likewise, a
+consumer-private model is not a second Neutral IR.
 
 MLIR's dialect idea is relevant but should be narrowed for Neutral. A Neutral
 domain vocabulary initially ought to be a versioned, data-described contract,
-not arbitrary native code loaded into the compiler. Flow owns what its
-vocabulary means, while the compiler owns namespacing, structural validation,
+not arbitrary native code loaded into the compiler. A consumer owns what its
+captured vocabulary data means, while the compiler owns qualification, structural validation,
 reference resolution, source provenance, and feature negotiation.
 
 Primary sources:
@@ -131,10 +135,9 @@ construct:
 - Which transformations preserve meaning?
 - Which errors belong to Neutral and which belong to the consumer?
 
-For domain operations, Neutral can preserve a declared contract without owning
-its dynamics. For example, Flow may own condition-result and skip propagation;
-the IR must preserve the structured expression, references, vocabulary version,
-and source origin needed for Flow to apply that contract.
+For application data, Neutral can preserve a declared contract without owning
+its dynamics. The IR retains the typed structure, references, vocabulary
+version, and source origin needed by the responsible consumer.
 
 Recommended modeling discipline:
 
@@ -193,8 +196,8 @@ Neutral should use a layered acceptance model:
 | Core structure | neutral-lang IR verifier | duplicate identity or dangling reference |
 | Required features | API negotiation | unsupported must-understand construct |
 | Domain schema | selected vocabulary validator | wrong payload kind or profile version |
-| Domain behavior | Flow or Neux | cycle in a relationship interpreted as a Flow dependency |
-| Target/runtime | consumer integration | provider lacks a required Flow guarantee |
+| Application behavior | selected consumer | structurally valid data rejected by consumer rules |
+| Target/runtime | consumer integration | target lacks a required external guarantee |
 
 An “IR parsed successfully” result proves only the first layer. APIs and
 diagnostics must preserve this distinction.
@@ -265,7 +268,7 @@ Sources:
 
 ## 8. Make source mapping and diagnostics part of the compiler contract
 
-Neutral Flow must explain consumer errors at `.neu` locations, including errors
+Neutral must map consumer errors to `.neu` locations, including errors
 on composed or generated structure. A source map added after the compiler is
 finished is unlikely to preserve enough origin information.
 
@@ -361,9 +364,8 @@ Sources:
 
 ### Phase A: behavior and corpus
 
-1. Complete a bounded Neux problem corpus independent of Flow.
-2. Compare it with Flow cases C1-C6 and extract only demonstrated common
-   structural needs.
+1. Complete a bounded, domain-neutral v0 source corpus.
+2. Extract only the structural needs exercised by the generic probe.
 3. Write a glossary separating source, declaration, operation, relation, value,
    vocabulary, IR, derivation, and consumer model.
 
@@ -379,8 +381,8 @@ Sources:
 7. Define an experimental logical IR model independent of encoding.
 8. Implement two throwaway encodings or APIs to expose hidden assumptions before
    selecting a stable one.
-9. Pass one Flow and one Neux fixture through the same compiler boundary into
-   separate reference consumers.
+9. Pass the generic fixture through the public compiler and reader boundary into
+   an effect-free probe.
 
 ### Phase D: evolution and evidence
 
@@ -402,7 +404,7 @@ Only after these phases should version checklists allocate features to releases.
 | LSP as the compiler API | Broad editor support | LSP is an editor protocol, not a compilation derivation or archival IR contract. |
 | One IR for every compiler phase | Fewer named formats | Source AST, public interchange, and private lowerings have different compatibility and performance needs. |
 | Automatic incremental compilation first | Attractive interactive performance | It adds cache invalidation and dependency complexity before full-compilation behavior is stable. |
-| Formal verification of the full design first | Strong assurance claim | Begin with bounded core properties; provider and consumer behavior remains outside the compiler proof boundary. |
+| Formal verification of the full design first | Strong assurance claim | Begin with bounded core properties; external-target and consumer behavior remains outside the compiler proof boundary. |
 
 ## Decisions this research does not make
 
@@ -415,8 +417,8 @@ Only after these phases should version checklists allocate features to releases.
 - whether canonical IR bytes are required;
 - an implementation language;
 - an executable compiler plugin system;
-- the stable Neutral core versus Flow/Neux vocabulary split; or
-- a v0/v1/v2 allocation.
+- any application vocabulary design; or
+- feature allocation beyond v0.
 
-Those decisions require the cross-domain corpus and explicit architecture gates
+Those decisions require concrete evidence and explicit architecture gates
 in [needed-features.md](../needed-features.md).

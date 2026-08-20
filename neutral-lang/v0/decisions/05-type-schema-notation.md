@@ -1,160 +1,80 @@
-# Section 5: type and schema notation
+# Section 5: types and records
 
-Status: proposed
+## SYN-TYP-001 — Core types
 
-Answers: `SYN-TYP-001` through `SYN-TYP-006`
+v0 predeclares:
 
-## SYN-TYP-001 — Minimal scalars
+- `num`: exact base-10 rational;
+- `string`: Unicode scalar sequence;
+- `bool`: `true` or `false`;
+- `List<T>`: ordered homogeneous list;
+- `Ref<T>`: document-local identity link; and
+- postfix `T?`: nullable type.
 
-| Type | Domain |
-| --- | --- |
-| `bool` | `true` or `false` |
-| `num` | Exact finite base-10 rational represented independently of host numeric types |
-| `string` | Finite Unicode scalar sequence |
+There is no standalone null type. `List` and `Ref` take exactly one invariant
+type argument. No other generic type is core.
 
-A source number is an arbitrary-precision signed coefficient times a power of
-ten, normalized for logical equality while retaining its source spelling in
-provenance. All zero spellings normalize to coefficient `0`, scale `0`. Logical
-IR preserves this mathematical value losslessly and does not inherit an
-encoder's or host's numeric type. Contract-required integer and decimal
-conversion must be exact.
+## SYN-TYP-002 — Exact numeric semantics
 
-Numeric handling has three non-interchangeable layers:
+`num` uses the host-independent exact rational rules in the lexical decision.
+v0 has no target numeric lowering and numeric spelling introduces no source
+subtyping.
 
-1. the Neutral logical value: the exact normalized decimal rational in IR;
-2. contract lowering: validation and deterministic conversion for a named target
-   representation without mutating the logical value; and
-3. encoded target representation: for example, binary32 bits owned by the
-   lowered consumer artifact.
-
-A rounded target value is a lowering result linked to the exact source value and
-contract. It never replaces that exact `num` in Neutral IR.
-Named IEEE binary conversion uses deterministic round-to-nearest, ties-to-even
-by default, matching Python's nearest-representable model without inheriting its
-host format. A contract may require exact representation instead. Subnormal
-results and rounding a nonzero value to signed zero are valid; overflow,
-invalid-sign integer conversion, and non-finite results are rejected. `string`
-does not become a number, and `null` inhabits only values whose expected type is
-`T?`.
-
-`Ref<T>` is a predeclared typed symbolic link to a declaration of type/kind
-`T`; only `ref(...)` constructs it. `SecretRef<T>` is a separate opaque
-reference type whose parameter describes the requested secret-delivery shape;
-it is not a scalar and has no literal value. Only
-`secret_ref(...)` constructs it under the security rules in section 12.
-
-Thus the primitive scalar set is exactly `num`, `string`, and `bool`; `null` is
-a literal admitted by nullable positions, not a fourth declared scalar type.
-
-## SYN-TYP-002 — Nominal records
+## SYN-TYP-003 — Nominal records
 
 ```neu
-record ImageConfig {
+record Config {
     string image,
-    string? note,
+    string? note = null,
     List<string> labels = [],
 }
 ```
 
-Records are nominal: equal fields do not make two record declarations the same
-type. Field names are unique. Declaration order is retained for presentation
-but does not affect logical type equality. v0 has no anonymous structural type.
-Fields have no independent visibility modifier. Once a record declaration is
-accessible, every field is part of its visible structural contract.
-Every nominal recursive record cycle is invalid unless the cycle is broken by a
-`Ref<T>` edge. `Node?` and `List<Node>` still embed `Node` and therefore do not
-make recursion valid; `Ref<Node>` links identity without embedding and is
-allowed.
+Record names are uppercase-leading. Field names are `snake_case`, unique within
+the record, and followed by commas. Records are nominal: matching fields do not
+make two differently named records compatible.
 
-## SYN-TYP-003 — Homogeneous collections
+Every nominal recursive record cycle is invalid unless the cycle crosses
+`Ref<T>`. `Node?` and `List<Node>` still embed `Node`; `Ref<Node>` links identity
+without embedding and is allowed.
 
-`List<T>` is the only v0 collection. It is homogeneous and ordered; duplicates
-are allowed. `T` may itself be a scalar, named record, qualified domain type,
-reference type, nullable type, or list, within nesting limits. Because
-nullability belongs to the type, `List<string?>` and `List<string>?` are
-distinct.
+## SYN-TYP-004 — Lists
 
-Maps, sets, tuples, and heterogeneous lists are deferred. A domain can use a
-named entry record inside a list in v0.
+`List<T>` is ordered and homogeneous. List order is logical. `T` is invariant,
+and an empty list requires an expected element type.
 
-## SYN-TYP-004 — Field states
+## SYN-TYP-005 — Field state
 
-| Meaning | Syntax |
-| --- | --- |
-| Required, non-nullable | `T name` |
-| Required, nullable | `T? name` |
-| Defaulted, non-nullable | `T name = constant_value` |
-| Defaulted, nullable | `T? name = null` |
-| Repeated/ordered | `List<T> name` |
+Required/defaulted and non-nullable/nullable are independent:
 
-`?` is a postfix type constructor that adds `null` but not omission. A nullable
-field remains required unless it has a default. There is no explicit
-optional-field modifier. Required/defaulted and nullable/non-nullable are
-independent axes for both Neutral records and vocabulary schemas. Defaults apply
-only when a field has no source entry; structural omission is not another source
-value. v0 has no `Nullable<T>` spelling, standalone null type, or `absent` value.
-Repetition is a type, not a modifier.
+| Form | Presence | Nullability |
+| --- | --- | --- |
+| `string name,` | required | non-null |
+| `string? note,` | required | nullable |
+| `string name = "x",` | omittable | non-null |
+| `string? note = null,` | omittable | nullable |
 
-A user-record default is a closed constant value. It may contain scalar
-literals, `null` in a nullable expected position, lists or contextual records
-composed recursively from constant values, and a vocabulary static value whose
-captured bundle marks it safe for constants. It cannot contain an ordinary
-binding name, `ref(...)`, or `secret_ref(...)`. A default therefore cannot make
-a nominal schema depend on module state, declaration identity, or a secret
-request.
+Omission is structural and is not a source value. v0 has no `optional`,
+`absent`, or `none` construct.
 
-## SYN-TYP-005 — Named references
+A user-record default is a closed constant: scalar/null literal, list, or
+contextual record recursively composed from closed constants. It cannot contain
+an ordinary binding name or `ref(...)`.
 
-Type references are local identifiers or namespace/vocabulary-qualified names:
+## SYN-TYP-006 — References and compatibility
 
-```neu
-ImageConfig local = { image: "x", labels: [] }
-namespace checks {
-    record ImageConfig { string image, List<string> labels = [], }
-    ImageConfig shared = { image: "x", labels: [] }
-}
-Flow::ArtifactRef artifact = { value: "sha256:example" }
-```
+Source assignment compatibility has only:
 
-Resolution produces typed identity, not retained name text. Unknown, ambiguous,
-inaccessible, wrong-kind, and cyclic references are distinct errors.
+1. exact resolved type identity; or
+2. widening non-nullable `T` to outer nullable `T?`.
 
-v0 assignment compatibility has only two rules:
+`List<string>` may initialize `List<string>?`, but not `List<string?>`.
+`List<T>` and `Ref<T>` are invariant. Numeric target lowering is outside v0.
 
-1. the source and expected types are exactly identical; or
-2. a non-nullable source `T` widens to the outer nullable type `T?`.
+## SYN-TYP-007 — Vocabulary-owned types
 
-There is no reverse nullable narrowing and no generic covariance. Consequently,
-`string` can initialize `string?`, and `List<string>` can initialize
-`List<string>?`, but `List<string>` cannot initialize `List<string?>`.
-`List<T>`, `Ref<T>`, and `SecretRef<T>` type arguments are invariant. Nominal
-records and vocabulary-owned types require identical resolved type identity.
-Numeric contract lowering is checked after source-level `num` compatibility and
-does not create additional source subtyping.
+An imported vocabulary may contribute nominal types referenced as
+`Vocabulary::Type`. The exact captured bundle owns their field schemas and
+closed defaults. They remain inspectable typed data in IR.
 
-## SYN-TYP-006 — Opaque domain types
-
-A bundle may declare `Flow::ArtifactRef` with exact schema/behavior versions,
-source representation, static constraints, feature, and must-understand status.
-
-```neu
-Flow::ArtifactRef artifact = {
-    value: "sha256:example",
-}
-```
-
-Opaque means Neutral does not own external behavior; it does not mean an
-unbounded blob. Neutral still validates structure, limits, qualification,
-provenance, and required-feature support. Unknown required types fail closed.
-
-## Required evidence
-
-Fixtures MUST cover scalars, nearest-even and exact-required numeric conversions
-and their failures while proving the exact IR value survives rounded lowering,
-nominal mismatch, duplicates, every null/default combination, nullable elements
-versus nullable collections, permitted outer nullability widening, rejected
-nullable narrowing and generic covariance, closed-constant defaults, rejected
-binding/identity/secret defaults, empty/nested lists, wrong-kind type references,
-generic secret-delivery types, and unsupported required domain types.
-Visibility fixtures also prove that an accessible record exposes its complete
-field contract and that fields reject visibility modifiers.
+v0 has no vocabulary static values, enum-case selection, or general `.` access.

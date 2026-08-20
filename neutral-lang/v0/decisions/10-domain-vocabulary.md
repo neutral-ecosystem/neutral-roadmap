@@ -1,177 +1,54 @@
-# Section 10: domain vocabulary surface
+# Section 8: minimal vocabulary boundary
 
-Status: proposed
+## SYN-VOC-001 — Source surface
 
-Answers: `SYN-DOM-001` through `SYN-DOM-006`
-
-## SYN-DOM-001 — Namespace-qualified vocabulary types
-
-Vocabulary-owned declarations use a namespace introduced by `use` plus an
-ordinary qualified type-first binding:
+v0 permits zero or one vocabulary requirement:
 
 ```neu
-Flow::Pipeline verify = {
-    config: ref(config),
+use Fixture
+
+Fixture::Metadata metadata = {
+    label: "sample",
 }
 ```
 
-`Pipeline` is not in the core grammar's keyword set. There is no separate domain
-declaration production: the selected data-only bundle describes the qualified
-type's allowed scope, fields, references, static constraints, features, and
-behavioral classification through a fixed, versioned Neutral-owned vocabulary
-schema.
+`use` introduces one namespace. `Vocabulary::Type` is a qualified nominal type;
+vocabulary-owned bindings otherwise use the ordinary binding/value grammar.
 
-That vocabulary schema is a closed tagged data model. v0 bundles may declare
-types, fields, constant defaults, static values, representation requirements,
-feature dependencies, behavioral identifiers/classifications, and constraint
-instances drawn from a Neutral-defined finite constraint-kind registry. Initial
-constraint kinds cover structural facts the compiler can decide, such as field
-presence, value/type compatibility, numeric ranges and representations,
-collection/text bounds, allowed static values, reference target kinds, and
-declaration placement. Each kind has fixed operands, deterministic semantics,
-and resource accounting owned by neutral-lang. Unknown required kinds fail
-closed.
+## SYN-VOC-002 — Exact captured identity
 
-Bundles cannot contain scripts, callbacks, bytecode, arbitrary expressions,
-custom validators, native/Wasm code, or entry points. Bundle validation is
-interpretation of this closed data schema by neutral-lang, never execution of
-vocabulary-supplied code.
+The host's captured lock input maps the source name to one exact vocabulary
+identity, content digest, schema version, and required structural feature set.
+Source cannot select a version range, request `latest`, name a URL/path, or
+trigger acquisition.
 
-Neutral parses the contextual braced value using the expected `Flow::Pipeline`
-type and validates the bundle contract. It does not implement pipeline or OS
-behavior. Unknown or incorrectly qualified types are name/type diagnostics;
-known vocabulary types with invalid payloads are vocabulary diagnostics.
+The IR records the exact resolved identity/version and the structural features
+required by used vocabulary data.
 
-## SYN-DOM-002 — Identity and required features
+## SYN-VOC-003 — Closed data-only schema
 
-Each used vocabulary namespace is declared before ordinary declarations:
+The vocabulary bundle conforms to a fixed versioned Neutral-owned schema. v0
+allows nominal type definitions, typed fields, closed constant defaults, and
+required structural feature IDs.
 
-```neu
-use Flow
-```
+It rejects scripts, callbacks, arbitrary expressions, custom validators,
+bytecode, native/Wasm modules, and executable entry points. Unknown fields or
+required structural semantics fail closed.
 
-The general form is `use Vocabulary`; `Flow` is an identifier, not a keyword.
-For example, a future Neux source can say `use Neux`. `Flow` is a source-local
-logical name. The captured lock manifest maps it to the exact vocabulary
-identity, bundle content digest, schema version, behavior version, and supported
-feature set. The mapping is not a range, mutable tag, or ambient registry result.
-The import exposes members only as qualified names such as `Flow::Pipeline`; it
-does not inject an unqualified `Pipeline` into the source scope.
+Published schema/feature IDs have immutable meaning. A semantic change requires
+a new qualified ID or schema version.
 
-Every vocabulary member, field, default, static value, constraint, behavioral
-classification, and feature declares the features needed to understand it. The
-compiler seeds feature discovery from directly referenced types/members and
-then computes a deterministic least fixed point over instantiated fields,
-nested type/schema dependencies, applied defaults, selected static values,
-applicable constraints, behavioral classifications, and feature-to-feature
-dependencies. Cycles are visited once by
-feature identity and do not make the result order-dependent. Compilation
-validates the complete transitive closure against the captured bundle and host
-policy, then records the closure and the reason each feature entered it in
-IR/derivation. Newly added content that is neither reached nor applied is not
-imported implicitly.
+## SYN-VOC-004 — Validation boundary
 
-## SYN-DOM-003 — Request is not activation
+Neutral validates bundle structure and each contextual vocabulary payload. It
+does not interpret application behavior. The generic probe enumerates the
+qualified type identity and typed fields only.
 
-`use Flow` is a vocabulary-namespace requirement, not a package fetch or
-permission grant. Compilation succeeds only when the caller's captured manifest
-and policy:
+An external reader receives the exact captured vocabulary contract from its
+host. It never performs hidden I/O to obtain a schema.
 
-- permits the exact vocabulary and behavior version;
-- provides an exact captured bundle through its resolver;
-- supports every feature in the computed transitive required-feature closure; and
-- satisfies configured trust/package policy.
+## SYN-VOC-005 — Diagnostics
 
-Source cannot select a local shared library, network endpoint, filesystem path,
-credential, trust root, or “latest” version. If policy and source disagree,
-compilation fails before domain payload validation.
-
-## SYN-DOM-004 — Field presence, nullability, and behavior
-
-Vocabulary schemas use the same field model as Neutral records. Each known
-field independently declares:
-
-- presence: required, or defaulted and therefore omittable;
-- type nullability: non-nullable or nullable; and
-- interpretation: behavioral data or non-behavioral metadata.
-
-There is no second vocabulary-only notion of an “optional field.” A nullable
-field without a default is still required. A defaulted non-nullable field may be
-omitted. The compiler records omission/default application separately from an
-explicit `null`.
-
-Every applied vocabulary default records the constructed value, vocabulary
-field/default identity and version, application site, and whether it introduces
-behavioral meaning. IR provenance distinguishes source-supplied values,
-user-record defaults, vocabulary defaults, and behavior introduced by a
-vocabulary default. An omitted field therefore cannot introduce unexplained
-behavior, and its applied default participates in transitive feature discovery.
-
-All fields use ordinary schema-named forms in v0; there is no universal
-`extensions` or `metadata` bag. An author cannot relabel behavioral data as
-metadata. Unknown behavioral fields fail closed. Unknown non-behavioral metadata
-is accepted only when a supported schema feature explicitly defines its bounded
-envelope and ignore/preserve policy; otherwise unknown fields are errors.
-
-## SYN-DOM-005 — Typed fields rather than extension maps
-
-Vocabulary-owned contextual bodies use core scalar, record, list, null,
-reference, secret-reference, enum, and other qualified vocabulary-owned value
-forms. Every field has a schema identity, expected type, presence/default rule,
-nullability, and behavioral classification.
-
-The following design is rejected:
-
-```neu
-Flow::Pipeline verify = {
-    extensions: {
-        arbitrary_provider_blob: "...",
-    },
-}
-```
-
-unless `extensions` itself is a precisely typed Flow field whose captured
-schema defines ownership, must-understand behavior, bounds, and portability
-classification. An untyped map is never the fallback for missing syntax.
-
-Every vocabulary-owned value is immutable copyable data. Ordinary value reuse
-creates a new declaration identity containing the same logical value and reuse
-provenance. A bundle cannot mark a value non-copyable in v0; relationships that
-need declaration identity use `Ref<T>`.
-
-A vocabulary static value may appear in a user-record field default only when
-the captured data-only bundle marks it constant-safe. Constant-safe means that
-selecting the inert value needs no lookup, authority, secret, execution, or
-instance identity; it does not weaken must-understand behavior.
-
-## SYN-DOM-006 — Diagnostic taxonomy
-
-Domain failures remain distinguishable:
-
-| Condition | Diagnostic class |
-| --- | --- |
-| Use name was never declared | Unknown vocabulary namespace |
-| Lock mapping missing or ambiguous | Vocabulary lock resolution |
-| Bundle not captured/permitted | Vocabulary resolution/policy |
-| Schema or behavior version unsupported | Vocabulary compatibility |
-| Required feature unsupported | Required-feature negotiation |
-| Constraint kind unknown or malformed | Vocabulary schema/constraint contract |
-| Qualified type absent | Unknown vocabulary member |
-| Field missing, duplicated, unknown, or wrong type | Domain payload validation |
-| Declaration in disallowed scope | Domain placement |
-| Static constraint fails | Domain contract |
-| Consumer rejects otherwise valid IR | Consumer diagnostic, not compiler syntax |
-
-Every diagnostic identifies source span, vocabulary identity/version, responsible
-layer, and safe remedy. Bundle code is never executed to render a message.
-
-## Required evidence
-
-Use at least one Flow and one Neux data-only bundle fixture. Tests MUST cover
-exact lock resolution, missing/ambiguous/mutable mappings, disallowed policy;
-direct, transitive, cyclic, unused, and unsupported feature states; defaults and
-constraints introducing features; unknown fields by classification; invalid
-placement; copy reuse; constant-safe and unsafe default values; behavioral
-default provenance; rejection of unknown constraint kinds and every executable
-bundle payload; bounded payload rejection; and proof that compilation performs
-no ambient lookup or extension execution.
+Distinct diagnostics cover unknown `use` name, missing/mismatched captured lock,
+invalid bundle schema, unknown required feature, unknown qualified type, invalid
+payload field, missing required field, duplicate field, and field type mismatch.

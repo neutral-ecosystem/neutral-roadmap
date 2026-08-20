@@ -8,6 +8,8 @@ This directory collects language-design and IR research relevant to
 [needed-features.md](../needed-features.md). It exists to make future
 architecture and roadmap decisions evidence-led. Nothing in these notes defines
 `.neu` syntax, Neutral semantics, the Neutral IR encoding, or a compiler API.
+The only current language scope is the v0 contract in
+[ARCHITECTURE.md](../ARCHITECTURE.md).
 
 ## Documents
 
@@ -39,8 +41,8 @@ of Neutral's own license; each retains its original copyright and license.
 - A source is evidence, not an architecture decision.
 - A successful design in a general-purpose language or machine-code compiler is
   not automatically suitable for Neutral.
-- Flow evidence may justify a Flow vocabulary feature. A Neutral core feature
-  needs cross-domain evidence, including the independent Neux corpus.
+- Application evidence may justify a captured vocabulary feature. A Neutral core
+  feature needs independent, domain-neutral evidence.
 - Concrete syntax, abstract syntax, public IR, compiler-internal forms, and
   consumer-private models remain separate design surfaces.
 - New claims should identify the source, the inference made from it, and the

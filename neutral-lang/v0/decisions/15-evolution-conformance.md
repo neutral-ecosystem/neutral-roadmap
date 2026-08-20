@@ -1,84 +1,40 @@
-# Section 15: evolution and conformance
-
-Status: proposed
-
-Answers: `SYN-EVO-001` through `SYN-EVO-003`
+# Section 12: evolution and conformance
 
 ## SYN-EVO-001 — Normative grammar
 
-The specification uses annotated EBNF plus separate normative lexical
-productions and prose invariants. EBNF defines structure; prose defines
-resolution, types, lowering, limits, and diagnostics. One parser generator's
-grammar is not normative.
+v0 must publish lexical grammar, raw-newline tokens, layout normalization,
+context-free grammar, and static validation rules. The contract cannot depend on
+one parser generator or recovery implementation.
 
-Lexical trivia may occur between tokens unless a physical newline is converted
-by the layout-normalization contract into a semantic `LINE_END`. Grammar
-productions omit trivia for readability. The normative frontend stages are raw
-lexing, deterministic newline/layout normalization, then parsing; a raw lexer
-does not decide whether a construct is syntactically complete.
+## SYN-EVO-002 — Conformance corpus and reader proof
 
-v0 has no infix operators or general precedence. Its value hierarchy is:
+The corpus covers:
 
-```text
-value
-  = scalar
-  | list
-  | contextual-record
-  | qualified-static-value
-  | binding-value
-  | identity-reference
-  | secret-reference
-```
+- every accepted syntax form and explicit exclusion;
+- invalid UTF-8, escapes, comments, layout, names, and headers;
+- records, lists, nullability, omission, defaults, and ordinary reuse;
+- forward values, value cycles, references, and recursive records;
+- exact numeric parsing, normalization, equality, and limits;
+- captured vocabulary success and failure;
+- resource limits and bounded diagnostics;
+- malformed/adversarial encoded IR; and
+- deterministic repeated/concurrent compilation.
 
-An ordinary qualified binding name is a value use; `ref(...)` is an identity
-link. `::` belongs to qualified-name grammar, `.` selects a vocabulary-owned enum case
-or static member, and leading minus belongs to a numeric literal. General value
-member access is absent. Delimiters determine nesting. Implementations cannot
-invent precedence.
+### Source-to-IR and reader proof
 
-The specification records grammar version, definitions, Unicode/encoding
-assumptions, and a machine-readable fixture manifest.
+Golden tests compare the logical IR graph modulo `ElementId` renaming, plus
+source map, provenance, derivation, and diagnostics. They do not freeze map
+iteration, pretty printing, or noncanonical serialization.
 
-## SYN-EVO-002 — Conformance corpus
-
-| Class | Purpose |
-| --- | --- |
-| Positive | Accepted source and expected logical IR/provenance |
-| Negative | Exact diagnostic code, spans, recovery |
-| Ambiguity | Lookalikes cannot gain two meanings |
-| Boundary | Empty/minimum/maximum/over-limit |
-| Determinism | Repeated/concurrent compilation equality |
-| Historical | Previously published source classification |
-| Adversarial | Deep nesting, invalid bytes, storms, deceptive text |
-
-Each fixture captures source bytes, compilation request, bundle identities,
-resource profile, expected result class, and safe diagnostics. Tests never
-depend on working directory, network, locale, clock, randomness, or hash order.
-
-The corpus first proves one minimal Flow fixture, then adds one independently
-designed Neux profile through the same IR API. This tests common shape, not
-shared domain behavior.
-
-## SYN-EVO-003 — Source-to-IR and reader conformance
-
-Every accepted construct demonstrates:
-
-1. deterministic logical lowering;
-2. source-unit/span origin for emitted declarations, values, and links;
-3. derivation inclusion for every decision-affecting input;
-4. one public IR encoding;
-5. validation/traversal through the public reader API; and
-6. a consumer diagnostic mapped back to source.
-
-The probe cannot access lexer, syntax tree, compiler internals, or source parser,
-and cannot execute domain behavior. A private refactor cannot change expected
-public IR without a documented public contract/version change.
-
-IR round-trip does not reproduce original `.neu` spelling, comments, or
-formatting. Source formatting has a separate contract.
+One generic effect-free probe must consume declarations, values, references,
+and vocabulary-owned data exclusively through the public reader API and map a
+probe diagnostic back to source.
 
 ## Exit rule
 
-These decisions become accepted v0 syntax only after grammar, implementation,
-formatter, fixtures, public IR mapping, and both probe cases pass. Until then,
-the parent checklist remains an open-work tracker.
+v0 is not complete until every master checklist item has normative prose,
+grammar, positive/negative fixtures, stable diagnostics, lowering/provenance,
+resource treatment, and reader evidence.
+
+Later syntax requires a separate proposal and cannot be added by silently
+extending the v0 grammar or vocabulary bundle.

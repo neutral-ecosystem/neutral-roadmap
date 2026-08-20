@@ -1,649 +1,275 @@
-# Neutral language showcase
+# Neutral language v0 showcase
 
-Status: showcase of the current v0 working proposal
+This document demonstrates every v0 source feature in one domain-neutral model.
+The language describes typed immutable data and identity links; it performs no
+runtime action.
 
-This document demonstrates every surface feature currently decided for Neutral
-v0. It does not invent syntax for unchecked v1 or v2 questions. Neutral is a
-typed tool-abstraction language: it describes data, identities, references, and
-vocabulary-owned declarations, then produces Neutral IR. It does not execute a
-pipeline, shell command, provider operation, or secret lookup.
-
-The normative direction remains in the
-[v0 authoring guide](v0/proposed-syntax-guide.md) and grouped
-[decision records](v0/decisions/README.md).
-
-## Complete source example
-
-The Flow declarations below are illustrative vocabulary-owned data. Their exact
-fields and behavior come from the captured Flow vocabulary bundle, not Neutral
-core.
+## Complete example
 
 ```neu
 neu "0.1"
-module example_delivery
+module showcase
 
-use Flow
+use Fixture
 
-// One-line comments are non-semantic trivia.
-
-/*
-Block comments can span lines.
-They do not become documentation or IR data.
-*/
-
-pub record ToolConfig {
+record Config {
     string image,
-    string? note,
-    string channel = "stable",
-    string? description = null,
+    string? note = null,
     List<string> labels = [],
 }
 
-pub record InvocationInput {
-    Ref<ToolConfig> config,
-    SecretRef<string> token,
+record Selection {
+    Ref<Config> config,
 }
 
-// Every binding is immutable.
+record Pair {
+    num left,
+    num right,
+}
+
+string image = "example.invalid/tool:1"
+string copied_image = image
 bool enabled = true
-num attempts = 3
-num ratio = 0.75
-num grouped = 1_000_000
-string message = "line one\nline two"
-string lambda = "\u{03BB}"
-string? release_note = null
-string build_stage = "build"
-List<string> stages = [build_stage, "verify"]
-List<string?> labels = ["portable", null]
-List<string>? inherited_labels = null
+num ratio = 0.5
 
-// Contextual construction gets its nominal type from the left-hand side.
-// channel, description, and labels are omitted, so their defaults apply.
-string tool_image = "example.invalid/tool:1"
-string mirror_image = tool_image
-
-ToolConfig base = {
-    image: mirror_image,
-    note: null,
+Config config = {
+    image: copied_image,
+    labels: ["portable", "typed"],
 }
 
-pub InvocationInput input = {
-    config: ref(base),
-    token: secret_ref("ci/signing-token"),
+Selection selection = {
+    config: ref(config),
 }
 
-pub namespace checks {
-    bool checks_enabled = true
-
-    Flow::Pipeline build = {
-        input: ref(input),
-        mode: Flow::Mode.strict,
-    }
-
-    Flow::Pipeline verify = {
-        input: ref(input),
-        mode: Flow::Mode.strict,
-    }
-
-    Flow::Dependency verify_after_build = {
-        from: ref(build),
-        to: ref(verify),
-    }
+Pair pair = {
+    left: 10,
+    right: ratio,
 }
 
-Flow::ArtifactRef artifact = {
-    value: "sha256:example",
+Fixture::Metadata metadata = {
+    label: "generic probe",
 }
 ```
 
-There are no trailing semicolons. A newline terminates a complete simple
-declaration. Commas separate fields and list elements, with a
-trailing comma allowed and preferred in multiline forms.
-
-## Headers, modules, and vocabularies
-
-Every source unit begins with an exact language version and one logical module.
-The module name is one `snake_case` identifier:
+## Headers
 
 ```neu
 neu "0.1"
-module example_delivery
+module showcase
 ```
 
-The quoted version has canonical `major.minor` syntax, not general string
-semantics. v0 accepts exactly `"0.1"`; escapes, signs, whitespace, leading-zero
-variants, extra components, ranges, and `latest` are invalid.
+Both are mandatory and canonical. One compilation contains one source unit and
+one logical module.
 
-All units in one v0 compilation closure use the same language version. Units
-from the same captured package may declare the same module; their declarations
-merge into one logical module scope. Unit order has no meaning, and duplicate
-names are errors. Equal module names from different packages do not merge.
-
-A vocabulary is imported by logical name:
+## Optional captured vocabulary
 
 ```neu
-use Flow
+use Fixture
 ```
 
-Vocabulary names use an uppercase-leading identifier class and
-`UpperCamelCase` style. `Flow` is an identifier, not a keyword. The captured
-lock manifest resolves it to one exact permitted vocabulary identity,
-digest, schema version, behavior version, and feature set. `use` performs no
-download, ambient lookup, or permission grant. It exposes only qualified names
-such as `Flow::Pipeline`; it does not inject an unqualified `Pipeline`.
+At most one vocabulary is used. The host captures its exact bundle; source does
+not download or select it. The bundle is closed data and may supply nominal
+schemas such as `Fixture::Metadata`.
 
-Vocabulary uses are source-unit scoped. Every unit that contains a
-`Flow::...` name declares `use Flow`. Equal uses in units of the same module must
-resolve to the same exact identity, digest, schema/behavior versions, and
-feature contract. Once any unit imports `Flow`, that name is reserved across the
-complete merged module and cannot collide with a root declaration in another
-unit.
-
-## Names and qualification
-
-Identifiers are case-sensitive ASCII names:
-
-```text
-[A-Za-z_][A-Za-z0-9_]*
-```
-
-Bindings, fields, namespaces, module names, and vocabulary static values use
-`snake_case`. Record/type names and vocabulary namespaces use `UpperCamelCase`
-style; the compiler enforces an uppercase-leading ASCII identifier rather than
-trying to infer word boundaries:
+## Immutable explicit bindings
 
 ```neu
-string release_name = "stable"
-record ReleaseConfig { string image, }
-use Flow
+num count = 10
+string label = "sample"
+bool enabled = true
 ```
 
-The stricter value-name shape is `[a-z][a-z0-9]*(?:_[a-z][a-z0-9]*)*`:
-underscores separate words but cannot lead, trail, repeat, or introduce a
-digit-only segment. Names such as `_internal`, `release__name`, `releaseName`, a
-lowercase record name, or an uppercase binding name are invalid.
+Bindings need no `let`, never need semicolons, and cannot be reassigned. Every
+declaration spells its type.
 
-`::` resolves through namespaces in the current module or through an imported
-vocabulary namespace:
+## Scalars
 
-```text
-checks::build
-Flow::Mode
-```
-
-It never marks a module boundary. v0 has no source-module import,
-module-qualified source access, or ambient lookup.
-
-## Visibility and exports
-
-Declarations are private unless marked `pub`:
+The scalar types are `num`, `string`, and `bool`.
 
 ```neu
-pub record Config { string image, }
-pub Config config = { image: "example.invalid/tool:1" }
-pub namespace api { pub bool enabled = true }
+num exact_decimal = 0.1
+string text = "hello\nworld"
+bool active = false
 ```
 
-`pub` is allowed on records, bindings, and namespaces, but not fields, headers,
-or `use`. A public declaration inside a namespace requires every containing
-namespace to be public. A public declaration's exposed type signature cannot
-name a private nominal type. The compiler recursively traverses each public
-binding's contained records, lists, and vocabulary payloads, inspects without
-following each `Ref<T>` edge, and rejects references to private declarations.
-Fields have no independent visibility; every field of an accessible record is
-part of its visible structural contract.
-Visibility defines the exported IR/documentation surface; it is not a secrecy
-or authorization boundary. Cross-module source access remains absent in v0.
+`num` is exact in Neutral IR. v0 does not convert it to a target integer or
+floating-point representation.
 
-`.` selects only an inert vocabulary-owned static value, such as an enum case:
-
-```neu
-Flow::Mode mode = Flow::Mode.strict
-Flow::Mode copied_mode = mode
-```
-
-All vocabulary-owned values are immutable copyable data in v0. Ordinary reuse
-creates a distinct declaration identity holding the same logical value and
-records reuse provenance. A vocabulary cannot mark a value non-copyable;
-identity-bearing relationships use `Ref<T>`.
-
-It is not general value member access. Forms such as `config.image`, functions,
-method calls, and computed properties are not part of v0. The left side must
-resolve to a type from the captured vocabulary bundle that declares the selected
-static value; user-defined records cannot have static members.
-
-## Scalar and collection types
-
-The author-facing primitive scalar types are:
-
-| Type | Examples | Rule |
-| --- | --- | --- |
-| `num` | `10`, `-4`, `0.25`, `1_000` | Exact source number |
-| `string` | `"hello"`, `"\u{03BB}"` | Finite Unicode scalar sequence |
-| `bool` | `true`, `false` | Boolean |
-
-`null` is not a fourth declared type. It is accepted only where the expected
-type has postfix nullability:
+## Nullability
 
 ```neu
 string? note = null
 List<string>? names = null
-List<string?> labels = ["one", null]
 ```
 
-`List<T>` is ordered and homogeneous. Order and duplicates are retained:
+`?` belongs to the type. `null` is the only null literal. It is invalid for a
+non-nullable expected type.
+
+## Lists
 
 ```neu
-List<num> values = [1, 2.5, 1]
-List<List<num>> matrix = [[1, 2], [3]]
+List<string> labels = ["one", "two"]
 List<string> empty = []
 ```
 
-The explicit expected type disambiguates an empty list and `null`.
+Lists are ordered and homogeneous. Context supplies the element type of `[]`.
 
-### Numeric representation
-
-Source uses only `num`, represented before lowering as an exact
-arbitrary-precision coefficient times a base-10 scale. Normalization makes `10`
-and `10.0` logically equal while provenance retains their spellings. Integer and
-decimal contracts require exact conversion. A named IEEE binary contract uses
-deterministic round-to-nearest, ties-to-even by default; a vocabulary may
-require `exact`. Subnormal results and nonzero values rounded to signed zero are
-valid. Overflow, invalid sign, and non-finite results are rejected. Host numeric
-behavior never participates.
-
-Neutral keeps the exact logical `num` in IR, contract lowering, and an encoded
-target such as binary32 bits as three separate layers. A rounded lowering result
-links to the exact value and contract; it never replaces the IR value.
+## Records and defaults
 
 ```neu
-num whole = 10
-num fraction = 10.5
-num bad = "10" // Invalid: string is not num.
-```
-
-`0.1` is rejected for binary32/binary64 under `exact`. Under the default
-nearest-even conversion, its results are fixed as binary32 `0x3dcccccd` and binary64
-`0x3fb999999999999a`. `0.5` is exactly representable. The conversion contract
-also tests `10.0`, `10.5`, overflow, and binary32 values `16_777_216` and
-`16_777_217`.
-
-`NaN`, infinity, exponent notation, and non-decimal numeric literals are not v0
-numeric forms.
-
-## Records, defaults, omission, and nullability
-
-Records are nominal and fields are type-first:
-
-```neu
-record Example {
-    string required_text,
-    string? required_nullable_text,
-    string defaulted_text = "default",
-    string? defaulted_nullable_text = null,
-    List<string> ordered_values = [],
-}
-```
-
-Field presence and nullability are independent:
-
-| Declaration | Must appear in construction? | May contain `null`? |
-| --- | --- | --- |
-| `string name,` | Yes | No |
-| `string? name,` | Yes | Yes |
-| `string name = "default",` | No | No |
-| `string? name = null,` | No | Yes |
-
-There is no optional-field modifier and no `absent` value. Omission means that a
-declared default is applied; it remains distinguishable from explicit `null` in
-provenance and IR.
-
-Record defaults are closed constants: scalar literals, compatible `null`, and
-lists or contextual records recursively made from constants are allowed. A
-vocabulary static value is allowed only when its captured bundle marks it
-constant-safe. Ordinary binding names, `ref(...)`, and `secret_ref(...)` are
-invalid in record defaults, so schemas cannot acquire hidden instance, identity,
-or secret dependencies. Applying a default copies the constant and records the
-field declaration as provenance; it creates no value-dependency edge.
-
-Record construction is contextual:
-
-```neu
-Example value = {
-    required_text: "present",
-    required_nullable_text: null,
-}
-```
-
-The right-hand side does not repeat `Example`. Untyped anonymous records and
-field shorthand are not supported.
-
-## Immutable bindings and value reuse
-
-All bindings are immutable and always state their type:
-
-```neu
-num attempts = 3
-string label = "verify"
-string copied_label = label
-List<string> labels = [label, copied_label]
-```
-
-There is no `let` keyword and no `name: Type` binding syntax.
-
-An ordinary binding name uses its immutable value and may appear anywhere a
-compatible value can appear, including contextual fields and lists:
-
-```neu
-ToolConfig config = {
-    image: label,
-    note: null,
-}
-```
-
-Compatibility is deliberately narrow: exact type identity is accepted, and a
-non-nullable `T` may widen to the outer nullable `T?`. Generic parameters are
-invariant. Thus `string` can initialize `string?` and `List<string>` can
-initialize `List<string>?`, but `List<string>` cannot initialize
-`List<string?>`; nullable-to-non-nullable narrowing is invalid.
-
-Forward value reuse is allowed. The compiler builds a static dependency graph
-and rejects cycles, making declaration order non-semantic. `label` uses a value;
-`ref(label)` instead creates a symbolic identity link. v0 has no `mut` or
-reassignment. v1 prioritizes immutable derivation/composition and then explicit
-override, validated by real Flow and independent Neux fixtures; mutation is
-investigated only if both mechanisms are insufficient.
-
-## Namespaces
-
-Namespaces provide lexical qualification only:
-
-```neu
-namespace checks {
-    string image = "example.invalid/check:1"
-
-    namespace internal {
-        bool enabled = true
-    }
-}
-```
-
-The resulting names are `checks::image` and `checks::internal::enabled`.
-Namespaces do not create files, pipeline stages, OS namespaces, provider groups,
-or security zones. Duplicate names and shadowing are invalid. Predeclared core
-names cannot be declared or shadowed in any scope.
-A namespace cannot be reopened. Repeating `namespace checks` in the same or a
-different source unit is a duplicate declaration even if its members differ.
-
-## Symbolic references
-
-`ref(...)` links the identity of a value binding:
-
-```text
-ref(config)
-ref(checks::config)
-```
-
-If the target binding has declared type `T`, the result has type `Ref<T>`.
-References do not copy, evaluate, contain, order, schedule, or snapshot their
-targets. Because `ref(...)` resolves identity, it may point forward to an
-immutable binding and is excluded from the ordinary value-dependency graph.
-IR stores target identity, expected type/kind, and provenance only. Consumers
-must not infer dependency, order, ownership, readiness, or containment from a
-reference; those meanings require an explicit domain-owned relationship such as
-`Flow::Dependency`.
-
-```neu
-InvocationInput selected = {
-    config: ref(config),
-    token: secret_ref("ci/signing-token"),
-}
-ToolConfig config = { image: image, note: null, }
-string image = "example.invalid/tool:1"
-```
-
-This is a forward identity link, not a read of `config` at that source position.
-By contrast, `string image2 = image` is an ordinary immutable value dependency.
-
-Only value bindings are legal targets:
-
-```text
-ref(Config) // Invalid: record type.
-ref(checks) // Invalid: namespace.
-ref(Flow) // Invalid: vocabulary namespace.
-```
-
-Static binding-value dependency cycles are invalid. Every nominal recursive record
-cycle must cross `Ref<T>`; neither `Node?` nor `List<Node>` breaks an embedded
-cycle. `ref(...)` and `Ref<T>` edges are identity links and are ignored by those
-cycle checks, so a reference-only cycle is valid:
-
-```neu
-record A {
-    Ref<B> b,
-}
-
-record B {
-    Ref<A> a,
-}
-
-A a = {
-    b: ref(b),
-}
-
-B b = {
-    a: ref(a),
-}
-```
-
-A consumer vocabulary may still reject such a cycle under its own domain
-rules. Neutral does not call every reference an execution dependency.
-
-## Secret references
-
-Secret requests are opaque and contextually typed:
-
-```neu
-SecretRef<string> token = secret_ref("ci/signing-token")
-SecretRef<string>? nullable_token = null
-```
-
-The string identifies the logical request; it does not determine `T` and is not
-the secret material. The use site supplies exactly one expected
-`SecretRef<T>`, optionally under `SecretRef<T>?`. Missing, non-secret, or
-ambiguous expected types are errors.
-
-Neutral never resolves the secret. IR retains an opaque identifier and safe
-provenance, while normal diagnostics and renderers redact the identifier.
-`SecretRef<T>` does not implicitly convert to `string`.
-
-A well-formed type argument is not a deliverability promise. Neutral core may
-accept a structurally valid shape such as `SecretRef<Ref<Config>>`, while the
-selected consumer/profile rejects it because no configured broker supports that
-delivery shape. This capability check occurs before secret resolution.
-
-## Vocabulary-owned data
-
-Vocabulary types use the same type-first binding and contextual construction as
-Neutral records:
-
-```neu
-Flow::ArtifactRef artifact = {
-    value: "sha256:example",
-}
-
-Flow::Mode mode = Flow::Mode.strict
-```
-
-Every vocabulary field independently defines:
-
-- whether it is required or has a default and may be omitted;
-- whether its type is nullable; and
-- whether it is behavioral data or non-behavioral metadata.
-
-Bundles conform to a fixed versioned Neutral-owned closed schema. They may
-declare types, fields, constant defaults, static values, representation
-requirements, behavioral IDs/classes, feature dependencies, and instances of
-predefined Neutral constraint kinds. Scripts, callbacks, arbitrary expressions,
-custom validators, bytecode, native/Wasm code, and entry points are forbidden.
-Unknown required constraint kinds fail closed.
-
-Required features form a transitive closure through referenced members,
-instantiated fields, nested type/schema dependencies, applied defaults, selected
-static values, constraints, behavioral classifications, and feature
-dependencies. IR records the closure and the reason for each feature.
-
-Unknown required behavior fails closed. Ignorable metadata needs an explicit,
-bounded schema envelope and preservation policy. There is no untyped universal
-`extensions` bag.
-
-Applied vocabulary defaults retain field/default identity and version,
-application site, behavioral classification, and feature reasons. Provenance
-distinguishes source values, user-record defaults, vocabulary defaults, and
-behavior introduced by vocabulary defaults.
-
-Vocabulary relationships are typed values whose meaning remains vocabulary
-owned:
-
-```neu
-Flow::Dependency verify_after_build = {
-    from: ref(build),
-    to: ref(verify),
-}
-```
-
-Neutral validates fields, target kinds, references, bounds, and captured static
-constraints. Flow decides whether this relationship represents pipeline order.
-
-## Multiple source units
-
-Two captured units from the same package may contribute different declarations
-to one module.
-
-`config.neu`:
-
-```neu
-neu "0.1"
-module example_shared
-
 record Config {
     string image,
+    string? note = null,
+    List<string> labels = [],
 }
 ```
 
-`values.neu`:
+Records are nominal. A field without a default is required. A default makes the
+field omittable but does not change its nullability.
+
+Defaults are closed constants and cannot read another binding or create an
+identity reference.
+
+## Contextual record construction
 
 ```neu
-neu "0.1"
-module example_shared
-
 Config config = {
     image: "example.invalid/tool:1",
 }
 ```
 
-The compiler merges both declaration sets independent of resolver order. One
-v0 compilation request contains units for one logical module/package identity.
-Mixed language versions, duplicate declarations, cross-package module merging,
-cross-module access, and static value-dependency cycles are rejected.
-Namespaces are not reopened across units; repeating a namespace declaration is
-a duplicate even when its members do not overlap.
+The binding supplies the expected type. `note` and `labels` use their defaults.
+Logical IR contains the final values; provenance says which values came from
+defaults.
 
-## Comments and strings
+Field shorthand and anonymous record types are absent.
+
+## Ordinary value reuse
 
 ```neu
-// Line comment.
-
-/* One-line block comment. */
-
-/*
-Multiline block comment.
-Block comments do not nest.
-*/
-
-string escaped = "quote: \" slash: \\ newline: \n tab: \t"
+string original = "value"
+string copy = original
 ```
 
-Both comment forms are non-semantic. Double-quoted strings support escapes for
-backslash, quote, newline, carriage return, tab, and Unicode scalars. Raw,
-multiline, and interpolated string literals are not part of v0.
+`copy` has the logical string value `"value"`. Provenance records the reuse
+edge. Forward reuse is allowed:
 
-## Source text, diagnostics, and safety limits
+```neu
+string copy = original
+string original = "value"
+```
 
-`.neu` source is UTF-8. One byte-order mark is accepted only at byte zero.
-Malformed UTF-8 and unescaped raw NUL bytes are fatal. `CRLF` and lone `CR` act
-as logical `LF`, while original bytes remain available for content identity and
-source spans. Indentation is formatting, not syntax.
+A cycle is invalid:
 
-The private frontend is staged as raw lexer, newline/layout normalizer, then
-parser. The lexer emits physical newlines; the layout stage decides whether
-they become semantic `LINE_END` tokens using delimiter and declaration-list
-context. Lexical trivia may occur between tokens unless a newline becomes
-`LINE_END`; grammar sketches omit trivia for readability.
+```neu
+string first = second
+string second = first
+```
 
-Diagnostics retain stable machine-readable categories:
+## Identity references
 
-| Prefix | Category |
-| --- | --- |
-| `NL-ENC` | Encoding |
-| `NL-LEX` | Tokens, literals, and comments |
-| `NL-PAR` | Grammar and recovery |
-| `NL-NAM` | Names and collisions |
-| `NL-KND` | Wrong declaration or reference kind |
-| `NL-TYP` | Type mismatch or numeric conversion |
-| `NL-DOM` | Vocabulary schema or placement |
-| `NL-FEA` | Unsupported required feature |
-| `NL-LIM` | Structural resource limit |
-| `NL-INT` | Compiler or captured-bundle defect |
+```neu
+record Selection {
+    Ref<Config> config,
+}
 
-The draft v0 structural baseline limits a unit to 2 MiB, a closure to 256 units
-and 16 MiB, structural nesting to 128, and ordinary diagnostics to 200 followed
-by one truncation diagnostic. Each numeric literal is also initially limited to
-4,096 significant decimal digits and an absolute decimal scale of 4,096, checked
-before expensive allocation or conversion. These numbers are named profile
-baselines to validate against representative and adversarial corpora, not
-permanent language semantics. Limit failure produces no authoritative IR.
-Hardware-dependent time and memory ceilings belong to named implementation
-profiles, not language semantics.
+Selection selection = {
+    config: ref(config),
+}
+```
 
-## Features supplied outside source syntax
+`ref(config)` links the declaration identity. It does not copy the record value
+and implies no containment, ownership, dependency, or order. Forward identity
+references are allowed and do not participate in value-cycle detection.
 
-| Feature | Owner |
-| --- | --- |
-| Captured source bytes and identities | Resolver/compiler request |
-| Package and vocabulary lock data | Resolver/compiler request |
-| Vocabulary permission and trust policy | Host policy |
-| Vocabulary schema and behavior bundle | Captured data-only bundle |
-| Required feature derivation | Compiler and vocabulary schema |
-| IR, derivation identity, origins, and source map | Compiler |
-| Resource budget and diagnostic-redaction policy | Compiler request/host |
-| Flow logical plan and CI/CD behavior | Neutral Flow |
-| Neux OS abstraction and command behavior | Neux |
-| Authorization, credentials, and execution | Consumer/runtime |
+## Reference-only recursion
 
-Source syntax cannot grant authority, select mutable “latest” dependencies,
-read the environment or filesystem, contact a network, or execute vocabulary
-code.
+```neu
+record Node {
+    Ref<Node>? next,
+}
+```
 
-## Deliberately absent from v0
+This is valid because the recursion crosses `Ref<Node>`. Embedded recursion is
+invalid:
 
-The current surface intentionally has no:
+```neu
+record Node {
+    Node? next,
+}
+```
 
-- implicit declaration types or `let`;
-- semicolon terminators;
-- source-module/package imports;
-- maps, sets, tuples, unions, or core enum declarations;
-- untyped anonymous records or field shorthand;
-- raw, multiline, or interpolated strings;
-- general value member access or indexing;
-- arithmetic, Boolean, or comparison operators;
-- general functions, methods, lambdas, loops, exceptions, or threads;
-- mutation, reassignment, compound assignment, or mutation methods;
-- macros, generated syntax, or executable compiler plugins;
-- environment, filesystem, command, provider, or network evaluation;
-- provider credentials or resolved secret material; or
-- Flow/Neux runtime lifecycle semantics.
+## Vocabulary-owned typed data
 
-Later-version checklist entries are design questions, not implemented syntax.
-They should be added to this showcase only after their decisions, lowering,
-diagnostics, and conformance fixtures are complete.
+```neu
+Fixture::Metadata metadata = {
+    label: "sample",
+}
+```
+
+The exact captured vocabulary schema defines the fields. The compiler validates
+them and emits qualified typed data. No vocabulary code runs, and the generic
+probe does not assign application meaning.
+
+## Qualification
+
+`::` is used only for `Vocabulary::Type` in v0. These are invalid:
+
+```neu
+module package::module
+Fixture::Metadata.value
+config.image
+```
+
+There are no local namespaces, module paths, static values, or member access.
+
+## Comments
+
+```neu
+// line comment
+
+/* non-nesting
+   block comment */
+```
+
+Comments are non-semantic trivia and do not attach documentation.
+
+## Type compatibility
+
+Exact type identity is required except that `T` may widen to outer `T?`:
+
+```neu
+string name = "sample"
+string? maybe_name = name
+```
+
+Generic arguments are invariant. `List<string>` cannot initialize
+`List<string?>`.
+
+## What reaches IR
+
+The public logical payload contains:
+
+- logical module and optional vocabulary identities;
+- declaration identity plus declaration fingerprint;
+- resolved types and final immutable values;
+- document-local reference edges; and
+- required structural features.
+
+Source maps record where elements came from. Provenance records explicit source,
+value reuse, and defaults. Derivation records the captured compilation inputs.
+
+`ElementId` is a graph-local label. Logical equality and deterministic output are
+defined modulo consistent `ElementId` renaming.
+
+## What v0 deliberately omits
+
+- namespaces and visibility modifiers;
+- multiple source units and imports;
+- secret references;
+- static/member selection;
+- maps, sets, tuples, unions, and enums;
+- operators, expressions, functions, and control structures;
+- mutation, override, composition, templates, and macros;
+- executable plugins or external evaluation; and
+- application-specific syntax or runtime behavior.

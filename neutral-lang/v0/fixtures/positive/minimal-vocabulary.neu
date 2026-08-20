@@ -1,13 +1,13 @@
 neu "0.1"
-module fixture_minimal_flow
+module fixture_minimal_vocabulary
 
-use Flow
+use Fixture
 
 record ToolConfig {
     string image,
 }
 
-record InvocationInput {
+record Selection {
     Ref<ToolConfig> config,
 }
 
@@ -17,11 +17,10 @@ ToolConfig config = {
     image: image,
 }
 
-InvocationInput input = {
+Selection selection = {
     config: ref(config),
 }
 
-Flow::Pipeline verify = {
-    input: ref(input),
-    mode: Flow::Mode.strict,
+Fixture::Metadata metadata = {
+    label: "generic probe",
 }

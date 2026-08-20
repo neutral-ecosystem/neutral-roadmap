@@ -1,140 +1,49 @@
-# Section 12: security-sensitive syntax
+# Section 9: security and limits
 
-Status: proposed
+## No authority-bearing syntax
 
-Answers: `SYN-SEC-001` through `SYN-SEC-006`
+v0 has no secret reference, credential, signature, policy, permission, command,
+filesystem, environment, or network syntax. A quoted string is always ordinary
+text and grants no authority.
 
-## SYN-SEC-001 — Opaque secret references
+## No execution during compilation
 
-Secret requests use a dedicated value form:
+Source and vocabulary validation execute no native code, script, callback,
+bytecode, plugin, or application operation. Vocabulary bundles are closed data.
 
-```neu
-SecretRef<string> token = secret_ref("ci/signing-token")
+## Explicit capture boundary
+
+The host supplies the only resolver. Source has no `include(path)`, URL import,
+ambient profile search, current-directory expansion, or registry lookup.
+
+```text
+capture(request) -> CapturedCompilation
+compileCaptured(captured) -> CompilationResult
 ```
 
-It is a contextually typed opaque value and does not determine `T` from its
-string argument. The use site MUST provide exactly one expected `SecretRef<T>`
-type, optionally under the nullable wrapper `SecretRef<T>?`. No expected type, a
-non-secret expected type, or multiple possible underlying `SecretRef<T>` types
-is an error. The argument is a logical identifier, not secret material, a
-provider credential, or a filesystem path. `T` declares the delivery shape
-requested from the eventual secret broker; the compiler does not inspect or
-guarantee the resolved content. Only bindings or fields with that expected
-secret-reference shape accept the value.
+Resolver credentials remain behind the host boundary. Missing source or
+vocabulary input fails closed rather than selecting a fallback.
 
-`SecretRef` requires exactly one well-formed Neutral type argument; bare, empty,
-and multi-argument forms are type errors. Well-formedness and deliverability are
-separate contracts. Neutral core accepts a structurally well-formed type argument
-without claiming that a broker can deliver it. A selected consumer/profile
-publishes its supported secret-delivery shapes and rejects unsupported shapes as
-a capability diagnostic before secret resolution. Thus forms such as
-`SecretRef<Ref<Config>>` or `SecretRef<List<SecretRef<string>>>` may be
-well-formed Neutral types yet unsupported by every selected broker/profile.
+## Safe diagnostics
 
-IR contains the opaque logical identifier, sensitivity classification, and
-source provenance. It MUST NOT contain resolved value, token, lease, destination
-credential, or broker response. neutral-lang never resolves the reference.
+Diagnostics separate stable code, safe parameters, source spans, and optional
+excerpt. They escape control characters and report logical source identities,
+not accidental host paths. Resolver credentials and host policy inputs never
+appear in ordinary rendering.
 
-## SYN-SEC-002 — Secret references are not text
+## Structural limits
 
-`SecretRef<T>` is not `string` and has no implicit conversion, interpolation,
-concatenation, formatting, equality display, or ordinary serialization as text.
-v0 has no interpolation in any case. A quoted value
-`"ci/signing-token"` is merely text and cannot satisfy `SecretRef<T>`.
+Compiler and reader APIs receive explicit versioned limits for:
 
-Human renderers show a redacted placeholder and safe element identity rather
-than the argument by default. A consumer must use a separate authorized broker
-protocol to act on the reference; the syntax grants no authority.
+- source and bundle bytes;
+- string length and nesting;
+- declaration, field, list-item, and reference counts;
+- numeric significant digits and decimal scale;
+- IR bytes/elements and traversal work; and
+- diagnostic count and safe rendered size.
 
-## SYN-SEC-003 — No execution during compilation
+Checks occur before proportional allocation or conversion. Crossing a limit
+produces a bounded diagnostic and no authoritative IR.
 
-v0 has no syntax for:
-
-- evaluating native, shell, provider, or downloaded code;
-- compiler macros or procedural annotations;
-- dynamic libraries or plugin entry points;
-- command substitution;
-- environment-variable lookup;
-- network/file reads; or
-- secret resolution.
-
-Vocabulary-owned typed declarations and raw text are inert data. Vocabulary
-bundles conform to the closed Neutral-owned declarative schema in `SYN-DOM-001`.
-They cannot contain scripts, callbacks, arbitrary expressions, executable
-validators, custom code, bytecode, native/Wasm modules, or entry points. A
-string that resembles a shell command remains text. Compiler constant handling
-is limited to parsing literal/record/list/reference forms and interpreting
-Neutral-defined declarative constraint kinds.
-
-## SYN-SEC-004 — Explicit resolver boundary
-
-The source language has no `include(path)`, URL import, ambient profile search,
-or home/current-directory expansion. v0 source declares logical modules and
-vocabulary `use` requirements; the compilation request supplies captured source
-units and bundles through one explicit resolver.
-
-Resolver credentials and mutable acquisition state never enter source, IR, or
-derivation. The derivation records safe immutable content/results, not secrets.
-A missing input fails closed instead of triggering fallback lookup.
-
-## SYN-SEC-005 — Safe diagnostics
-
-Diagnostics MUST NOT copy secret-reference arguments, values in schema-marked
-sensitive fields, resolver credentials, environment values, or untrusted
-control characters into ordinary messages.
-
-Each diagnostic record separates stable code, safe parameters, primary span,
-related spans, and optional excerpt. Safe/server mode omits excerpts intersecting
-sensitive nodes and replaces values with typed redaction markers. Paths are
-reported as safe logical source names, not accidental host paths. Terminal and
-HTML renderers escape all untrusted text.
-
-Redaction never changes whether compilation succeeds and cannot be disabled by
-source syntax.
-
-## SYN-SEC-006 — Lexical and structural limits
-
-The draft desktop/CI structural measurement baseline is:
-
-| Budget | v0 provisional limit |
-| --- | ---: |
-| Bytes per source unit | 2 MiB |
-| Source units | 256 |
-| Complete closure | 16 MiB |
-| Import/composition depth | 64 |
-| Structural nesting | 128 |
-| Significant decimal digits per `num` literal | 4,096 |
-| Decimal scale per `num` literal | 4,096 |
-| Emitted diagnostics | 200 plus one truncation diagnostic |
-
-A `num` literal counts decimal digits after removing separators and leading
-zeroes; at least one zero digit remains for zero. Its scale is the number of
-digits after the decimal point before semantic trailing-zero normalization.
-Both limits are profile-controlled inputs; 4,096 is a provisional desktop/CI
-measurement baseline, not permanent language semantics. The check occurs before
-arbitrary-precision allocation, normalization, or decimal-to-binary conversion.
-
-A text literal is bounded by the source-unit and decoded-node budgets.
-Delimiter, type, and value nesting all consume the same structural depth budget;
-changing construct kind cannot reset it. Block comments do not nest and are
-bounded by source-unit size and compilation work budgets.
-
-Limits are explicit compiler inputs and recorded in derivation when they affect
-acceptance. Crossing a limit produces one bounded diagnostic and no authoritative
-IR. A host may impose stricter limits but never silently larger ones than its
-published safety ceiling.
-
-Wall-clock deadlines and memory ceilings depend on implementation, hardware,
-concurrency, and deployment. They belong to named implementation resource
-profiles, not the Neutral language contract. See
-[implementation resource budgets](../../docs/implementation-resource-budgets.md).
-
-## Required evidence
-
-Tests MUST demonstrate that secret arguments never appear in normal output,
-missing/non-secret/ambiguous contextual secret types fail, well-formed but
-profile-unsupported delivery shapes receive a pre-resolution capability
-diagnostic, source cannot trigger
-any ambient effect, malicious Unicode/control text is escaped, missing resolver
-inputs fail closed, and every language-level limit is tested below, at, and
-above its boundary without unbounded recovery diagnostics.
+Wall-clock deadlines, external cancellation, and physical memory ceilings are
+implementation/deployment controls, not reproducible language semantics.

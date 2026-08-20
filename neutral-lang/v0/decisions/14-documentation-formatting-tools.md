@@ -1,53 +1,23 @@
-# Section 14: documentation, formatting, and tools
+# Section 11: documentation and formatting
 
-Status: proposed
+## SYN-TOL-001 — Comments and stable formatting
 
-Answers: `SYN-TOL-001` and `SYN-TOL-002`
+`//` and `/* ... */` are non-semantic trivia. v0 has no documentation comment,
+annotation, attribute, or attachment model. Documentation tools may display
+source comments but cannot treat them as logical IR.
 
-## SYN-TOL-001 — No documentation attachment in v0
+### Formatter
 
-v0 has no documentation-comment or documentation-annotation production.
-`//` and `/* ... */` are non-semantic comments and never attach to a following
-module, vocabulary `use`, declaration, or field.
+One reference formatter defines stable output for v0 syntax:
 
-```neu
-/* Configuration note only, not IR documentation. */
-record Config {
-    // Human-facing label is a domain value, not symbol identity.
-    string label,
-}
-```
+- canonical header order;
+- four-space indentation inside record declarations and values;
+- one declaration field per line with trailing comma;
+- normalized spaces around `=`, after `:`, and after commas;
+- no semicolons; and
+- deterministic preservation/placement of comments.
 
-Comments may remain in the private syntax tree and source-preserving tools, but
-they do not enter logical IR or affect resolution, types, logical equality,
-authorization, or execution. A future documentation feature requires its own
-syntax, lowering, provenance, and compatibility decision.
+Formatting must preserve logical IR. Formatted bytes are not canonical IR bytes,
+source identity, or signing material.
 
-## SYN-TOL-002 — Stable formatter
-
-The reference formatter uses:
-
-- UTF-8, logical `LF`, and one final newline;
-- four-space indentation and no indentation tabs;
-- one space around `=` and after `:`/`,` where applicable;
-- postfix `?` attached to its type and one space before the declared name;
-- contextual braced values without a repeated right-hand constructor type;
-- opening brace on the declaration line;
-- one item per line in multiline constructs;
-- trailing commas in multiline fields/lists;
-- no semicolons and one logical declaration per line;
-- double-quoted text with shortest unambiguous supported escapes;
-- preserved line and block comments; and
-- default width 100 Unicode scalar columns except unbreakable tokens.
-
-Formatting is deterministic and idempotent. v0 refuses to rewrite a file with
-fatal parse errors. Formatting may change source/derivation identity but MUST
-preserve logical IR. It is not canonical IR, signature input, or proof of
-domain equivalence.
-
-## Required evidence
-
-Golden files cover all constructs, line and block-comment boundaries, attempted
-block nesting, long forms, escapes, and malformed refusal. Tests assert
-formatter idempotence and logical IR equality before/after formatting under
-equal captured non-source inputs.
+Idempotence and parse/format/parse logical equality are conformance properties.

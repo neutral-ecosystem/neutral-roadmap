@@ -1,6 +1,0 @@
-neu "0.1"
-module fixture_field_visibility
-
-pub record Config {
-    pub string image,
-}

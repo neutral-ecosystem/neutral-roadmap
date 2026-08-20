@@ -1,6 +1,8 @@
 neu "0.1"
 module fixture_vocabulary_collision
 
-record Flow {
+use Fixture
+
+record Fixture {
     string name,
 }
