@@ -2,20 +2,12 @@
 
 Status: working v0 decision baseline
 
-These files answer every item in
-[the v0 syntax checklist](../syntax-checklist.md), grouped by its section.
-They define a coherent candidate syntax but do not mark the checklist complete:
-completion still requires review, a normative grammar, implementation,
-diagnostic fixtures, source maps, and consumer conformance evidence.
-
 Editable author-facing synthesis:
 [proposed v0 syntax guide](../proposed-syntax-guide.md).
 
 Initial positive, negative, and numeric cases:
 [v0 fixture index](../fixtures/README.md).
 
-Resolved design-audit findings:
-[v0 problem-resolution ledger](../problems.md).
 
 Normative words such as **MUST**, **MUST NOT**, and **MAY** describe the proposed
 contract. Flow and Neux behavior is illustrative only and remains owned by those
