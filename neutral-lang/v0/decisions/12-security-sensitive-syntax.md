@@ -95,13 +95,21 @@ The draft desktop/CI structural measurement baseline is:
 | Complete closure | 16 MiB |
 | Import/composition depth | 64 |
 | Structural nesting | 128 |
+| Significant decimal digits per `num` literal | 4,096 |
+| Decimal scale per `num` literal | 4,096 |
 | Emitted diagnostics | 200 plus one truncation diagnostic |
 
-A text or numeric literal is additionally bounded by the containing source-unit
-limit and the configured decoded-node budget. Delimiter, type, and value nesting
-all consume the same structural depth budget; changing construct kind cannot
-reset it. Block comments do not nest and are bounded by source-unit size and
-compilation work budgets.
+A `num` literal counts decimal digits after removing separators and leading
+zeroes; at least one zero digit remains for zero. Its scale is the number of
+digits after the decimal point before semantic trailing-zero normalization.
+Both limits are profile-controlled inputs; 4,096 is a provisional desktop/CI
+measurement baseline, not permanent language semantics. The check occurs before
+arbitrary-precision allocation, normalization, or decimal-to-binary conversion.
+
+A text literal is bounded by the source-unit and decoded-node budgets.
+Delimiter, type, and value nesting all consume the same structural depth budget;
+changing construct kind cannot reset it. Block comments do not nest and are
+bounded by source-unit size and compilation work budgets.
 
 Limits are explicit compiler inputs and recorded in derivation when they affect
 acceptance. Crossing a limit produces one bounded diagnostic and no authoritative

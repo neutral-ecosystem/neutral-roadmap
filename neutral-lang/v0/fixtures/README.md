@@ -13,6 +13,9 @@ vocabulary bundles.
   Its `Flow` names use only the already documented illustrative vocabulary
   surface. The test harness must supply the tiny captured data-only bundle; this
   repository does not invent a bundle serialization to make the fixture work.
+- `positive/visibility-defaults-compatibility.neu` covers `pub`, public
+  containers, closed constant defaults, a constant-safe vocabulary static
+  default, and permitted outer-nullability widening.
 
 ## Negative
 
@@ -22,6 +25,13 @@ vocabulary bundles.
   production.
 - `negative/value-cycle.neu` parses but must fail semantic analysis because its
   ordinary immutable value-dependency graph is cyclic.
+- `negative/nonconstant-default.neu` rejects an ordinary binding in a record
+  default.
+- `negative/generic-covariance.neu` rejects widening inside `List<T>`.
+- `negative/private-public-surface.neu` rejects a public signature that exposes
+  a private nominal type.
+- `negative/module-path.neu` rejects `::` in the single-identifier module
+  header.
 
 ## Numeric conversion
 

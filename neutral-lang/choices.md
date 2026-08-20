@@ -499,6 +499,8 @@ It should separately bound:
 - bytes per source unit and per complete closure;
 - source-unit count, import depth, and vocabulary dependency depth;
 - nesting, collection sizes, string/binary sizes, and reference count;
+- significant decimal digits and absolute decimal scale per numeric literal,
+  checked before arbitrary-precision allocation or conversion;
 - composition/expansion depth and generated-element count;
 - encoded and decoded IR size;
 - deterministic work units where the implementation exposes them; and
@@ -521,6 +523,8 @@ desktop/CI profile for early measurement—not a compatibility promise—is:
 | Complete source closure | 16 MiB |
 | Import or composition depth | 64 |
 | Structural nesting depth | 128 |
+| Significant decimal digits per numeric literal | 4,096 |
+| Absolute decimal scale per numeric literal | 4,096 |
 | Expanded IR elements | 10,000 |
 | Decoded IR size | 32 MiB |
 | Emitted diagnostics | 200, followed by one truncation diagnostic |

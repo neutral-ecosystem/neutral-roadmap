@@ -9,10 +9,11 @@ Answers: `SYN-VAL-001` through `SYN-VAL-008`
 Scalar forms follow `SYN-LEX-007` and `SYN-LEX-008` and are checked against
 an explicit expected type. Source `num` is an exact arbitrary-precision base-10
 rational within configured digit/scale limits. Integer and decimal targets
-require exact conversion. A named IEEE binary target requires the vocabulary
-contract to select exact conversion or deterministic round-to-nearest,
-ties-to-even; absent policy fails closed. Host-machine numeric types, widths,
-rounding modes, locale, and overflow rules never participate.
+require exact conversion. A named IEEE binary target uses deterministic
+round-to-nearest, ties-to-even by default and may be constrained to exact
+representation by the vocabulary. Subnormal and signed-zero results are valid;
+overflow and non-finite results are rejected. Host-machine numeric types,
+widths, rounding modes, locale, and overflow rules never participate.
 
 Numeric source values are exact within configured digit/scale limits. A
 `string` is a Unicode scalar sequence after escape processing. Invalid spelling,
@@ -61,7 +62,10 @@ The compiler preserves structural omission/default application versus explicit
 `null` in provenance and IR. v0 has no `absent` token and no optional-field
 modifier. A vocabulary-owned field follows the same rule as a Neutral record
 field: it may be omitted only when its captured schema supplies a default.
-Omission is still not a source value.
+Omission is still not a source value. User-record defaults are closed constants
+under `SYN-TYP-004`; applying one copies that constant into the constructed value
+and records both the construction site and field-default declaration as origin.
+It creates no ordinary binding dependency.
 
 ## SYN-VAL-005 — Binding values and identity references
 
@@ -88,7 +92,6 @@ are allowed; every cycle in their graph is rejected before evaluation.
 ```neu
 ref(config)
 ref(checks::config)
-ref(acme::delivery::checks::config)
 ```
 
 If the target binding has declared type `T`, `ref(...)` has type `Ref<T>` and
@@ -126,6 +129,12 @@ Neutral validates the captured static schema and emits qualified identity. It
 does not prove the external artifact exists or is trusted. Construction cannot
 execute code or perform lookup.
 
+Every vocabulary-owned value is immutable copyable data in v0. Ordinary reuse
+of `Flow::Pipeline build` in `Flow::Pipeline second = build` creates a second
+declaration identity containing the same logical value and provenance linking
+the reuse. Vocabulary bundles have no non-copyable-value marker. Identity-bearing
+relationships must use `Ref<T>` rather than relying on object-like copy behavior.
+
 ## SYN-VAL-008 — Record shorthand
 
 v0 rejects record shorthand. Authors write `image: image` for ordinary value
@@ -135,7 +144,7 @@ binding resolution and improves source maps/migrations.
 
 ## Required evidence
 
-Fixtures MUST cover scalar mismatch, exact and explicitly rounded numeric
+Fixtures MUST cover scalar mismatch, nearest-even and exact-required numeric
 conversion boundaries,
 every contextual-record error including repeated/absent/ambiguous expected
 types, binding values inside records/lists, forward value dependencies, static

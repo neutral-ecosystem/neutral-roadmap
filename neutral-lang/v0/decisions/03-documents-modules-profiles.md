@@ -2,7 +2,7 @@
 
 Status: proposed
 
-Answers: `SYN-DOC-001` through `SYN-DOC-004`
+Answers: `SYN-DOC-001` through `SYN-DOC-004` and `SYN-DOC-007`
 
 ## SYN-DOC-001 — Language behavior version
 
@@ -88,38 +88,75 @@ closure; supporting that case requires the future vocabulary-renaming decision.
 Every unit declares one logical module:
 
 ```neu
-module acme::delivery
+module acme_delivery
 ```
 
-A module is one or more `snake_case` identifiers joined by `::`. It is a
-logical name, not a path, URL, registry coordinate, mutable tag, package
-identity, or display label.
+A module is exactly one `snake_case` identifier. It is a logical name, not a
+namespace path, filesystem path, URL, registry coordinate, mutable tag, package
+identity, or display label. `::` is not part of module-name syntax.
 
 The request associates each unit with immutable content and package identity.
-The module declaration must agree with that manifest. Multiple source units from
-the same captured package identity may declare the same module; their
-declarations form one logical module namespace. Units with different package
-identities cannot merge into one v0 module. Duplicate declaration names across
-merged units are errors, and source-unit or resolver order has no semantic
-meaning.
+The module declaration must agree with that manifest. One v0 compilation request
+contains source units for exactly one logical module and captured package
+identity. Multiple units may declare that same module and merge into one module
+scope. A different module name or package identity is a request-level error.
+Duplicate declarations across merged units are errors, and source-unit or
+resolver order has no semantic meaning.
 
 Vocabulary `use` declarations remain source-unit scoped: every unit that uses a
 vocabulary-qualified name declares the corresponding `use`. Equal use names in
 units of the same module must resolve to the same exact captured bundle. A
 different resolution is a closure-level conflict, not an order-dependent choice.
 
-v0 has no source-module or package imports. The request/resolver may provide a
-closed set of units for qualified references. `use` imports only a captured
-vocabulary namespace; neither module spelling nor `use` searches disk or network.
+v0 has no source-module/package imports and no cross-module source access.
+`qualified::names` resolve only through namespaces in the current module or a
+vocabulary namespace introduced by `use`; a module name never participates in
+that resolution. `use` imports only a captured vocabulary namespace; neither
+module spelling nor `use` searches disk or network. An explicit module-import or
+absolute-module syntax remains a future decision.
+
+## SYN-DOC-007 — Visibility and exports
+
+Declarations are private unless marked `pub`:
+
+```neu
+pub record ToolConfig {
+    string image,
+}
+
+pub ToolConfig config = {
+    image: "example.invalid/tool:1",
+}
+```
+
+`pub` may modify a namespace, record declaration, or binding declaration; it is
+not legal on a field, `use`, or header. A nested public declaration requires
+every containing namespace to be `pub`, otherwise the declaration is rejected as
+a misleading unreachable export. A public declaration's exposed type signature
+cannot name a private nominal type, and public identity-reference values cannot
+expose private targets.
+
+Visibility defines the module's exported declaration surface in IR,
+documentation, and consumer tooling. Private declarations remain in IR when
+needed to represent and explain the compiled module, and authorized readers may
+inspect them. `pub` is therefore not confidentiality, authorization, or a trust
+boundary.
+
+Because v0 has no cross-module source access, `pub` does not make a declaration
+addressable from another source module yet. Future module imports may expose only
+this recorded public surface; they must not retroactively treat all v0 private
+declarations as public.
 
 ## Invalid and boundary cases
 
 Missing, duplicate, late, malformed, or unsupported headers; mixed closure
-versions; absent modules; cross-package module-name collisions; duplicate names
+versions; multiple module/package identities in one request; duplicate names
 in a merged module; conflicting cross-unit vocabulary resolutions; late or
 duplicate `use` declarations within one unit; missing/ambiguous/disallowed lock
 mappings; version or digest mismatch; unsupported used features; and namespace
-collisions each receive distinct diagnostics.
+collisions; misplaced `pub`; a public declaration inside a private namespace; and
+public surfaces exposing private types or identity targets each receive distinct
+diagnostics.
 
 All header records and spans enter the derivation manifest. Diagnostics require
 no consumer or vocabulary code execution.

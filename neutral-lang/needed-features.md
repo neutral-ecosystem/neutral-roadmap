@@ -152,8 +152,8 @@ lifecycle.
 - **NL-NAM-001:** Important declarations and generated elements have explicit,
   stable identities independent of display labels.
 - **NL-NAM-002:** Scope, visibility, qualification, shadowing, and collision
-  rules are deterministic. In source, `::` is reserved for module/namespace
-  or vocabulary qualification; v0 `.` selects only a vocabulary-owned enum case
+  rules are deterministic. In v0 source, `::` is reserved for namespaces in the
+  current module or vocabulary qualification; v0 `.` selects only a vocabulary-owned enum case
   or static member and is not general value member access.
 - **NL-NAM-003:** `ref(...)` targets only value bindings and is represented as a
   resolved symbolic link to binding identity, never as text a consumer must
@@ -168,8 +168,8 @@ lifecycle.
   declaration identity. Both may target later immutable bindings, while only
   ordinary value uses contribute to static dependency-cycle detection.
 - **NL-NAM-005:** References can target value bindings in another captured
-  source unit or versioned package without losing the target's immutable
-  identity.
+  source unit of the same merged module without losing the target's immutable
+  identity. v0 has no module-qualified or cross-module source access.
 - **NL-NAM-006:** Renaming and aliasing preserve an inspectable origin and never
   create two authoritative identities accidentally.
 - **NL-NAM-007:** Consumers can enumerate declarations and relationships without
@@ -177,7 +177,7 @@ lifecycle.
 - **NL-NAM-008:** Human-readable names remain available for diagnostics and
   visualization even when stable machine identities differ.
 - **NL-NAM-009:** Author-facing names use an intentional category split:
-  `snake_case` for bindings, fields, namespace/module segments, and static
+  `snake_case` for bindings, fields, namespaces, module names, and static
   values; `UpperCamelCase` style for record/types and vocabulary namespaces.
   The compiler enforces only an uppercase-leading lexical class for the latter,
   because machine recognition of word boundaries would be subjective. External
@@ -195,6 +195,14 @@ lifecycle.
   mutation or reassignment syntax, and declaration order is non-semantic after
   required headers. Mutation remains future-only unless real Flow and Neux
   evidence shows immutable composition or explicit overriding is insufficient.
+- **NL-NAM-014:** v0 module headers contain one `snake_case` identifier. A
+  compilation request contains units for one logical module/package identity;
+  `::` never encodes a module path.
+- **NL-NAM-015:** Records, bindings, and namespaces are private by default and
+  may be exported with `pub`. Public nested declarations require public
+  containers; public exposed type signatures and identity links cannot expose private
+  declarations. Visibility controls the IR/documentation surface, not secrecy,
+  authority, or execution permission.
 
 These capabilities let Flow derive named work and dependency relationships, but
 Neutral does not decide that a declaration is a job or that a reference is a
@@ -247,10 +255,10 @@ readiness edge.
   constructor type on the right-hand side.
 - **NL-VAL-005:** Numeric ranges, precision, text/binary distinction, ordering,
   duplicate-key behavior, and null/omission behavior are not left to an encoding
-  library's defaults. Integer/decimal conversion is exact. A binary vocabulary
-  contract explicitly selects exact conversion or deterministic IEEE
-  round-to-nearest, ties-to-even; missing policy and host-dependent behavior fail
-  closed.
+  library's defaults. Integer/decimal conversion is exact. Named IEEE formats
+  use deterministic round-to-nearest, ties-to-even by default and a vocabulary
+  may require exact conversion. Subnormals and signed-zero underflow are valid,
+  while overflow, non-finite results, and host-dependent behavior fail.
 - **NL-VAL-006:** A value retains its declaration, origin, and transformation
   provenance sufficiently for a consumer diagnostic.
 - **NL-VAL-007:** Sensitive classification and contextually typed generic opaque
@@ -265,6 +273,16 @@ readiness edge.
   unevaluated for the consumer.
 - **NL-VAL-010:** Structured outputs can be described and referenced without the
   compiler claiming that an execution will actually produce them.
+- **NL-VAL-011:** User-record defaults are closed constants: recursively constant
+  literals, lists, records, and explicitly constant-safe vocabulary static
+  values. They cannot depend on bindings, declaration identities, or secrets;
+  applying a default records provenance but creates no value-dependency edge.
+- **NL-VAL-012:** Source value compatibility is exact identity plus only outer
+  `T` to `T?` widening. Generic arguments are invariant, and nominal and
+  vocabulary-owned types require identical resolved identity.
+- **NL-VAL-013:** Every v0 vocabulary-owned value is immutable copyable data.
+  Copy reuse creates a new declaration identity with the same logical value and
+  recorded provenance; identity-bearing relationships use `Ref<T>`.
 
 ## 8. Symbolic computation and availability
 
@@ -890,6 +908,8 @@ Use these only as initial desktop/CI measurement values, not stable promises:
 | Complete source closure | 16 MiB |
 | Import or composition depth | 64 |
 | Structural nesting depth | 128 |
+| Significant decimal digits per numeric literal | 4,096 |
+| Absolute decimal scale per numeric literal | 4,096 |
 | Expanded IR elements | 10,000 |
 | Decoded IR size | 32 MiB |
 | Emitted diagnostics | 200, then one truncation diagnostic |
@@ -898,6 +918,8 @@ Before any stable release, replace or confirm the numbers using representative,
 near-limit, and adversarial Flow and Neux corpora. Wall-clock and memory ceilings
 belong to a named implementation/deployment profile, as described in
 [implementation resource budgets](docs/implementation-resource-budgets.md).
+Numeric digit and scale limits are checked before constructing an
+arbitrary-precision coefficient or starting decimal-to-binary conversion.
 
 ### 10. Which consumer conformance case proves the boundary without implementing Flow or Neux inside the compiler?
 

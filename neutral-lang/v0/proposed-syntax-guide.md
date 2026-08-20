@@ -15,14 +15,15 @@ The revised surface follows these preferences:
 - `num` is the preferred author-facing numeric type;
 - `int`, `uint`, and `float` representations remain compiler/IR and domain
   contract concerns beneath `num`;
-- source `num` is an exact base-10 value; contract-specific numeric lowering is
-  exact unless a binary contract explicitly permits deterministic rounding;
+- source `num` is an exact base-10 value; integer and decimal lowering is exact,
+  while named IEEE binary lowering defaults to deterministic nearest-even and
+  may be constrained to exact;
 - text uses `string`;
 - nullability is a postfix type constructor such as `string?`;
 - `null` is the only explicit source null/empty literal; there is no `absent`
   token;
-- `::` resolves a name through module or namespace scopes, including a
-  vocabulary namespace introduced by `use`;
+- `::` resolves namespaces in the current module, including a vocabulary
+  namespace introduced by `use`; it never marks a module boundary;
 - `.` selects a vocabulary-owned enum case or static member; general value
   member access is not part of v0; and
 - Neutral remains a tool-abstraction language, not a general-purpose language.
@@ -32,9 +33,9 @@ Three details are deliberate:
 1. v0 has no mutation or reassignment. A future version may reconsider mutation
    only after real Flow and independently designed Neux cases prove that
    immutable composition or explicit overriding is insufficient.
-2. Integer and decimal conversion is exact. IEEE binary conversion requires an
-   explicit vocabulary policy choosing exactness or deterministic
-   round-to-nearest, ties-to-even. Unspecified precision loss is rejected.
+2. Integer and decimal conversion is exact. IEEE binary conversion defaults to
+   deterministic round-to-nearest, ties-to-even; a vocabulary may require exact
+   representation instead.
 3. `string? label` means nullable, not omittable. A field without a default must
    be supplied; a field with a default may be omitted.
 
@@ -42,38 +43,38 @@ Three details are deliberate:
 
 ```neu
 neu "0.1"
-module acme::delivery
+module acme_delivery
 
 use Flow
 
 /* Reusable configuration data. */
-record ToolConfig {
+pub record ToolConfig {
     string image,
     string? note,
     List<string> labels = [],
 }
 
 /* Data containing symbolic references. */
-record InvocationInput {
+pub record InvocationInput {
     Ref<ToolConfig> config,
     SecretRef<string> token,
 }
 
 string tool_image = "example.invalid/tool:1"
 
-ToolConfig base = {
+pub ToolConfig base = {
     image: tool_image,
     note: null,
 }
 
-InvocationInput input = {
+pub InvocationInput input = {
     config: ref(base),
     token: secret_ref("ci/signing-token"),
 }
 
-namespace checks {
-    Flow::Pipeline verify = {
-        input: ref(acme::delivery::input),
+pub namespace checks {
+    pub Flow::Pipeline verify = {
+        input: ref(input),
         mode: Flow::Mode.strict,
     }
 }
@@ -107,12 +108,12 @@ resolution.
 ### Module
 
 ```neu
-module acme::delivery
+module acme_delivery
 ```
 
-A module name is a `::`-qualified logical name whose segments use `snake_case`.
-It is not a file path, URL, package download instruction, or mutable version
-tag.
+A module name is one `snake_case` identifier. It is not a namespace path, file
+path, URL, package download instruction, or mutable version tag. `::` never
+appears in a module name.
 
 One logical module may span multiple source units from the same captured package
 identity. Their declarations merge into one module namespace; duplicate names
@@ -122,8 +123,9 @@ source-unit scoped: each unit that spells `Flow::...` must contain `use Flow`.
 Equal use names in units of the same module must resolve to the same captured
 bundle or compilation fails.
 
-v0 has no source-module or package import statement. `use` introduces only a
-captured vocabulary namespace; the compiler request supplies the source closure.
+One v0 compilation request contains units for exactly one logical module and
+package identity. v0 has no source-module/package import or cross-module source
+access. `use` introduces only a captured vocabulary namespace.
 
 ### Using a vocabulary
 
@@ -187,7 +189,7 @@ v0 identifiers remain ASCII:
 
 Names follow two case classes:
 
-- `snake_case` for bindings, fields, namespace/module segments, and
+- `snake_case` for bindings, fields, namespace names, module names, and
   vocabulary-owned static values; and
 - `UpperCamelCase` style for record/type names and vocabulary namespaces.
 
@@ -223,7 +225,7 @@ Unicode display names belong in `string` values. v0 has no quoted identifiers.
 Reserved core words are:
 
 ```text
-neu module use namespace record
+neu module use pub namespace record
 true false null ref secret_ref
 ```
 
@@ -231,11 +233,11 @@ true false null ref secret_ref
 type/type-constructor names. Predeclared core names cannot be declared or
 shadowed in any scope.
 
-Use `::` to resolve a name through module or namespace scopes:
+Use `::` to resolve a name through namespaces in the current module, including
+an imported vocabulary namespace:
 
 ```neu
 checks::config
-acme::delivery::checks::config
 Flow::Mode
 ```
 
@@ -252,7 +254,11 @@ A decimal point occurs only between digits in a numeric literal or after a
 qualified vocabulary type/static-member path, so it cannot be confused with
 `::` qualification.
 
-## 6. Declaring variables and bindings
+Module names never participate in `::` lookup. v0 has no syntax for reaching a
+different source module, so a path cannot be ambiguous between a module and a
+namespace.
+
+## 6. Declaring and exporting bindings
 
 The default form is type-first, immutable, and terminated by a line ending:
 
@@ -269,6 +275,7 @@ num ratio = 0.75
 string label = "build"
 List<string> labels = ["portable", "checked"]
 SecretRef<string> token = secret_ref("ci/token")
+pub string release_channel = "stable"
 ```
 
 There is no `let` keyword and no colon between name and type.
@@ -276,6 +283,14 @@ There is no `let` keyword and no colon between name and type.
 A declared name creates the machine-facing symbolic identity within its module
 and namespace. Human display labels remain ordinary `string` fields. Renaming a
 declaration changes its symbolic identity in v0.
+
+Declarations are private unless marked `pub`. `pub` may precede a namespace,
+record, or binding declaration; it cannot modify a field, header, or `use`.
+Nested public declarations require every containing namespace to be public.
+Visibility is recorded for IR consumers, documentation, and future imports; it
+is not confidentiality or authorization, and v0 still has no cross-module source
+access. A public declaration's exposed type signature cannot name a private
+nominal type, and a public identity reference cannot target a private binding.
 
 The declared type remains explicit. The following is invalid:
 
@@ -304,8 +319,8 @@ Config config = {
 }
 ```
 
-The name may be namespace- or module-qualified and must resolve to a value
-binding whose type is compatible with the expected position. It creates a
+The name may be namespace-qualified within the current module and must resolve
+to a value binding whose type is compatible with the expected position. It creates a
 static value-dependency edge. It does not create a `Ref<T>` value or preserve an
 identity relationship in IR; provenance still links the use to its source and
 originating binding.
@@ -319,9 +334,27 @@ string image = "example.invalid/tool:1"
 ```
 
 The compiler collects declarations, resolves ordinary value dependencies from
-binding initializers, contextual fields, list elements, and declared defaults,
+binding initializers, contextual fields, and list elements,
 rejects every dependency cycle, and evaluates the remaining graph
 deterministically. Internal topological evaluation order is not source meaning.
+Record defaults are closed constants and therefore add no binding dependency
+edges.
+
+Compatibility is deliberately invariant except for outer nullability widening:
+
+```neu
+string x = "a"
+string? y = x // Valid: T widens to T?.
+
+List<string> a = ["x"]
+List<string>? nullable_list = a // Valid: the whole list widens to nullable.
+List<string?> b = a // Invalid: generic arguments are invariant.
+```
+
+`T?` never narrows to `T`. `List<T>`, `Ref<T>`, and `SecretRef<T>` require exact
+type arguments, and nominal/vocabulary-owned types require identical resolved
+type identity. Numeric representation lowering is a separate check after both
+source positions have type `num`.
 
 `ref(image)` is separate: it creates a symbolic `Ref<string>` link to the
 declaration identity and does not read or copy `image`. Forward `ref(...)`
@@ -358,22 +391,22 @@ Contract-specific conversion follows these rules:
   within the declared range;
 - decimal targets require exact representation within declared precision,
   scale, and range;
-- every IEEE binary target names its format, such as binary32 or binary64, and
-  explicitly chooses `exact` or `round_ties_to_even` conversion;
-- `exact` rejects any conversion whose mathematical result differs;
-- `round_ties_to_even` uses deterministic IEEE 754 round-to-nearest,
-  ties-to-even for that named format;
-- a binary target with no conversion policy fails closed;
-- overflow, invalid sign changes, non-finite results, nonzero-to-zero underflow,
-  and unspecified precision loss are rejected;
+- every IEEE binary target names its format, such as binary32 or binary64;
+- binary conversion defaults to deterministic IEEE 754 round-to-nearest,
+  ties-to-even, like Python's nearest-representable model;
+- this default permits subnormal results and rounding a sufficiently small
+  nonzero value to signed zero;
+- a vocabulary may require `exact`, which rejects any changed mathematical value;
+- overflow, invalid sign changes for integer targets, and non-finite results are
+  rejected;
 - text never automatically converts to a number; and
 - widths, ranges, intermediate arithmetic, and rounding never come from the
   host machine.
 
 Here, value-preserving means that interpreting the target representation under
 its declared mathematical model yields exactly the same rational as the source
-`num`. A rounded result is not called value-preserving; it is permitted only by
-the explicit `round_ties_to_even` contract.
+`num`. A rounded result is not called value-preserving; it is accepted by the
+default nearest-even binary rule and rejected by an `exact` target.
 
 Examples:
 
@@ -399,16 +432,22 @@ the representation, are:
 | `10.0` | `int32` | Accepted automatically because it is integral |
 | `10.5` | `int32` | Rejected: fractional loss |
 | `0.1` | binary32, `exact` | Rejected: not exactly representable |
-| `0.1` | binary32, `round_ties_to_even` | Accepted as bits `0x3dcccccd` |
-| `0.1` | binary64, `round_ties_to_even` | Accepted as bits `0x3fb999999999999a` |
+| `0.1` | binary32, default | Accepted as bits `0x3dcccccd` |
+| `0.1` | binary64, default | Accepted as bits `0x3fb999999999999a` |
 | `0.5` | binary32, `exact` | Accepted because it is exact |
 | `16_777_216` | binary32, `exact` | Accepted because it is exact |
 | `16_777_217` | binary32, `exact` | Rejected: precision loss |
-| `16_777_217` | binary32, `round_ties_to_even` | Accepted as `16_777_216` |
+| `16_777_217` | binary32, default | Accepted as `16_777_216` |
+| `0.00000000000000000000000000000000000000000000000001` | binary32, default | Accepted as positive zero |
 
 v0 numeric literals use decimal digits. Underscores may occur only between
 digits. Leading zeroes other than `0` are invalid. Fractional values require
 digits on both sides of the point. There is no exponent or non-decimal base.
+
+The compiler resource profile separately limits significant decimal digits and
+decimal scale before arbitrary-precision allocation or conversion. The
+provisional desktop/CI baseline is 4,096 for each; callers may choose stricter
+values, and stable limits require corpus measurements.
 
 ## 9. Primitive and opaque core types
 
@@ -512,6 +551,23 @@ record NullableDefaults {
 }
 ```
 
+User-record defaults use a restricted closed `constant_value` subset: scalar
+literals, nullable `null`, constant lists/records, and vocabulary static values
+explicitly marked constant-safe by their captured bundle. They cannot read a
+binding, create an identity reference, or request a secret:
+
+```neu
+record InvalidDefaults {
+    string image = default_image, // Invalid: binding dependency.
+    Ref<Config> config = ref(default_config), // Invalid: identity dependency.
+    SecretRef<string> token = secret_ref("prod/token"), // Invalid: secret request.
+}
+```
+
+Applying a default copies its closed constant into the constructed value and
+retains the field-default declaration as provenance. It adds no binding edge to
+the value-dependency graph.
+
 Fields cannot repeat. Records are nominal: equal field shapes do not make two
 record declarations the same type.
 
@@ -562,16 +618,16 @@ known. Ambiguous or absent expected types are errors.
 ## 14. Namespaces
 
 ```neu
-namespace checks {
+pub namespace checks {
     string mode = "strict"
 
-    namespace internal {
-        bool enabled = true
+    pub namespace api {
+        pub bool enabled = true
     }
 }
 ```
 
-The names are `checks::mode` and `checks::internal::enabled`. Namespaces do not
+The names are `checks::mode` and `checks::api::enabled`. Namespaces do not
 create files, execution stages, OS namespaces, provider groups, or security
 zones.
 
@@ -591,7 +647,6 @@ Use `ref(...)` to link to a value binding:
 ```neu
 ref(config)
 ref(checks::config)
-ref(acme::delivery::checks::config)
 ```
 
 If the target value binding has declared type `T`, the reference has type
@@ -644,8 +699,8 @@ A a = { b: ref(b), }
 B b = { a: ref(a), }
 ```
 
-Module-qualified references work only when the compiler request supplied the
-module in the captured closure. They never fetch it.
+Module-qualified references do not exist in v0. Qualified references resolve
+only through namespaces in the current module and never fetch source.
 
 ## 16. Secret references
 
@@ -705,6 +760,11 @@ Flow::Pipeline verify = {
 captured data-only Flow bundle defines the qualified type, its fields, static
 constraints, behavioral classification, and required features. Neutral does
 not execute it.
+
+Vocabulary-owned values are immutable copyable data. For example,
+`Flow::Pipeline second = verify` creates a new declaration identity containing
+the same logical value and reuse provenance. A vocabulary cannot mark a value
+non-copyable in v0; identity-bearing relationships use `Ref<T>`.
 
 An unknown or unqualified domain type is invalid:
 
@@ -810,25 +870,28 @@ Source cannot override these with annotations or strings.
 
 ## 23. Diagnostics and limits
 
-Diagnostic prefixes remain:
+Diagnostic class prefixes are:
 
 | Prefix | Meaning |
 | --- | --- |
-| `NL-SYN-ENC` | Encoding |
-| `NL-SYN-LEX` | Tokens/literals/comments |
-| `NL-SYN-PAR` | Grammar |
-| `NL-SYN-NAM` | Names/collisions |
-| `NL-SYN-KND` | Wrong declaration kind |
-| `NL-SYN-TYP` | Type mismatch |
-| `NL-SYN-DOM` | Domain schema/placement |
-| `NL-SYN-FEA` | Unsupported feature |
-| `NL-SYN-LIM` | Resource limit |
-| `NL-SYN-INT` | Compiler/bundle defect |
+| `NL-ENC` | Encoding |
+| `NL-LEX` | Tokens/literals/comments |
+| `NL-PAR` | Grammar |
+| `NL-NAM` | Names/collisions |
+| `NL-KND` | Wrong declaration kind |
+| `NL-TYP` | Type mismatch |
+| `NL-DOM` | Domain schema/placement |
+| `NL-FEA` | Unsupported feature |
+| `NL-LIM` | Resource limit |
+| `NL-INT` | Compiler/bundle defect |
 
 Initial structural measurement limits remain 2 MiB per unit, 256 units, 16 MiB
-per closure, depth 128, and 200 diagnostics plus one truncation record. Deadline
-and memory ceilings are implementation/deployment policy, not language
-semantics; see [implementation resource budgets](../docs/implementation-resource-budgets.md).
+per closure, depth 128, 4,096 significant decimal digits and absolute scale per
+numeric literal, and 200 diagnostics plus one truncation record. Numeric limits
+are checked before arbitrary-precision allocation or conversion. These are
+profile measurement baselines, not frozen language semantics. Deadline and
+memory ceilings are implementation/deployment policy; see
+[implementation resource budgets](../docs/implementation-resource-budgets.md).
 
 Recovered syntax never produces authoritative IR.
 
@@ -858,8 +921,9 @@ composition or explicit overriding is insufficient.
 | Goal | Revised syntax |
 | --- | --- |
 | Language version | `neu "0.1"` |
-| Module | `module acme::delivery` |
+| Module | `module acme_delivery` |
 | Vocabulary import | `use Flow` |
+| Public declaration | `pub Config config = { ... }` |
 | Immutable binding | `num x = 10` |
 | Ordinary value reuse | `num y = x` |
 | `string` | `string name = "value"` |
@@ -904,18 +968,20 @@ declaration =
     | binding_declaration
 
 namespace_declaration =
-    "namespace", snake_name, "{",
+    [ visibility ], "namespace", snake_name, "{",
     { declaration },
     "}", LINE_END
 
 record_declaration =
-    "record", upper_camel_name, "{", { record_field }, "}", LINE_END
+    [ visibility ], "record", upper_camel_name, "{", { record_field }, "}", LINE_END
 
 record_field =
-    type, snake_name, [ "=", value ], ","
+    type, snake_name, [ "=", constant_value ], ","
 
 binding_declaration =
-    type, snake_name, "=", value, LINE_END
+    [ visibility ], type, snake_name, "=", value, LINE_END
+
+visibility = "pub"
 
 type =
     primary_type, [ "?" ]
@@ -960,11 +1026,29 @@ reference_value =
 secret_reference_value =
     "secret_ref", "(", string_literal, ")"
 
+constant_value =
+      boolean_literal
+    | numeric_literal
+    | string_literal
+    | "null"
+    | constant_list_value
+    | constant_contextual_record_value
+    | constant_safe_qualified_static_value
+
+constant_list_value =
+    "[", [ constant_value, { ",", constant_value }, [ "," ] ], "]"
+
+constant_contextual_record_value =
+    "{", { constant_value_field }, "}"
+
+constant_value_field =
+    snake_name, ":", constant_value, ","
+
 qualified_name =
     identifier, { "::", identifier }
 
 module_name =
-    snake_name, { "::", snake_name }
+    snake_name
 
 identifier =
       snake_name
@@ -984,14 +1068,18 @@ checks the required feature set from used vocabulary members; enforces
 nullable-only null and one unambiguous expected type for every contextual record;
 requires one underlying expected `SecretRef<T>` for `secret_ref(...)`; restricts
 ordinary binding values and `ref(...)` targets to value bindings; permits
-forward value and identity resolution; requires compatible expected types for
-ordinary value use; requires the left side of `.` to resolve to a vocabulary-owned type
+forward value and identity resolution; requires exact expected types or only
+outer `T` to `T?` widening for ordinary value use, with invariant generic
+arguments; restricts record defaults to closed constants and constant-safe
+vocabulary static values; requires the left side of `.` to resolve to a vocabulary-owned type
 that declares the selected static value; rejects every static ordinary-value
 dependency cycle and every nominal record cycle not broken by `Ref<T>` while
-ignoring identity-reference edges for those checks; rejects mixed-version closures,
-cross-package module merging, and duplicate names in merged module scopes;
-and checks declaration uniqueness, name-category casing, and schema-owned
-vocabulary fields.
+ignoring identity-reference edges for those checks; rejects mixed-version
+closures, cross-package module merging, cross-module source access, and
+duplicate names in merged module scopes; enforces private-by-default visibility
+and public-container rules; checks configured numeric digit and scale budgets
+before expensive conversion; and checks declaration uniqueness, name-category
+casing, and schema-owned vocabulary fields.
 
 `LINE_END` is emitted after a physical newline, including after a trailing line
 comment, when the current source or namespace declaration-list item is complete.

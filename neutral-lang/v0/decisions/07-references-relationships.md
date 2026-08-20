@@ -29,14 +29,14 @@ uses an immutable binding value while `ref(config)` links its identity.
 | --- | --- | --- |
 | Local | `ref(config)` | Current scope, then lexical parents |
 | Namespace | `ref(checks::config)` | Named namespace in current module |
-| Module | `ref(acme::common::config)` | Exact module in captured closure |
 
-A module-qualified reference does not fetch. v0 has no module/package imports; the
-request/resolver supplies the captured closure. Paths and URLs are illegal in
-`ref(...)`. Resolution never searches ambient files or packages.
+v0 has no module-qualified reference, source-module import, or cross-module
+source access. `::` traverses namespaces inside the current module or a captured
+vocabulary namespace; it never denotes a module boundary. Paths and URLs are
+illegal in `ref(...)`. Resolution never searches ambient files or packages.
 
-Unresolved, ambiguous, inaccessible, wrong-kind, and missing-closure targets
-receive different diagnostics.
+Unresolved, ambiguous, inaccessible, and wrong-kind targets receive different
+diagnostics.
 
 `ref(x)` links the identity of immutable binding `x`; it does not evaluate,
 copy, or snapshot the value at that source position. Declaration identities are
@@ -81,8 +81,8 @@ propagation. Relationship identity and endpoint spans remain in IR.
 
 ## Required evidence
 
-Fixtures MUST cover every qualification, text/reference distinction, missing
-closure units, types/namespaces/modules/vocabularies as wrong-kind targets,
+Fixtures MUST cover every permitted qualification, rejection of module-shaped
+qualification, text/reference distinction, types/namespaces/modules/vocabularies as wrong-kind targets,
 ambiguous targets, forward ordinary-value and identity targets, static value
 cycles versus valid identity-reference-only cycles, embedded nullable/list
 recursion versus `Ref<T>` recursion, containment versus linking, and one Flow

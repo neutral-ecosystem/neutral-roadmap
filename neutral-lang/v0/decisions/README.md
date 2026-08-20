@@ -41,17 +41,17 @@ The decision set uses this shape for examples:
 
 ```neu
 neu "0.1"
-module acme::delivery
+module acme_delivery
 
 use Flow
 
-record ImageConfig {
+pub record ImageConfig {
     string image,
     string? note,
     List<string> labels = [],
 }
 
-ImageConfig base = {
+pub ImageConfig base = {
     image: tool_image,
     note: null,
     labels: ["portable"],
@@ -59,9 +59,9 @@ ImageConfig base = {
 
 string tool_image = "example.invalid/tool:1"
 
-namespace checks {
-    Flow::Pipeline verify = {
-        config: ref(acme::delivery::base),
+pub namespace checks {
+    pub Flow::Pipeline verify = {
+        config: ref(base),
     }
 }
 ```

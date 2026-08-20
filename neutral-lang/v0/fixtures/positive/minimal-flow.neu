@@ -1,5 +1,5 @@
 neu "0.1"
-module fixture::minimal_flow
+module fixture_minimal_flow
 
 use Flow
 

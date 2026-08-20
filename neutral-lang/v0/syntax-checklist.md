@@ -31,7 +31,7 @@ Proposed answers: [lexical and source-text decisions](decisions/02-lexical-sourc
 - [ ] **SYN-LEX-001 · v0** — Specify accepted source encodings, byte-order-mark handling, invalid byte behavior, and line-ending normalization.
 - [ ] **SYN-LEX-002 · v0** — Define whitespace, indentation significance or insignificance, statement separation, and permitted line continuation.
 - [ ] **SYN-LEX-003 · v0** — Define line comments, block comments if present, nesting behavior, and unterminated-comment diagnostics.
-- [ ] **SYN-LEX-004 · v0** — Define ASCII identifiers; require strict `snake_case` for bindings, fields, namespace/module segments, and static values; require uppercase-leading names with `UpperCamelCase` as the style for record/types and vocabulary namespaces; define underscore placement, case, Unicode, and confusable diagnostics.
+- [ ] **SYN-LEX-004 · v0** — Define ASCII identifiers; require strict `snake_case` for bindings, fields, namespaces, module names, and static values; require uppercase-leading names with `UpperCamelCase` as the style for record/types and vocabulary namespaces; define underscore placement, case, Unicode, and confusable diagnostics.
 - [ ] **SYN-LEX-005 · v0** — Define reserved/contextual words; give `::` the sole meaning of namespace/module/vocabulary qualification and restrict `.` in v0 to vocabulary-owned enum cases or static members, excluding general value member access.
 - [ ] **SYN-LEX-006 · v0** — Define delimiter pairs, separators, logical-newline and closing-brace termination, and trailing-separator rules; `.neu` has no semicolon terminator.
 - [ ] **SYN-LEX-007 · v0** — Define ordinary text literals, escapes, invalid escape handling, and Unicode scalar behavior.
@@ -44,7 +44,8 @@ Proposed answers: [document and profile decisions](decisions/03-documents-module
 - [ ] **SYN-DOC-001 · v0** — Require every source unit to declare its exact `.neu` language-behavior version and reject mixed versions in one v0 compilation closure.
 - [ ] **SYN-DOC-002 · v0** — Define the top-level document shape and whether declarations, values, or both may appear at the root.
 - [ ] **SYN-DOC-003 · v0** — Define `use Vocabulary` (for example, `use Flow`) as a vocabulary namespace import resolved only through the compilation request's exact captured lock manifest.
-- [ ] **SYN-DOC-004 · v0** — Define module/package names independently from paths, URLs, mutable tags, and display labels; merge same-module units only within one captured package and reject cross-unit or cross-package collisions.
+- [ ] **SYN-DOC-004 · v0** — Use one `snake_case` identifier for a module header, independently from paths, URLs, mutable tags, and display labels; limit a v0 request to one module/package identity, merge its units deterministically, and prohibit module-qualified or cross-module source access.
+- [ ] **SYN-DOC-007 · v0** — Define private-by-default `pub` visibility for records, bindings, and namespaces, public-container and public-signature validity, and exported IR/documentation without treating visibility as authorization.
 
 ## 4. Declarations, bindings, and names
 
@@ -65,8 +66,8 @@ Proposed answers: [type and schema decisions](decisions/05-type-schema-notation.
 - [ ] **SYN-TYP-001 · v0** — Define the primitive scalar set as `num`, `string`, and `bool`; represent source `num` as an exact host-independent base-10 rational, and require numeric contracts to define exact or deterministic IEEE rounding behavior.
 - [ ] **SYN-TYP-002 · v0** — Define record/structured-value type syntax, field names, field order, and duplicate-field diagnostics.
 - [ ] **SYN-TYP-003 · v0** — Define homogeneous collection type syntax and whether collection order is part of the type contract.
-- [ ] **SYN-TYP-004 · v0** — Define postfix type nullability (`T?`) including nested positions; make required/defaulted and nullable/non-nullable independent field axes; define omission without an optional-field modifier or `absent` value.
-- [ ] **SYN-TYP-005 · v0** — Define named type and schema references with vocabulary/package qualification.
+- [ ] **SYN-TYP-004 · v0** — Define postfix type nullability (`T?`) including nested positions; make required/defaulted and nullable/non-nullable independent field axes; restrict user-record defaults to closed constants, and define omission without an optional-field modifier or `absent` value.
+- [ ] **SYN-TYP-005 · v0** — Define local/namespace/vocabulary named types and exact type compatibility with only outer `T` to `T?` widening; keep generic arguments invariant and exclude source-module qualification.
 - [ ] **SYN-TYP-006 · v0** — Define opaque vocabulary-owned types that remain inspectable and versioned without exposing consumer semantics.
 
 ## 6. Literal values and value construction
@@ -79,7 +80,7 @@ Proposed answers: [literal and value decisions](decisions/06-literal-values.md).
 - [ ] **SYN-VAL-004 · v0** — Define `null` as the only explicit source null/empty literal and distinguish it from structural omission/default application and unavailable/deferred results.
 - [ ] **SYN-VAL-005 · v0** — Define ordinary binding names as immutable value uses in compatible value positions and `ref(...)` as a distinct symbolic identity link; restrict both target forms to value bindings.
 - [ ] **SYN-VAL-006 · v0** — Define `.` selection only when its left side resolves to a vocabulary-owned type declaring the named inert static value; exclude user-record statics, unscoped strings, functions, computed properties, and general value member access.
-- [ ] **SYN-VAL-007 · v0** — Apply contextual construction to vocabulary-owned typed values and define schema-linked diagnostics.
+- [ ] **SYN-VAL-007 · v0** — Apply contextual construction to immutable copyable vocabulary-owned data; define distinct copied declaration identity, reuse provenance, constant-safe static defaults, and schema-linked diagnostics.
 - [ ] **SYN-VAL-008 · v0** — Define whether record-field shorthand exists and prevent it from obscuring the referenced binding.
 
 ## 7. References and structural relationships
@@ -87,7 +88,7 @@ Proposed answers: [literal and value decisions](decisions/06-literal-values.md).
 Proposed answers: [reference and relationship decisions](decisions/07-references-relationships.md).
 
 - [ ] **SYN-REF-001 · v0** — Define unambiguous `ref(...)` syntax that links value-binding identity rather than evaluating or snapshotting a value.
-- [ ] **SYN-REF-002 · v0** — Define local, qualified, and cross-source reference resolution; reject types, records, namespaces, modules, and vocabularies as wrong-kind targets.
+- [ ] **SYN-REF-002 · v0** — Define local and current-module namespace reference resolution across merged units; prohibit module-qualified and cross-module targets, and reject types, records, namespaces, modules, and vocabularies as wrong-kind targets.
 - [ ] **SYN-REF-003 · v0** — Define containment versus reference syntax so layout is not mistaken for ownership.
 - [ ] **SYN-REF-004 · v0** — Define typed domain relationship declarations without assigning graph or execution meaning in core.
 
@@ -111,13 +112,13 @@ Proposed answers: [security-sensitive syntax decisions](decisions/12-security-se
 - [ ] **SYN-SEC-003 · v0** — Prohibit source constructs that execute native code, shell code, provider code, or vocabulary plugins during parsing or validation.
 - [ ] **SYN-SEC-004 · v0** — Make all import/profile acquisition explicit through the supplied resolver; define no ambient network or filesystem include syntax.
 - [ ] **SYN-SEC-005 · v0** — Define safe diagnostics for sensitive literals, annotations, paths, and source excerpts.
-- [ ] **SYN-SEC-006 · v0** — Define deterministic lexical/structural limits so pathological source fails predictably, while keeping hardware-dependent deadlines and memory ceilings in named implementation profiles.
+- [ ] **SYN-SEC-006 · v0** — Define profile-controlled lexical, numeric-significant-digit, decimal-scale, and structural limits checked before expensive work, while keeping hardware-dependent deadlines and memory ceilings in named implementation profiles.
 
 ## 13. Diagnostics and invalid/incomplete syntax
 
 Proposed answers: [diagnostic decisions](decisions/13-diagnostics-invalid-syntax.md).
 
-- [ ] **SYN-DIA-001 · v0** — Assign stable diagnostic categories for invalid tokens, malformed constructs, unresolved names, wrong kinds, and invalid domain payloads.
+- [ ] **SYN-DIA-001 · v0** — Assign direct `NL-<CLASS>-<ID>` diagnostic categories for encoding, syntax, names, kinds, types, vocabularies, features, limits, and internal defects.
 - [ ] **SYN-DIA-002 · v0** — Define source-span units and behavior for Unicode, tabs, line endings, and invalid text.
 - [ ] **SYN-DIA-003 · v0** — Define parser recovery boundaries so one error does not silently reinterpret following declarations.
 - [ ] **SYN-DIA-004 · v0** — Define deterministic diagnostic ordering and a bounded “too many errors” result.

@@ -1,5 +1,5 @@
 neu "0.1"
-module fixture::value_reuse
+module fixture_value_reuse
 
 /* Ordinary values and identity links remain distinct. */
 record ToolConfig {

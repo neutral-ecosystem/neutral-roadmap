@@ -6,7 +6,7 @@ Answers: `SYN-DIA-001` through `SYN-DIA-006`
 
 ## SYN-DIA-001 — Stable diagnostic classes
 
-Codes use `NL-SYN-<CLASS>-<NUMBER>`:
+Codes use `NL-<CLASS>-<ID>`:
 
 | Class | Responsibility |
 | --- | --- |
@@ -58,7 +58,7 @@ stable code, then deterministic safe parameters. Ordering never depends on
 threads, hash maps, resolver delivery, locale, or message text.
 
 The initial cap is 200 ordinary diagnostics. The compiler then stops optional
-recovery and appends exactly one `NL-SYN-LIM-TOO-MANY`. Fatal encoding or
+recovery and appends exactly one `NL-LIM-TOO-MANY`. Fatal encoding or
 resource failures may stop earlier. Truncation can never look successful.
 
 ## SYN-DIA-005 — Ambiguity
@@ -67,7 +67,7 @@ The grammar must be unambiguous. Whitespace, newline, indentation, formatter
 style, and recovery cannot select meaning.
 
 If invalid input admits competing recovery trees, emit
-`NL-SYN-PAR-AMBIGUOUS` over the smallest distinguishing span and no
+`NL-PAR-AMBIGUOUS` over the smallest distinguishing span and no
 authoritative IR. Do not silently select the first parser alternative.
 
 The ambiguity corpus covers keyword boundaries, `::` qualified ordinary value

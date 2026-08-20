@@ -1,0 +1,22 @@
+neu "0.1"
+module fixture_visibility
+
+use Flow
+
+pub record Config {
+    string image,
+    string? note = null,
+    List<string> labels = [],
+    Flow::Mode mode = Flow::Mode.strict,
+}
+
+string image = "example.invalid/tool:1"
+pub Config config = { image: image }
+
+// Only the outer nullability changes.
+string? nullable_image = image
+List<string>? nullable_labels = ["portable"]
+
+pub namespace api {
+    pub Ref<Config> selected = ref(config)
+}

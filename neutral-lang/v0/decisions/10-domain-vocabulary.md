@@ -102,6 +102,16 @@ unless `extensions` itself is a precisely typed Flow field whose captured
 schema defines ownership, must-understand behavior, bounds, and portability
 classification. An untyped map is never the fallback for missing syntax.
 
+Every vocabulary-owned value is immutable copyable data. Ordinary value reuse
+creates a new declaration identity containing the same logical value and reuse
+provenance. A bundle cannot mark a value non-copyable in v0; relationships that
+need declaration identity use `Ref<T>`.
+
+A vocabulary static value may appear in a user-record field default only when
+the captured data-only bundle marks it constant-safe. Constant-safe means that
+selecting the inert value needs no lookup, authority, secret, execution, or
+instance identity; it does not weaken must-understand behavior.
+
 ## SYN-DOM-006 — Diagnostic taxonomy
 
 Domain failures remain distinguishable:
@@ -127,5 +137,6 @@ layer, and safe remedy. Bundle code is never executed to render a message.
 Use at least one Flow and one Neux data-only bundle fixture. Tests MUST cover
 exact lock resolution, missing/ambiguous/mutable mappings, disallowed policy,
 used/unused/unsupported feature states, unknown fields by classification,
-invalid placement, bounded payload rejection, and proof that compilation
-performs no ambient lookup or extension execution.
+invalid placement, copy reuse, constant-safe and unsafe default values, bounded
+payload rejection, and proof that compilation performs no ambient lookup or
+extension execution.

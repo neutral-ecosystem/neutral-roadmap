@@ -11,10 +11,11 @@ source span, and IR element identity. The source identifier is machine-facing.
 Human display text is an ordinary typed domain field and never affects
 resolution.
 
-The resolved symbolic name is `module::namespace::name`. IR identity also
-binds the owning document/derivation, so equal spellings in different captured
-documents are not conflated. Renaming changes identity in v0; durable aliases
-are deferred.
+The source-visible symbolic name is `namespace::name` within the current module.
+IR identity separately binds the single module name and owning
+document/derivation, so equal spellings in different documents are not
+conflated. Module identity is never encoded as a source `::` prefix. Renaming
+changes identity in v0; durable aliases are deferred.
 
 Source names follow the lexical case categories: declarations that introduce
 values use `snake_case`, while record/type declarations use `UpperCamelCase`.
@@ -26,7 +27,7 @@ rather than rewritten into source casing.
 Bindings use:
 
 ```neu
-Type name = value
+[pub] Type name = value
 ```
 
 There is no `let` keyword and no colon between the name and type. Bindings are
@@ -101,7 +102,7 @@ identify both conflicting declarations; source order never chooses a winner.
 ## SYN-DEC-007 — Forward references
 
 Both ordinary binding-value references and symbolic identity references may
-target later immutable bindings in the captured closure. The compiler collects
+target later immutable bindings in the current merged module. The compiler collects
 declarations before resolving either form, so declaration source order is not
 evaluation or execution order.
 
@@ -119,8 +120,9 @@ create a `Ref<T>` or a public identity relationship. The compiler rejects every
 cycle in the value-dependency graph before evaluation. Acyclic dependencies are
 evaluated in deterministic topological order; this internal order does not make
 source order semantic. The graph includes ordinary value uses in binding
-initializers, contextual record fields, list elements, and declared defaults.
-Type compatibility is checked at every use site.
+initializers, contextual record fields, and list elements. User-record defaults
+are closed constants and add no binding edges. Type compatibility follows the
+exact-match plus outer-nullability widening rule in `SYN-TYP-005`.
 
 `ref(...)` edges are excluded from the value-dependency graph because they link
 binding identities rather than reading target values. Reference-only cycles are
@@ -132,8 +134,9 @@ static contract prohibits it; Neutral does not infer execution semantics.
 
 ## Required evidence
 
-Fixtures MUST cover every declaration kind, forward value and identity
-references, value reuse in records and lists, namespace
+Fixtures MUST cover every declaration kind, private/public declarations,
+misplaced or unreachable `pub`, forward value and identity references, value
+reuse in records and lists, namespace
 qualification, duplicate cross-kind names, shadowing, case-confusable names,
 static value-dependency cycles, valid reference-only cycles, and
 source-name/display-name/IR-identity distinctions.

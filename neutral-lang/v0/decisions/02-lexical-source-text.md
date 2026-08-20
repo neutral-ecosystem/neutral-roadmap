@@ -77,7 +77,7 @@ snakeName      = [a-z][a-z0-9]*(_[a-z][a-z0-9]*)*
 upperCamelName = [A-Z][A-Za-z0-9]*
 ```
 
-Bindings, fields, namespace names, module segments, and vocabulary-owned static
+Bindings, fields, namespace names, module names, and vocabulary-owned static
 values MUST use `snakeName`. Record/type names and vocabulary use names MUST use
 `upperCamelName`. The latter denotes the compiler-enforced uppercase-leading
 lexical class. `UpperCamelCase` is the authoring style; the compiler does not
@@ -104,18 +104,19 @@ in the first public contract.
 The v0 reserved words are:
 
 ```text
-neu module use namespace record
+neu module use pub namespace record
 true false null ref secret_ref
 ```
 
 `bool`, `num`, `string`, `List`, `Ref`, and `SecretRef` are predeclared core
 type/type-constructor names and cannot be declared or shadowed in any scope.
 
-`::` resolves a name through module or namespace scopes, including a vocabulary
-namespace introduced by `use`. Qualification is explicit and left-to-right:
+`::` resolves a name through namespaces in the current module, including a
+vocabulary namespace introduced by `use`. Module names never occur in qualified
+source names. Qualification is explicit and left-to-right:
 
 ```neu
-acme::delivery::config
+checks::config
 Flow::Mode
 ```
 
@@ -148,7 +149,8 @@ Separators are `,`, `:`, `=`, `?`, `::`, `.`, and logical newline:
 - `:` separates a field name from its constructed value;
 - `=` introduces a binding value or field default;
 - `?` after a complete type marks that type nullable;
-- `::` resolves names through module/namespace scopes;
+- `::` resolves namespaces in the current module and captured vocabulary
+  namespaces; it never denotes a module boundary;
 - `.` selects a vocabulary-owned enum case or static member; general value
   member access is not part of v0; and
 - logical newline terminates complete declaration-list items.
@@ -201,26 +203,35 @@ host/JSON-number type.
 An expected captured contract may request a signed/unsigned integer, decimal,
 or named IEEE 754 binary format. Integer and decimal conversion is accepted only
 when the mathematical value is exactly representable within the declared range,
-precision, and scale. A binary floating-point contract MUST select either
-`exact` or `round_ties_to_even`: `exact` rejects any changed value, while
-`round_ties_to_even` applies deterministic IEEE 754 round-to-nearest,
-ties-to-even for the named format. A binary contract with no conversion policy
-fails closed. Overflow, invalid sign changes, non-finite results, nonzero values
-rounded to zero, and all unspecified precision loss are rejected. No width,
+precision, and scale. A binary floating-point target defaults to deterministic
+IEEE 754 round-to-nearest, ties-to-even for its named format. This includes
+subnormal results and rounding sufficiently small nonzero values to signed zero.
+A vocabulary may instead mark the target `exact`, which rejects any changed
+mathematical value. Overflow and non-finite results remain invalid. No width,
 rounding mode, locale, or intermediate representation may come from the host
 machine.
 
 “Value-preserving” means that interpreting the target representation under its
 declared mathematical model produces exactly the same rational number as the
 normalized source `num`. A rounded result is explicitly not value-preserving;
-it is accepted only under `round_ties_to_even`, never under an implicit notion
-of safe or close-enough conversion.
+it is accepted by the default nearest-even binary conversion but rejected by an
+`exact` target.
 
-For example, `0.1` is rejected for binary32 or binary64 under `exact`; under
-`round_ties_to_even` it becomes binary32 bits `0x3dcccccd` or binary64 bits
+For example, `0.1` is rejected for binary32 or binary64 under `exact`; under the
+default nearest-even rule it becomes binary32 bits `0x3dcccccd` or binary64 bits
 `0x3fb999999999999a`. `0.5` is exact in both formats. Conversion fixtures also
 cover integral `10.0`, fractional `10.5`, overflow, and the binary32 boundary
 between `16_777_216` and `16_777_217`.
+
+Design rationale: Python likewise stores `0.1` as the nearest representable
+binary fraction, but Neutral names the IEEE format so behavior is portable.
+Python also applies a configurable digit cap to expensive decimal-integer text
+conversion, while C++ numeric parsing targets a caller-selected bounded type and
+reports out-of-range values. Neutral therefore uses explicit numeric budgets
+rather than treating source-unit bytes as its only defense. See the
+[Python floating-point explanation](https://docs.python.org/3/tutorial/floatingpoint.html),
+[Python integer-string limit](https://docs.python.org/3/library/stdtypes.html#integer-string-conversion-length-limitation),
+and [C++ `from_chars` rules](https://eel.is/c++draft/charconv.from.chars).
 
 There is no `absent` token or standalone null type. A field omitted because a
 declared default applies is structural omission, not a second source value.

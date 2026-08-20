@@ -19,7 +19,6 @@ parser example.
 
 - [ ] **SYN-DOC-005 · v1** — Decide whether `use` extends to source modules/packages; define relative versus package resolution without ambient search.
 - [ ] **SYN-DOC-006 · v1** — Define qualified, aliased, and selective `use` forms and their collision behavior.
-- [ ] **SYN-DOC-007 · v1** — Define visibility and export declarations without making file layout an accidental visibility rule.
 - [ ] **SYN-DOC-008 · v1** — Define how immutable dependency identity or version constraints are expressed without treating mutable tags as captured identity.
 - [ ] **SYN-DOC-009 · v1** — Define syntax-level handling and diagnostics for missing, duplicate, cyclic, ambiguous, and disallowed module/package uses.
 - [ ] **SYN-DOC-010 · v1** — Define vocabulary namespace renaming or multiple-version use, if justified, without weakening lock-manifest identity.

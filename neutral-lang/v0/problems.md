@@ -1,47 +1,100 @@
-HIGH — Cross-module access has no visibility model. The language allows names such as acme::delivery::config, but there is no concept of public/private declarations. This effectively makes every declaration in every module present in the captured closure externally addressable. Suggested solution: either add the intended pub model with private-by-default declarations, or prohibit cross-module access in v0 until visibility is designed.
-- add a pub keyword to mark that the variable is public , default is private
+# Neutral v0 problem resolutions
 
-HIGH — Module paths and namespace paths can become ambiguous. Both modules and namespaces use lowercase snake_case segments with ::. For example, acme::delivery::x could theoretically mean module acme::delivery or namespace acme::delivery reachable from the current scope. The guide does not define how that collision is resolved. Suggested solution: define a strict resolution algorithm. Prefer rejecting ambiguous paths rather than silently giving modules or namespaces precedence. If this becomes cumbersome, introduce an explicit absolute-module form later.
-- remove the '::' for modules , only keep it for namespacess ... 
+Status: resolved in the proposed v0 design; implementation and conformance
+evidence remain pending.
 
-HIGH — Record defaults are currently too powerful. Because record_field accepts any value, this is currently legal in principle:
+This file records how each audit finding changed the design. The authoritative
+details are in the grouped [decision records](decisions/README.md) and the
+[proposed syntax guide](proposed-syntax-guide.md).
 
-record Config {
-    string image = default_image,
-    Ref<Tool> tool = ref(default_tool),
-    SecretRef<string> token = secret_ref("prod/token"),
-}
+## 1. Visibility and cross-module access — resolved
 
-A nominal type can therefore secretly depend on module bindings, specific declaration identities, or even secret requests. That mixes type/schema definition with instance-level dependency state. Suggested solution: define a restricted constant_value subset for record defaults. Allow literals, lists/records composed of constants, null, and explicitly safe static vocabulary values; disallow ordinary binding references, ref(...), and secret_ref(...) in user-record defaults.
-resolve the problem by removing the cause (make the reord less powerfull)
+Declarations are private by default. `pub` may export a record, binding, or
+namespace into public IR and generated documentation. A public declaration in a
+namespace requires every containing namespace to be public. A public
+declaration's exposed type signature cannot name a private nominal type, and
+public identity references cannot target private declarations.
 
-MEDIUM — “Type compatible” is underspecified. Ordinary value reuse says the source binding must be compatible with the expected type, but compatibility rules are not actually defined. For example, it is unclear whether these should work:
+This is deliberately not a security boundary: `pub` does not grant authority or
+promise confidentiality. v0 also prohibits source-module imports,
+module-qualified names, and cross-module source access.
 
-string x = "a"
-string? y = x
+## 2. Module paths versus namespace paths — resolved
 
+The module header contains exactly one `snake_case` name, for example
+`module acme_delivery`. `::` never separates module segments. It qualifies only
+namespaces in the current merged module or members of a captured vocabulary
+namespace. One v0 compilation request contains units for one logical
+module/package identity. Absolute module syntax is deferred until imports have a
+real use case.
 
-List<string> a = ["x"]
-List<string?> b = a
+## 3. Record defaults are too powerful — resolved
 
-The first is probably desirable; the second requires a deliberate variance decision. Suggested solution: define compatibility explicitly. A clean v0 rule would be T -> T? widening is allowed, while List<T>, Ref<T>, SecretRef<T>, and nominal records otherwise require exact type matching. Avoid generic covariance until there is a demonstrated need.
--implement the  T -> T? and disallow the ambigious ones
+Record fields now accept a restricted `constant_value`, not an arbitrary
+`value`. A default may contain literals, compatible `null`, and lists or
+contextual records recursively composed from constants. A vocabulary static
+value is permitted only when its captured data-only bundle marks it
+constant-safe.
 
-MEDIUM — Copy semantics for vocabulary-owned declarations need an explicit rule. This is currently possible under ordinary value reuse:
+Ordinary binding names, `ref(...)`, and `secret_ref(...)` are invalid in record
+defaults. Applying a default copies the closed constant and records the field
+default as provenance; it creates no binding dependency.
 
-Flow::Pipeline build = { ... }
-Flow::Pipeline second = build
+## 4. Type compatibility — resolved
 
-Since ordinary reuse copies a logical value rather than identity, build and second become two different declaration identities containing the same pipeline value. That may be correct, but a vocabulary could define types for which such cloning is semantically inappropriate. Suggested solution: explicitly choose one of two rules: all vocabulary values are immutable copyable data by definition, or vocabulary schemas can mark certain declaration types as non-copyable. The former is considerably simpler if Flow/Neux can live with it.
--all vocabulary values are immutable copyable data by definition,
+v0 permits only:
 
-MEDIUM — round_ties_to_even and underflow policy are slightly inconsistent. The document says binary conversion uses IEEE round-to-nearest, ties-to-even, but separately rejects nonzero-to-zero underflow. Proper IEEE rounding can legitimately round a sufficiently tiny nonzero number to zero. Suggested solution: say that Neutral first performs IEEE ties-to-even rounding and then applies additional Neutral validity checks, including rejection of a zero result from a nonzero source. Alternatively, allow IEEE underflow-to-zero. Do not describe the entire operation as unrestricted IEEE rounding if Neutral deliberately rejects one valid IEEE result.
--make auto conversion logic like python 
+1. exact resolved type identity; or
+2. widening an outer non-nullable `T` to `T?`.
 
-MEDIUM — Arbitrary-precision num needs its own structural limit. A source unit can currently contain an enormous decimal coefficient up to the broader source-size limit. Arbitrary-precision normalization and decimal-to-binary conversion can become disproportionately expensive. Suggested solution: add a numeric-digit/precision budget to the compiler resource profile, such as maximum significant decimal digits per literal/value. Keep the actual limit profile-controlled rather than language-semantic.
--resolve how python/cpp/... resolved this problem
+Nullable narrowing is invalid. `List<T>`, `Ref<T>`, and `SecretRef<T>` arguments
+are invariant. Therefore `string -> string?` and
+`List<string> -> List<string>?` are valid, while
+`List<string> -> List<string?>` is invalid. Nominal records and
+vocabulary-owned types otherwise require identical resolved identity.
 
-LOW — NL-SYN-* is misleading for non-syntax diagnostics. Names such as NL-SYN-TYP, NL-SYN-DOM, NL-SYN-FEA, and NL-SYN-LIM classify type, domain, feature, and resource failures under SYN. Suggested solution: either document SYN as meaning the entire Neutral source/compiler frontend rather than “syntax,” or preferably use categories such as NL-TYP-*, NL-NAM-*, NL-DOM-*, NL-LIM-*. Fixing this before diagnostic codes become public avoids compatibility baggage.
-- change the name to sometging more appropriate
+## 5. Vocabulary value copying — resolved
 
-LOW — The value-dependency graph should explicitly include default expansion. The text says dependencies are collected from declared defaults, but once record defaults are applied during construction, it should be completely clear whether the dependency belongs to the record type, constructed binding, or both for provenance/cycle reporting. Suggested solution: if defaults are restricted to closed constant values as recommended above, this problem largely disappears. Otherwise specify that applied defaults become dependencies of each constructed value and retain the default declaration as their origin.
+Every vocabulary-owned v0 value is immutable copyable data. Ordinary reuse
+creates a new declaration identity containing the same logical value and records
+reuse provenance. Vocabulary bundles cannot declare non-copyable values in v0;
+domain relationships that need identity use `Ref<T>`.
+
+## 6. Binary rounding and underflow — resolved
+
+Source `num` remains an exact, host-independent decimal rational. Integer and
+decimal targets require exact conversion. A named IEEE binary target uses
+deterministic round-to-nearest, ties-to-even by default, like Python's documented
+nearest-representable model; a vocabulary may instead require exact conversion.
+Subnormal results and nonzero values rounded to signed zero are valid. Overflow
+and non-finite results are rejected. The selected named format, never the host
+machine's float type, controls the result.
+
+## 7. Arbitrary-precision resource exhaustion — resolved provisionally
+
+The initial compiler profile limits each numeric literal to 4,096 significant
+decimal digits and an absolute decimal scale of 4,096. Implementations check
+both before constructing an arbitrary-precision coefficient or attempting
+decimal-to-binary conversion. These are measured profile baselines, not frozen
+language semantics; representative Flow, Neux, and adversarial corpora must
+validate them before a stable release.
+
+Python's default integer string-conversion limit is 4,300 digits, while C++
+conversion APIs report out-of-range for the concrete destination type. Neutral
+needs both an early work bound and exact destination-contract validation, so it
+uses a nearby round profile baseline plus explicit target conversion checks.
+
+## 8. Diagnostic names — resolved
+
+The old umbrella `NL-SYN-*` prefix is removed. Compiler diagnostics use direct
+layer classes of the form `NL-<CLASS>-<ID>`, including `NL-ENC`, `NL-LEX`,
+`NL-PAR`, `NL-NAM`, `NL-KND`, `NL-TYP`, `NL-DOM`, `NL-FEA`, `NL-LIM`, and
+`NL-INT`. For example, the recovery cap emits `NL-LIM-TOO-MANY`.
+
+## 9. Default expansion in the dependency graph — resolved by construction
+
+Because record defaults are closed constants, default expansion cannot refer to
+a binding or declaration identity. It adds no ordinary value-dependency edge.
+The constructed value records both its construction site and the field-default
+declaration as provenance, so diagnostics can still explain where the value came
+from.
