@@ -11,6 +11,12 @@ productions and prose invariants. EBNF defines structure; prose defines
 resolution, types, lowering, limits, and diagnostics. One parser generator's
 grammar is not normative.
 
+Lexical trivia may occur between tokens unless a physical newline is converted
+by the layout-normalization contract into a semantic `LINE_END`. Grammar
+productions omit trivia for readability. The normative frontend stages are raw
+lexing, deterministic newline/layout normalization, then parsing; a raw lexer
+does not decide whether a construct is syntactically complete.
+
 v0 has no infix operators or general precedence. Its value hierarchy is:
 
 ```text

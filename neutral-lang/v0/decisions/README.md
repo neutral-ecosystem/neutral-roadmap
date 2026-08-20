@@ -14,6 +14,9 @@ Editable author-facing synthesis:
 Initial positive, negative, and numeric cases:
 [v0 fixture index](../fixtures/README.md).
 
+Resolved design-audit findings:
+[v0 problem-resolution ledger](../problems.md).
+
 Normative words such as **MUST**, **MUST NOT**, and **MAY** describe the proposed
 contract. Flow and Neux behavior is illustrative only and remains owned by those
 applications.
@@ -78,6 +81,7 @@ shell execution, provider credentials, or runtime lifecycle syntax. Later
 checklists may add composition and symbolic structure, but only through their
 recorded decisions.
 
-Every binding is immutable. Mutation remains a future question and requires
-concrete Flow and independently designed Neux evidence that immutable
-composition or explicit overriding is insufficient.
+Every binding is immutable. Future work first designs immutable derivation and
+composition, then explicit override with provenance. Actual mutation is
+investigated only if both mechanisms fail concrete Flow and independently
+designed Neux cases.

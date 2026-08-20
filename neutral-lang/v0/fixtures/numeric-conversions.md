@@ -23,4 +23,6 @@ supplies an abstract expected contract; no host numeric conversion is permitted.
 
 These cases remain semantic fixtures until the vocabulary numeric-contract
 encoding is fixed. Their result is already fixed: none may inherit host
-behavior.
+behavior. For every accepted rounded case, the expected IR still contains the
+exact source `num`; the listed bits belong only to a contract-lowering/target
+representation record linked by provenance.

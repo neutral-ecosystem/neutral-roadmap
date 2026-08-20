@@ -10,10 +10,11 @@ Answers: `SYN-LEX-001` through `SYN-LEX-008`
 at byte offset zero and ignored for tokenization; any other BOM is invalid.
 Malformed UTF-8 and unescaped raw NUL bytes are fatal decoding errors.
 
-The captured source retains original bytes for content identity. Lexing maps
-`CRLF` and lone `CR` to logical `LF` for grammar and display while spans
-remain half-open offsets into original bytes. Locale-dependent decoding and
-silent replacement of invalid bytes are rejected as non-reproducible.
+The captured source retains original bytes for content identity. The raw lexer
+recognizes physical newline tokens and maps `CRLF` and lone `CR` to logical `LF`
+while spans remain half-open offsets into original bytes. Locale-dependent
+decoding and silent replacement of invalid bytes are rejected as
+non-reproducible.
 
 ## SYN-LEX-002 — Whitespace and termination
 
@@ -21,6 +22,20 @@ Space and horizontal tab separate tokens but carry no meaning. Indentation is
 not syntactic. A logical newline terminates a complete header, simple
 declaration in a source or namespace declaration list. There is
 no semicolon token and no backslash line continuation.
+
+The frontend has three private stages:
+
+```text
+raw lexer -> newline/layout normalizer -> parser
+```
+
+The raw lexer emits physical newlines without deciding grammatical
+completeness. The deterministic layout normalizer tracks delimiters and
+declaration-list context and converts physical newlines into semantic
+`LINE_END` tokens or trivia. The parser consumes that normalized stream. This
+keeps syntax-aware newline policy out of token recognition while preserving
+the no-semicolon surface. A synthetic final `LINE_END` is produced by the
+layout stage when a complete final item reaches end of file.
 
 A line comment is trivia before its newline, so this is valid:
 

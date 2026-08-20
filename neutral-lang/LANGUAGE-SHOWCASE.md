@@ -110,6 +110,10 @@ neu "0.1"
 module example_delivery
 ```
 
+The quoted version has canonical `major.minor` syntax, not general string
+semantics. v0 accepts exactly `"0.1"`; escapes, signs, whitespace, leading-zero
+variants, extra components, ranges, and `latest` are invalid.
+
 All units in one v0 compilation closure use the same language version. Units
 from the same captured package may declare the same module; their declarations
 merge into one logical module scope. Unit order has no meaning, and duplicate
@@ -130,7 +134,10 @@ such as `Flow::Pipeline`; it does not inject an unqualified `Pipeline`.
 
 Vocabulary uses are source-unit scoped. Every unit that contains a
 `Flow::...` name declares `use Flow`. Equal uses in units of the same module must
-resolve to the same bundle.
+resolve to the same exact identity, digest, schema/behavior versions, and
+feature contract. Once any unit imports `Flow`, that name is reserved across the
+complete merged module and cannot collide with a root declaration in another
+unit.
 
 ## Names and qualification
 
@@ -180,8 +187,11 @@ pub namespace api { pub bool enabled = true }
 `pub` is allowed on records, bindings, and namespaces, but not fields, headers,
 or `use`. A public declaration inside a namespace requires every containing
 namespace to be public. A public declaration's exposed type signature cannot
-name a private nominal type, and a public identity link cannot target a private
-declaration.
+name a private nominal type. The compiler recursively traverses each public
+binding's contained records, lists, and vocabulary payloads, inspects without
+following each `Ref<T>` edge, and rejects references to private declarations.
+Fields have no independent visibility; every field of an accessible record is
+part of its visible structural contract.
 Visibility defines the exported IR/documentation surface; it is not a secrecy
 or authorization boundary. Cross-module source access remains absent in v0.
 
@@ -241,6 +251,10 @@ deterministic round-to-nearest, ties-to-even by default; a vocabulary may
 require `exact`. Subnormal results and nonzero values rounded to signed zero are
 valid. Overflow, invalid sign, and non-finite results are rejected. Host numeric
 behavior never participates.
+
+Neutral keeps the exact logical `num` in IR, contract lowering, and an encoded
+target such as binary32 bits as three separate layers. A rounded lowering result
+links to the exact value and contract; it never replaces the IR value.
 
 ```neu
 num whole = 10
@@ -336,8 +350,9 @@ initialize `List<string>?`, but `List<string>` cannot initialize
 Forward value reuse is allowed. The compiler builds a static dependency graph
 and rejects cycles, making declaration order non-semantic. `label` uses a value;
 `ref(label)` instead creates a symbolic identity link. v0 has no `mut` or
-reassignment. Mutation remains a future feature only if real Flow and Neux
-evidence shows composition or explicit overriding is insufficient.
+reassignment. v1 prioritizes immutable derivation/composition and then explicit
+override, validated by real Flow and independent Neux fixtures; mutation is
+investigated only if both mechanisms are insufficient.
 
 ## Namespaces
 
@@ -357,6 +372,8 @@ The resulting names are `checks::image` and `checks::internal::enabled`.
 Namespaces do not create files, pipeline stages, OS namespaces, provider groups,
 or security zones. Duplicate names and shadowing are invalid. Predeclared core
 names cannot be declared or shadowed in any scope.
+A namespace cannot be reopened. Repeating `namespace checks` in the same or a
+different source unit is a duplicate declaration even if its members differ.
 
 ## Symbolic references
 
@@ -371,6 +388,10 @@ If the target binding has declared type `T`, the result has type `Ref<T>`.
 References do not copy, evaluate, contain, order, schedule, or snapshot their
 targets. Because `ref(...)` resolves identity, it may point forward to an
 immutable binding and is excluded from the ordinary value-dependency graph.
+IR stores target identity, expected type/kind, and provenance only. Consumers
+must not infer dependency, order, ownership, readiness, or containment from a
+reference; those meanings require an explicit domain-owned relationship such as
+`Flow::Dependency`.
 
 ```neu
 InvocationInput selected = {
@@ -436,6 +457,11 @@ Neutral never resolves the secret. IR retains an opaque identifier and safe
 provenance, while normal diagnostics and renderers redact the identifier.
 `SecretRef<T>` does not implicitly convert to `string`.
 
+A well-formed type argument is not a deliverability promise. Neutral core may
+accept a structurally valid shape such as `SecretRef<Ref<Config>>`, while the
+selected consumer/profile rejects it because no configured broker supports that
+delivery shape. This capability check occurs before secret resolution.
+
 ## Vocabulary-owned data
 
 Vocabulary types use the same type-first binding and contextual construction as
@@ -455,9 +481,26 @@ Every vocabulary field independently defines:
 - whether its type is nullable; and
 - whether it is behavioral data or non-behavioral metadata.
 
+Bundles conform to a fixed versioned Neutral-owned closed schema. They may
+declare types, fields, constant defaults, static values, representation
+requirements, behavioral IDs/classes, feature dependencies, and instances of
+predefined Neutral constraint kinds. Scripts, callbacks, arbitrary expressions,
+custom validators, bytecode, native/Wasm code, and entry points are forbidden.
+Unknown required constraint kinds fail closed.
+
+Required features form a transitive closure through referenced members,
+instantiated fields, nested type/schema dependencies, applied defaults, selected
+static values, constraints, behavioral classifications, and feature
+dependencies. IR records the closure and the reason for each feature.
+
 Unknown required behavior fails closed. Ignorable metadata needs an explicit,
 bounded schema envelope and preservation policy. There is no untyped universal
 `extensions` bag.
+
+Applied vocabulary defaults retain field/default identity and version,
+application site, behavioral classification, and feature reasons. Provenance
+distinguishes source values, user-record defaults, vocabulary defaults, and
+behavior introduced by vocabulary defaults.
 
 Vocabulary relationships are typed values whose meaning remains vocabulary
 owned:
@@ -503,6 +546,8 @@ The compiler merges both declaration sets independent of resolver order. One
 v0 compilation request contains units for one logical module/package identity.
 Mixed language versions, duplicate declarations, cross-package module merging,
 cross-module access, and static value-dependency cycles are rejected.
+Namespaces are not reopened across units; repeating a namespace declaration is
+a duplicate even when its members do not overlap.
 
 ## Comments and strings
 
@@ -529,6 +574,12 @@ multiline, and interpolated string literals are not part of v0.
 Malformed UTF-8 and unescaped raw NUL bytes are fatal. `CRLF` and lone `CR` act
 as logical `LF`, while original bytes remain available for content identity and
 source spans. Indentation is formatting, not syntax.
+
+The private frontend is staged as raw lexer, newline/layout normalizer, then
+parser. The lexer emits physical newlines; the layout stage decides whether
+they become semantic `LINE_END` tokens using delimiter and declaration-list
+context. Lexical trivia may occur between tokens unless a newline becomes
+`LINE_END`; grammar sketches omit trivia for readability.
 
 Diagnostics retain stable machine-readable categories:
 

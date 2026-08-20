@@ -1,0 +1,6 @@
+neu "0.1"
+module fixture_vocabulary_collision
+
+use Flow
+
+Flow::Mode mode = Flow::Mode.strict

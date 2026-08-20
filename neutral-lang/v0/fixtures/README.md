@@ -32,12 +32,35 @@ vocabulary bundles.
   a private nominal type.
 - `negative/module-path.neu` rejects `::` in the single-identifier module
   header.
+- `negative/version-escape.neu` rejects escape syntax in the canonical language
+  version token.
+- `negative/version-leading-zero.neu` rejects a noncanonical version component.
+- `negative/nested-private-reference.neu` rejects a private identity target
+  nested inside the logical value of a public binding.
+- `negative/field-visibility.neu` rejects an independent visibility modifier on
+  a record field.
+- `negative/namespace-reopen-a.neu` and `namespace-reopen-b.neu` form one
+  compilation case that rejects namespace reopening across source units.
+- `negative/vocabulary-collision-a.neu` and `vocabulary-collision-b.neu` form one
+  compilation case that rejects a module-wide collision between `use Flow` and
+  a root declaration named `Flow`.
 
 ## Numeric conversion
 
 `numeric-conversions.md` defines host-independent semantic cases against an
 abstract captured numeric contract. It deliberately does not invent a concrete
 vocabulary-bundle encoding before that format is designed.
+
+## Vocabulary contracts
+
+`vocabulary-contract-cases.md` defines closed-schema rejection, transitive
+feature closure, behavioral-default provenance, feature cycles, and unreachable
+feature cases without prematurely choosing a bundle encoding.
+
+## Secret delivery
+
+`secret-delivery-cases.md` separates core type well-formedness from selected
+profile/broker delivery capability and requires rejection before secret access.
 
 Exact numeric diagnostic numbers and byte spans remain part of the unfinished
 diagnostic registry. Until that registry exists, these fixtures assert the

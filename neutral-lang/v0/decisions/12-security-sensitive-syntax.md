@@ -23,8 +23,13 @@ guarantee the resolved content. Only bindings or fields with that expected
 secret-reference shape accept the value.
 
 `SecretRef` requires exactly one well-formed Neutral type argument; bare, empty,
-and multi-argument forms are type errors. Consumer/broker support for that
-delivery shape is a later capability decision, not compiler proof.
+and multi-argument forms are type errors. Well-formedness and deliverability are
+separate contracts. Neutral core accepts a structurally well-formed type argument
+without claiming that a broker can deliver it. A selected consumer/profile
+publishes its supported secret-delivery shapes and rejects unsupported shapes as
+a capability diagnostic before secret resolution. Thus forms such as
+`SecretRef<Ref<Config>>` or `SecretRef<List<SecretRef<string>>>` may be
+well-formed Neutral types yet unsupported by every selected broker/profile.
 
 IR contains the opaque logical identifier, sensitivity classification, and
 source provenance. It MUST NOT contain resolved value, token, lease, destination
@@ -53,10 +58,13 @@ v0 has no syntax for:
 - network/file reads; or
 - secret resolution.
 
-Vocabulary-owned typed declarations and raw text are inert data. Vocabulary bundles are
-data-only. A string that resembles a shell command remains text. Compiler
-constant handling is limited to parsing literal/record/list/reference forms and
-applying declarative static constraints.
+Vocabulary-owned typed declarations and raw text are inert data. Vocabulary
+bundles conform to the closed Neutral-owned declarative schema in `SYN-DOM-001`.
+They cannot contain scripts, callbacks, arbitrary expressions, executable
+validators, custom code, bytecode, native/Wasm modules, or entry points. A
+string that resembles a shell command remains text. Compiler constant handling
+is limited to parsing literal/record/list/reference forms and interpreting
+Neutral-defined declarative constraint kinds.
 
 ## SYN-SEC-004 — Explicit resolver boundary
 
@@ -124,7 +132,9 @@ profiles, not the Neutral language contract. See
 ## Required evidence
 
 Tests MUST demonstrate that secret arguments never appear in normal output,
-missing/non-secret/ambiguous contextual secret types fail, source cannot trigger
+missing/non-secret/ambiguous contextual secret types fail, well-formed but
+profile-unsupported delivery shapes receive a pre-resolution capability
+diagnostic, source cannot trigger
 any ambient effect, malicious Unicode/control text is escaped, missing resolver
 inputs fail closed, and every language-level limit is tested below, at, and
 above its boundary without unbounded recovery diagnostics.

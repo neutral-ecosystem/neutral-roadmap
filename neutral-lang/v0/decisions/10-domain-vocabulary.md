@@ -18,7 +18,24 @@ Flow::Pipeline verify = {
 `Pipeline` is not in the core grammar's keyword set. There is no separate domain
 declaration production: the selected data-only bundle describes the qualified
 type's allowed scope, fields, references, static constraints, features, and
-behavioral classification.
+behavioral classification through a fixed, versioned Neutral-owned vocabulary
+schema.
+
+That vocabulary schema is a closed tagged data model. v0 bundles may declare
+types, fields, constant defaults, static values, representation requirements,
+feature dependencies, behavioral identifiers/classifications, and constraint
+instances drawn from a Neutral-defined finite constraint-kind registry. Initial
+constraint kinds cover structural facts the compiler can decide, such as field
+presence, value/type compatibility, numeric ranges and representations,
+collection/text bounds, allowed static values, reference target kinds, and
+declaration placement. Each kind has fixed operands, deterministic semantics,
+and resource accounting owned by neutral-lang. Unknown required kinds fail
+closed.
+
+Bundles cannot contain scripts, callbacks, bytecode, arbitrary expressions,
+custom validators, native/Wasm code, or entry points. Bundle validation is
+interpretation of this closed data schema by neutral-lang, never execution of
+vocabulary-supplied code.
 
 Neutral parses the contextual braced value using the expected `Flow::Pipeline`
 type and validates the bundle contract. It does not implement pipeline or OS
@@ -41,10 +58,18 @@ feature set. The mapping is not a range, mutable tag, or ambient registry result
 The import exposes members only as qualified names such as `Flow::Pipeline`; it
 does not inject an unqualified `Pipeline` into the source scope.
 
-Every vocabulary member/field declares the features needed to understand it.
-The compiler derives the actually used required-feature set, verifies it against
-the resolved bundle, and records both the exact resolution and used features in
-IR/derivation. Newly added unused features are not imported implicitly.
+Every vocabulary member, field, default, static value, constraint, behavioral
+classification, and feature declares the features needed to understand it. The
+compiler seeds feature discovery from directly referenced types/members and
+then computes a deterministic least fixed point over instantiated fields,
+nested type/schema dependencies, applied defaults, selected static values,
+applicable constraints, behavioral classifications, and feature-to-feature
+dependencies. Cycles are visited once by
+feature identity and do not make the result order-dependent. Compilation
+validates the complete transitive closure against the captured bundle and host
+policy, then records the closure and the reason each feature entered it in
+IR/derivation. Newly added content that is neither reached nor applied is not
+imported implicitly.
 
 ## SYN-DOM-003 — Request is not activation
 
@@ -54,7 +79,7 @@ and policy:
 
 - permits the exact vocabulary and behavior version;
 - provides an exact captured bundle through its resolver;
-- supports every feature required by the used vocabulary members; and
+- supports every feature in the computed transitive required-feature closure; and
 - satisfies configured trust/package policy.
 
 Source cannot select a local shared library, network endpoint, filesystem path,
@@ -74,6 +99,13 @@ There is no second vocabulary-only notion of an “optional field.” A nullable
 field without a default is still required. A defaulted non-nullable field may be
 omitted. The compiler records omission/default application separately from an
 explicit `null`.
+
+Every applied vocabulary default records the constructed value, vocabulary
+field/default identity and version, application site, and whether it introduces
+behavioral meaning. IR provenance distinguishes source-supplied values,
+user-record defaults, vocabulary defaults, and behavior introduced by a
+vocabulary default. An omitted field therefore cannot introduce unexplained
+behavior, and its applied default participates in transitive feature discovery.
 
 All fields use ordinary schema-named forms in v0; there is no universal
 `extensions` or `metadata` bag. An author cannot relabel behavioral data as
@@ -123,6 +155,7 @@ Domain failures remain distinguishable:
 | Bundle not captured/permitted | Vocabulary resolution/policy |
 | Schema or behavior version unsupported | Vocabulary compatibility |
 | Required feature unsupported | Required-feature negotiation |
+| Constraint kind unknown or malformed | Vocabulary schema/constraint contract |
 | Qualified type absent | Unknown vocabulary member |
 | Field missing, duplicated, unknown, or wrong type | Domain payload validation |
 | Declaration in disallowed scope | Domain placement |
@@ -135,8 +168,10 @@ layer, and safe remedy. Bundle code is never executed to render a message.
 ## Required evidence
 
 Use at least one Flow and one Neux data-only bundle fixture. Tests MUST cover
-exact lock resolution, missing/ambiguous/mutable mappings, disallowed policy,
-used/unused/unsupported feature states, unknown fields by classification,
-invalid placement, copy reuse, constant-safe and unsafe default values, bounded
-payload rejection, and proof that compilation performs no ambient lookup or
-extension execution.
+exact lock resolution, missing/ambiguous/mutable mappings, disallowed policy;
+direct, transitive, cyclic, unused, and unsupported feature states; defaults and
+constraints introducing features; unknown fields by classification; invalid
+placement; copy reuse; constant-safe and unsafe default values; behavioral
+default provenance; rejection of unknown constraint kinds and every executable
+bundle payload; bounded payload rejection; and proof that compilation performs
+no ambient lookup or extension execution.

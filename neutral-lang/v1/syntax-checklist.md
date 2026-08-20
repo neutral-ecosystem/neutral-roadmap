@@ -44,6 +44,7 @@ parser example.
 - [ ] **SYN-VAL-011 · v1** — Define collection/record spread or merge notation together with explicit conflict precedence.
 - [ ] **SYN-VAL-012 · v1** — Define multiline structured values and delimiter elision rules without indentation ambiguity.
 - [ ] **SYN-VAL-013 · v1** — Define duration, timestamp, path, URI, digest, and similar values as typed constructors or domain types rather than ambiguous magic strings.
+- [ ] **SYN-VAL-014 · v1** — Define immutable record derivation/update with explicit overridden fields, deterministic conflict rules, and provenance; select syntax only after real Flow and independent Neux fixtures validate the capability.
 
 ## 7. References and structural relationships
 
@@ -56,7 +57,7 @@ parser example.
 - [ ] **SYN-CMP-001 · v1** — Define reusable component declaration syntax independently from Flow templates or Neux scripts.
 - [ ] **SYN-CMP-002 · v1** — Define component application with named typed arguments and explicit missing/extra argument diagnostics.
 - [ ] **SYN-CMP-003 · v1** — Define result exposure from a component without leaking compiler-internal generated names.
-- [ ] **SYN-CMP-004 · v1** — Define default and override syntax with deterministic precedence and origin tracking.
+- [ ] **SYN-CMP-004 · v1** — Define default and explicit override syntax with deterministic precedence and origin tracking, before considering any mutation feature.
 - [ ] **SYN-CMP-005 · v1** — Define explicit inclusion/composition rather than textual macro substitution.
 - [ ] **SYN-CMP-006 · v1** — Define bounded collection-based expansion that is not named after a Flow matrix.
 - [ ] **SYN-CMP-007 · v1** — Define expansion additions, exclusions, and filters as typed data/expressions with deterministic ordering.

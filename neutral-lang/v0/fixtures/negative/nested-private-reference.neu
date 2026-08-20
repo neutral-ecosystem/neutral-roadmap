@@ -1,0 +1,16 @@
+neu "0.1"
+module fixture_nested_private_reference
+
+pub record Config {
+    string image,
+}
+
+pub record Selection {
+    List<Ref<Config>> configs,
+}
+
+Config private_config = { image: "example.invalid/tool:1" }
+
+pub Selection exposed = {
+    configs: [ref(private_config)],
+}

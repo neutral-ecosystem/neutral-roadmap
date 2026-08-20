@@ -58,6 +58,13 @@ namespace checks {
 Source proximity/order imply nothing. IR gives containment and reference
 different relationship kinds. Indentation never establishes either.
 
+Public IR encodes `Ref<T>` as an identity-link node only: target identity,
+expected target type/kind, and provenance. It carries no dependency, ordering,
+ownership, readiness, or containment flag. Consumers MUST NOT infer any such
+relationship from a `Ref<T>`, its field name, or source position. Those meanings
+require an explicit domain-owned relationship value such as
+`Flow::Dependency`; if that construct is absent, the relationship is absent.
+
 The static value-dependency cycle check follows ordinary binding-value uses and
 ignores `ref(...)` edges. A cycle made entirely from typed identity references is
 therefore structurally valid; a cycle that requires reading another binding's
@@ -75,8 +82,9 @@ Flow::Dependency check_after_build = {
 ```
 
 The bundle declares field types, endpoint kinds, multiplicity, features, and
-static constraints. Neutral resolves and checks links but does not call them
-execution edges, decide readiness, infer cycle meaning, or define failure
+static constraints. Neutral resolves endpoint identity links plus the explicit
+domain relationship value, but does not call bare `Ref<T>` values execution
+edges, decide readiness, infer cycle meaning, or define failure
 propagation. Relationship identity and endpoint spans remain in IR.
 
 ## Required evidence

@@ -12,9 +12,14 @@ Every source unit MUST begin, after trivia, with:
 neu "0.1"
 ```
 
-The value is an exact language-behavior version, not a range. Every unit states
-it explicitly; v0 does not inherit from a directory, filename, environment, or
-other source. Unsupported versions fail before later declarations are parsed.
+The quoted token has its own canonical `language_version` grammar; it is not a
+general `string` value. Its content is `major.minor`, where each component is
+`0` or a nonzero ASCII decimal digit followed by zero or more digits. Escapes,
+whitespace, signs, leading-zero variants, extra components, ranges, and names
+such as `latest` are invalid. v0 accepts exactly the canonical spelling
+`"0.1"`. Every unit states it explicitly; v0 does not inherit from a directory,
+filename, environment, or other source. Unsupported well-formed versions fail
+before later declarations are parsed.
 
 Every source unit in one compilation closure MUST declare the same exact
 language-behavior version. A mixed-version closure fails before merged module
@@ -71,17 +76,22 @@ The import exposes members only below the vocabulary namespace. It does not add
 unqualified names to the surrounding scope: `Flow::Pipeline` is valid, while an
 unqualified `Pipeline` is not imported.
 
-Used vocabulary members declare their feature dependencies in the captured
-bundle. The compiler aggregates and verifies those features instead of treating
-`use Flow` as a request for every present or future feature. It records the
-actual used feature set and exact resolution in IR/derivation.
+Referenced vocabulary members seed the transitive feature-closure procedure in
+`SYN-DOM-002`; nested schema dependencies, applied defaults, static values,
+constraints, behavioral classifications, and feature dependencies may add
+indirect requirements. The compiler verifies and records the complete closure
+and its reason edges instead of treating `use Flow` as a request for every
+present or future feature.
 
-Within one source unit, use names are unique and reserve their name against the
-merged module's root declarations. Repeating the same use name in another unit
-of that module is allowed only under the identical-resolution rule below. v0 has
-no source alias, selective-use, version-range, or inline vocabulary-identity
+Vocabulary namespace names are reserved across the complete merged module, not
+only the unit containing `use`. If any unit says `use Flow`, no declaration of
+any kind named `Flow` may appear at module root in any unit. Repeating `use Flow`
+in another unit is allowed only when both uses resolve to the same exact
+vocabulary identity, content digest, schema version, behavior version, and
+feature contract. v0 has no source alias, selective-use, version-range, or inline vocabulary-identity
 syntax. Two bundles that require the same source name cannot coexist in one v0
 closure; supporting that case requires the future vocabulary-renaming decision.
+Within one source unit, the same `use` name may appear at most once.
 
 ## SYN-DOC-004 — Module and package names
 
@@ -102,6 +112,11 @@ identity. Multiple units may declare that same module and merge into one module
 scope. A different module name or package identity is a request-level error.
 Duplicate declarations across merged units are errors, and source-unit or
 resolver order has no semantic meaning.
+
+A namespace is one declaration and cannot be reopened. Two namespace
+declarations named `checks` are duplicates even when they occur in different
+source units and contain disjoint members. Namespace contents exist only inside
+their single declaring block.
 
 Vocabulary `use` declarations remain source-unit scoped: every unit that uses a
 vocabulary-qualified name declares the corresponding `use`. Equal use names in
@@ -130,11 +145,17 @@ pub ToolConfig config = {
 ```
 
 `pub` may modify a namespace, record declaration, or binding declaration; it is
-not legal on a field, `use`, or header. A nested public declaration requires
+not legal on a field, `use`, or header. Fields have no independent visibility:
+every field of an accessible record is part of that record's visible structural
+contract. A nested public declaration requires
 every containing namespace to be `pub`, otherwise the declaration is rejected as
 a misleading unreachable export. A public declaration's exposed type signature
-cannot name a private nominal type, and public identity-reference values cannot
-expose private targets.
+cannot name a private nominal type. For a public binding, the compiler
+recursively traverses the complete logical value's containment nodes—including
+nested records, lists, and vocabulary payloads—and inspects every encountered
+`Ref<T>`. It does not follow reference edges during traversal; each encountered
+reference is rejected when its target is not public. This exposure check is
+bounded, cycle-safe, and independent of source nesting depth.
 
 Visibility defines the module's exported declaration surface in IR,
 documentation, and consumer tooling. Private declarations remain in IR when
@@ -149,14 +170,16 @@ declarations as public.
 
 ## Invalid and boundary cases
 
-Missing, duplicate, late, malformed, or unsupported headers; mixed closure
+Missing, duplicate, late, malformed, escaped, noncanonical, or unsupported
+version headers; mixed closure
 versions; multiple module/package identities in one request; duplicate names
-in a merged module; conflicting cross-unit vocabulary resolutions; late or
-duplicate `use` declarations within one unit; missing/ambiguous/disallowed lock
-mappings; version or digest mismatch; unsupported used features; and namespace
-collisions; misplaced `pub`; a public declaration inside a private namespace; and
-public surfaces exposing private types or identity targets each receive distinct
-diagnostics.
+or namespace reopening in a merged module; conflicting cross-unit vocabulary
+resolutions; module-wide vocabulary/declaration name collisions; late or
+duplicate `use` declarations within one unit; missing, ambiguous, or disallowed
+lock mappings; version or digest mismatch; unsupported required features;
+namespace collisions; misplaced `pub`; a public declaration inside a private
+namespace; and public surfaces exposing private types or identity targets each
+receive distinct diagnostics.
 
 All header records and spans enter the derivation manifest. Diagnostics require
 no consumer or vocabulary code execution.

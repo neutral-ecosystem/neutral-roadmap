@@ -431,6 +431,14 @@ an execution boundary.
 Use data-only vocabulary bundles supplied by the compilation request through the
 same explicit resolver model as source dependencies.
 
+“Data-only” means a fixed, versioned, Neutral-owned closed schema. Bundles may
+declare types, fields, constant defaults, static values, representation
+requirements, feature dependencies, behavioral IDs/classes, and instances of
+predefined bounded constraint kinds. They cannot contain scripts, callbacks,
+arbitrary expressions, executable validators, custom code, bytecode,
+native/Wasm modules, or entry points. Unknown required constraint kinds fail
+closed.
+
 This is the target architecture, not the prerequisite for the first parser
 proof. Begin with one tiny data-only vocabulary captured directly by the test
 harness. Add package acquisition, lock resolution, compatibility migration, and
@@ -449,8 +457,11 @@ use Flow
 The compilation request's captured lock manifest maps `Flow` to one exact
 permitted vocabulary identity, content digest, schema version, behavior version,
 and supported feature set. `use Flow` never performs ambient lookup or selects
-“latest.” Required features are derived from the vocabulary members actually
-used, so newly added unused features do not change an existing source unit.
+“latest.” Required features are a deterministic transitive closure from used
+members through instantiated fields, nested type/schema dependencies, applied
+defaults, static values,
+constraints, behavioral classifications, and feature dependencies. Newly added
+unreached features do not change an existing source unit.
 
 A bundle declares its identity, owner assertion, schema and behavior versions,
 compatibility range, feature dependencies, allowed node/value forms, reference

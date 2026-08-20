@@ -30,9 +30,9 @@ The revised surface follows these preferences:
 
 Three details are deliberate:
 
-1. v0 has no mutation or reassignment. A future version may reconsider mutation
-   only after real Flow and independently designed Neux cases prove that
-   immutable composition or explicit overriding is insufficient.
+1. v0 has no mutation or reassignment. v1 first investigates immutable
+   derivation/composition, then explicit override; mutation is considered only
+   if both fail real Flow and independently designed Neux cases.
 2. Integer and decimal conversion is exact. IEEE binary conversion defaults to
    deterministic round-to-nearest, ties-to-even; a vocabulary may require exact
    representation instead.
@@ -101,7 +101,10 @@ neu "0.1"
 ```
 
 Every unit states an exact language-behavior version. There is no omitted
-version, `latest`, or range. Every unit in one compilation closure must declare
+version, `latest`, or range. The quoted version is not a general string literal:
+it must be canonical `major.minor`, with no escapes, signs, whitespace, leading
+zeroes (except the component `0`), or extra components. v0 accepts exactly
+`"0.1"`. Every unit in one compilation closure must declare
 the same exact version; mixed-version closures are rejected before name or type
 resolution.
 
@@ -122,6 +125,12 @@ packages cannot contribute to the same module in v0. A vocabulary `use` remains
 source-unit scoped: each unit that spells `Flow::...` must contain `use Flow`.
 Equal use names in units of the same module must resolve to the same captured
 bundle or compilation fails.
+
+An imported vocabulary namespace reserves its name across the complete merged
+module. If any unit says `use Flow`, no root declaration named `Flow` is legal in
+any unit. Repeated `use Flow` declarations must resolve to the same exact
+vocabulary identity, digest, schema version, behavior version, and feature
+contract.
 
 One v0 compilation request contains units for exactly one logical module and
 package identity. v0 has no source-module/package import or cross-module source
@@ -148,9 +157,11 @@ not inject `Pipeline`, `Mode`, or other members as unqualified names; authors
 write `Flow::Pipeline` and `Flow::Mode.strict`.
 
 `use Flow` does not silently require every feature the vocabulary may ever add.
-Each referenced vocabulary type, member, field, or enum case identifies its
-required features in the captured bundle. The compiler aggregates that used
-feature set, verifies support, and records it in IR and derivation. v0 has no
+The compiler computes a transitive feature closure seeded by referenced
+types/members and expanded through instantiated fields, nested type/schema
+dependencies, applied defaults, selected static values, constraints, behavioral classifications, and
+feature-to-feature dependencies. It verifies the complete fixed point and
+records each feature plus its reason in IR and derivation. v0 has no
 source alias or selective-use syntax; those are future import-design questions.
 
 ## 4. Comments
@@ -290,7 +301,10 @@ Nested public declarations require every containing namespace to be public.
 Visibility is recorded for IR consumers, documentation, and future imports; it
 is not confidentiality or authorization, and v0 still has no cross-module source
 access. A public declaration's exposed type signature cannot name a private
-nominal type, and a public identity reference cannot target a private binding.
+nominal type. For every public binding, the compiler recursively inspects the
+containment nodes of its complete logical value, including nested records, lists,
+and vocabulary payloads. It inspects but does not follow each `Ref<T>` edge, and
+every encountered reference must target a public binding.
 
 The declared type remains explicit. The following is invalid:
 
@@ -360,9 +374,12 @@ source positions have type `num`.
 declaration identity and does not read or copy `image`. Forward `ref(...)`
 resolution is allowed and its edges are excluded from value-cycle detection.
 
-Mutation remains a future question. It may be reconsidered only if concrete
-Flow and independently designed Neux cases demonstrate that immutable
-composition, a derived binding, or an explicit override model is insufficient.
+The next design priority is immutable derivation/composition, followed by
+explicit override with deterministic precedence and provenance. v0 intentionally
+has no spelling for either. v1 must test the capability against real Flow
+configuration and an independently designed Neux case before choosing syntax.
+Actual mutation is investigated only if both immutable mechanisms prove
+insufficient.
 
 ## 8. The generic numeric type
 
@@ -384,6 +401,16 @@ every zero spelling, including `-0.0`, becomes coefficient `0`, scale `0`. The
 original spelling remains in provenance. Logical IR carries the normalized
 mathematical value, and concrete encoders must preserve it losslessly rather
 than assuming a host or JSON number is sufficient.
+
+Keep three layers distinct:
+
+1. Neutral IR stores the exact logical `num`;
+2. contract lowering validates and converts it for a named target; and
+3. the consumer artifact stores the encoded representation, such as binary32
+   bits.
+
+A rounded lowering result links back to the exact value and contract. It never
+replaces the exact `num` in Neutral IR.
 
 Contract-specific conversion follows these rules:
 
@@ -571,6 +598,10 @@ the value-dependency graph.
 Fields cannot repeat. Records are nominal: equal field shapes do not make two
 record declarations the same type.
 
+Fields have no independent visibility and cannot be marked `pub` or private.
+Every field of an accessible record is part of that record's visible structural
+contract.
+
 Record fields and bindings are immutable in v0. Authors construct a new named
 value instead of updating an existing one:
 
@@ -581,8 +612,11 @@ Config config = {
 }
 ```
 
-v0 has no spread/update syntax. A future composition or explicit override form
-requires its own cross-domain evidence and provenance rules.
+v0 has no spread/update syntax. Immutable derivation/update and explicit
+override are prioritized for v1, require deterministic conflict rules and full
+origin tracking, and must be tested first with real Flow configuration and then
+an independent Neux case. This guide does not reserve or endorse `with` or any
+other future spelling.
 
 ## 13. Constructing record values
 
@@ -639,6 +673,8 @@ module, and `use` headers.
 
 When a module spans source units, those rules apply to the merged module scope.
 File/request order never breaks a duplicate-name tie or changes resolution.
+A namespace cannot be reopened: a second `namespace checks` declaration is a
+duplicate even when it occurs in another unit and contains different members.
 
 ## 15. Symbolic references
 
@@ -666,6 +702,12 @@ A symbolic reference is not the target's copied value and does not automatically
 mean containment, execution order, or data dependency. An ordinary `config` in
 value position uses the immutable value; `ref(config)` links declaration
 identity. Text containing a name remains text.
+
+Neutral IR represents `Ref<T>` with target identity, expected target type/kind,
+and provenance only. It has no dependency, ordering, ownership, readiness, or
+containment meaning. Consumers must use an explicit vocabulary-owned construct,
+such as `Flow::Dependency`, for those relationships and must never infer them
+from a reference, field name, or source position.
 
 Only value bindings are legal targets. Record types, other types, namespaces,
 modules, and vocabulary namespaces are wrong-kind errors:
@@ -733,8 +775,10 @@ SecretRef<string>? token = null
 The type parameter describes the delivery shape requested from the later secret
 broker. The compiler does not resolve the secret or claim that its eventual
 contents satisfy that shape. The compiler only validates that the type argument
-is a well-formed Neutral type; a consumer or broker separately decides whether
-it supports that delivery shape.
+is a well-formed Neutral type. Secret deliverability is a separate capability
+contract published by the selected consumer/profile. It may reject otherwise
+well-formed shapes such as `SecretRef<Ref<Config>>` or
+`SecretRef<List<SecretRef<string>>>` before broker resolution.
 
 ## 17. Vocabulary-owned typed declarations
 
@@ -760,6 +804,19 @@ Flow::Pipeline verify = {
 captured data-only Flow bundle defines the qualified type, its fields, static
 constraints, behavioral classification, and required features. Neutral does
 not execute it.
+
+“Data-only” is strict: bundles conform to a fixed versioned Neutral-owned closed
+schema. They may declare types, fields, constant defaults, static values,
+representation requirements, feature dependencies, behavioral IDs/classes, and
+instances of predefined Neutral constraint kinds. They cannot contain scripts,
+callbacks, arbitrary expressions, executable validators, custom code,
+bytecode, native/Wasm modules, or entry points. Unknown required constraint
+kinds fail closed.
+
+Required features are a transitive closure over directly referenced members,
+instantiated fields, nested type/schema dependencies, applied defaults, selected
+static values, constraints, behavioral classifications, and feature
+dependencies. IR records the final set and why each feature entered it.
 
 Vocabulary-owned values are immutable copyable data. For example,
 `Flow::Pipeline second = verify` creates a new declaration identity containing
@@ -796,6 +853,10 @@ rejected when it does not resolve through the captured vocabulary bundle.
 The bundle—not the author—independently classifies field presence/default,
 nullability, and behavioral meaning. Unknown required behavior fails closed. v0
 has no untyped `extensions` bag through which behavioral data can be hidden.
+When a vocabulary default is applied, IR records its bundle field/default
+identity and version, application site, behavioral classification, introduced
+feature reasons, and whether the behavior came from source or default. Omitted
+syntax therefore cannot create unexplained domain behavior.
 
 ## 19. Domain-owned relationships
 
@@ -811,6 +872,16 @@ Flow owns whether this means pipeline ordering. A Neux relationship would keep
 its independent OS meaning.
 
 ## 20. Whitespace and punctuation
+
+The private frontend is explicitly staged:
+
+```text
+raw lexer -> newline/layout normalizer -> parser
+```
+
+The raw lexer emits physical newlines. The layout stage—not the lexer—uses
+delimiter and declaration-list context to emit semantic `LINE_END` tokens or
+ordinary trivia. The parser consumes the normalized stream.
 
 - Source is UTF-8. A BOM is accepted only at byte zero.
 - Malformed UTF-8 and raw NUL bytes are fatal.
@@ -913,8 +984,8 @@ v0 still has no:
 - provider credentials or resolved secrets; or
 - Flow/Neux runtime lifecycle syntax.
 
-Future mutation requires concrete Flow and Neux evidence that immutable
-composition or explicit overriding is insufficient.
+Future work prioritizes immutable derivation/composition, then explicit
+override, before mutation is investigated at all.
 
 ## 25. Quick reference
 
@@ -948,6 +1019,8 @@ composition or explicit overriding is insufficient.
 This is a design sketch, not yet the normative grammar.
 Blank lines separate productions in this sketch. It deliberately uses no
 semicolon-like production terminator, matching the `.neu` surface.
+Lexical trivia may occur between tokens unless a physical newline becomes a
+semantic `LINE_END`; trivia is omitted from productions for readability.
 
 ```ebnf
 source =
@@ -956,7 +1029,10 @@ source =
     { declaration },
     end_of_file
 
-language_header = "neu", string_literal, LINE_END
+language_header = "neu", language_version, LINE_END
+language_version = '"', version_component, ".", version_component, '"'
+version_component = "0" | NONZERO_DIGIT, { DIGIT }
+NONZERO_DIGIT = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 module_header = "module", module_name, LINE_END
 
 use_declaration =
@@ -1062,10 +1138,13 @@ upper_camel_name =
     ASCII_UPPER, { ASCII_LETTER | DIGIT }
 ```
 
-Static validation—not grammar alone—requires every `use` name to resolve through
-the captured lock manifest to one permitted exact vocabulary bundle; derives and
-checks the required feature set from used vocabulary members; enforces
-nullable-only null and one unambiguous expected type for every contextual record;
+Static validation—not grammar alone—resolves every `use` name through the
+captured lock manifest to one permitted exact vocabulary bundle; validates
+that bundle against the closed Neutral-owned declarative schema and rejects
+unknown constraint kinds or executable payloads; reserves
+every used vocabulary namespace across the merged module; derives and checks the
+transitive required-feature closure from direct and indirect contributors;
+enforces nullable-only null and one unambiguous expected type for every contextual record;
 requires one underlying expected `SecretRef<T>` for `secret_ref(...)`; restricts
 ordinary binding values and `ref(...)` targets to value bindings; permits
 forward value and identity resolution; requires exact expected types or only
@@ -1076,17 +1155,19 @@ that declares the selected static value; rejects every static ordinary-value
 dependency cycle and every nominal record cycle not broken by `Ref<T>` while
 ignoring identity-reference edges for those checks; rejects mixed-version
 closures, cross-package module merging, cross-module source access, and
-duplicate names in merged module scopes; enforces private-by-default visibility
-and public-container rules; checks configured numeric digit and scale budgets
+duplicate names and namespace reopening in merged module scopes; enforces
+private-by-default visibility, public-container rules, and recursive public-value
+reference exposure checks; checks configured numeric digit and scale budgets
 before expensive conversion; and checks declaration uniqueness, name-category
 casing, and schema-owned vocabulary fields.
 
-`LINE_END` is emitted after a physical newline, including after a trailing line
-comment, when the current source or namespace declaration-list item is complete.
-It is suppressed inside value/type delimiters and after syntactically incomplete
-tokens. Namespace declaration braces establish a nested declaration-list mode;
-they do not suppress `LINE_END`. The lexer emits a synthetic `LINE_END` before
-end-of-file when needed.
+The raw lexer emits physical newlines. The newline/layout normalizer emits
+`LINE_END` after a physical newline, including after a trailing line comment,
+when the current source or namespace declaration-list item is complete. It
+suppresses `LINE_END` inside value/type delimiters and after syntactically
+incomplete tokens. Namespace declaration braces establish a nested
+declaration-list mode; they do not suppress `LINE_END`. The layout normalizer
+emits a synthetic `LINE_END` before end-of-file when needed.
 
 ## 27. How to revise this proposal
 

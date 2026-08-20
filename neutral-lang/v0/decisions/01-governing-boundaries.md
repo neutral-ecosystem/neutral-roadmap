@@ -12,7 +12,7 @@ The ecosystem has four distinct representation contracts:
 | --- | --- | --- | --- |
 | Concrete `.neu` source | neutral-lang specification | Versioned public contract | Author notation, comments, vocabulary `use` requirements |
 | Compiler-private models | neutral-lang implementation | None | Tokens, recovery state, syntax trees, resolution/type state, lowering forms |
-| Neutral IR | neutral-lang IR specification | Independently versioned public contract | Resolved identities, typed structure, vocabulary-owned data, provenance links |
+| Neutral IR | neutral-lang IR specification | Independently versioned public contract | Resolved identities, typed structure, exact logical values, vocabulary-owned data, provenance links |
 | Consumer-private model | Flow or Neux | Private to that application | Flow plans or Neux OS models and their domain behavior |
 
 The only supported direction is:
@@ -51,6 +51,9 @@ but MUST NOT alter logical IR. v0 has no documentation-attachment syntax.
 
 Generated or normalized IR elements MUST name their originating construct.
 Lowering MUST NOT invent Flow or Neux semantics or discard required domain data.
+Contract-specific numeric lowering and encoded target representations are
+derived records outside the exact logical value; rounding never overwrites the
+Neutral IR `num`.
 If required data has no public IR representation, compilation fails with an
 internal contract diagnostic; a consumer is never expected to reparse source.
 

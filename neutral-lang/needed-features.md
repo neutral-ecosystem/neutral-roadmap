@@ -141,11 +141,17 @@ lifecycle.
 - **NL-SRC-009:** An editor or GUI may supply unsaved in-memory source units
   through the same resolver abstraction without changing compiler meaning.
 - **NL-SRC-010:** Every unit in one v0 compilation closure declares the same
-  exact language-behavior version. Multiple units may merge into one logical
+  exact language-behavior version using canonical `major.minor` syntax rather
+  than a general string literal; v0 accepts only `"0.1"`. Multiple units may merge into one logical
   module deterministically only within one captured package identity; duplicate
   names are errors and unit order has no semantic meaning. Vocabulary uses
-  remain unit-scoped, and equal use names in units of the same module must
-  resolve to the same captured bundle.
+  remain unit-scoped, but each imported name is reserved across the merged
+  module and equal uses must resolve to the same exact captured bundle. A
+  namespace declaration cannot be reopened across units.
+- **NL-SRC-011:** The private frontend separates raw lexing, deterministic
+  newline/layout normalization, and parsing. Trivia may occur between tokens
+  except where layout emits semantic `LINE_END`; grammar notation states this
+  once rather than repeating trivia in every production.
 
 ## 5. Names, scopes, declarations, and references
 
@@ -193,16 +199,20 @@ lifecycle.
   records cannot acquire static members in v0.
 - **NL-NAM-013:** All v0 bindings are immutable and initialized once. v0 has no
   mutation or reassignment syntax, and declaration order is non-semantic after
-  required headers. Mutation remains future-only unless real Flow and Neux
-  evidence shows immutable composition or explicit overriding is insufficient.
+  required headers. Future design prioritizes immutable derivation/composition,
+  then explicit override; mutation is investigated only if both fail real Flow
+  and independent Neux cases.
 - **NL-NAM-014:** v0 module headers contain one `snake_case` identifier. A
   compilation request contains units for one logical module/package identity;
   `::` never encodes a module path.
 - **NL-NAM-015:** Records, bindings, and namespaces are private by default and
   may be exported with `pub`. Public nested declarations require public
-  containers; public exposed type signatures and identity links cannot expose private
-  declarations. Visibility controls the IR/documentation surface, not secrecy,
+  containers; public exposed type signatures cannot expose private declarations,
+  and recursive traversal of every public logical value rejects nested `Ref<T>`
+  links to private targets. Visibility controls the IR/documentation surface, not secrecy,
   authority, or execution permission.
+- **NL-NAM-016:** Fields have no independent visibility. Every field of an
+  accessible record is part of that record's visible structural contract.
 
 These capabilities let Flow derive named work and dependency relationships, but
 Neutral does not decide that a declaration is a job or that a reference is a
@@ -242,7 +252,9 @@ readiness edge.
   exact normalized arbitrary-precision base-10 rational. Integer, decimal, and
   named IEEE formats are contract-owned lowering targets, not additional
   author-facing scalar declarations. Logical IR preserves the normalized value
-  losslessly without assuming a host or JSON numeric representation.
+  losslessly without assuming a host or JSON numeric representation. Exact
+  logical value, contract lowering, and encoded target representation are
+  separate records; a rounded lowering never replaces the logical IR value.
 - **NL-VAL-003:** Required/defaulted, nullable/non-nullable, and repeated fields
   are distinguishable even though `null` is the only explicit source null/empty
   literal. A default makes a field omittable; `T?` makes its value nullable.
@@ -266,6 +278,8 @@ readiness edge.
   containing resolved secret material or claiming the compiler verified that
   material. `secret_ref("id")` obtains exactly one `T` from its expected type;
   the identifier text never determines `T`.
+  Well-formedness of `T` is separate from consumer/profile secret-deliverability;
+  unsupported shapes fail capability validation before broker resolution.
 - **NL-VAL-008:** Unknown or unsupported domain value kinds fail according to
   must-understand rules; they are not coerced silently.
 - **NL-VAL-009:** Constraints that can be checked without application state are
@@ -342,6 +356,10 @@ information an eventual design must preserve.
   IR. Its result belongs to the consumer's own immutable normalized record.
 - **NL-CMP-010:** Recursive composition is either rejected or governed by a
   separately specified, bounded contract before it is accepted.
+- **NL-CMP-011:** Immutable record derivation/update is the first practical
+  composition capability to validate. It needs explicit overridden fields,
+  deterministic conflict rules, and complete provenance; syntax follows real
+  Flow and independently designed Neux fixtures rather than being assumed.
 
 ## 10. Domain vocabulary and extension contract
 
@@ -358,13 +376,18 @@ Extensibility must not become unversioned arbitrary compiler plugins.
   implicitly.
 - **NL-DOM-003:** Vocabulary-owned typed declarations use the same type-first
   binding and contextual-value grammar as local declarations. Their data
-  contracts can be loaded and validated without executing provider or
-  application code.
+  contracts use a fixed versioned Neutral-owned closed schema and can be loaded
+  and validated without executing provider or application code. Bundles contain
+  no scripts, callbacks, arbitrary expressions, executable validators, custom
+  code, bytecode, native/Wasm modules, or entry points.
 - **NL-DOM-004:** Core IR carries namespace-qualified vocabulary-owned typed
   declarations and values without assigning their external behavior.
 - **NL-DOM-005:** Required and optional domain features are distinguishable.
-  Each vocabulary member declares its feature dependencies; the compiler
-  derives and records the required set from members actually used. Unknown or
+  The compiler computes a deterministic transitive closure from referenced
+  members through instantiated fields, nested type/schema dependencies, applied
+  defaults, static values,
+  constraints, behavior classifications, and feature dependencies, recording
+  each feature's reason. Unknown or
   unsupported required behavior fails closed, while ignorable metadata must be
   explicitly declared non-behavioral.
 - **NL-DOM-006:** Domain payloads have bounded size, depth, allowed value kinds,
@@ -388,6 +411,10 @@ Extensibility must not become unversioned arbitrary compiler plugins.
   record fields: required/defaulted, nullable/non-nullable, and
   behavioral/non-behavioral. A vocabulary cannot invent a second field-presence
   notion called “optional.”
+- **NL-DOM-014:** Applied vocabulary defaults record field/default identity and
+  version, application site, behavior classification, and introduced-feature
+  reasons. Provenance distinguishes source values, record defaults, vocabulary
+  defaults, and behavior introduced by a default.
 
 ## 11. Contracts, capabilities, and effects
 
@@ -477,6 +504,10 @@ meaning.
   immutable logical value with provenance for both use and origin; it does not
   become a `Ref<T>` identity edge. Implementations may share storage internally,
   but that sharing is not public IR meaning.
+- **NL-IR-016:** `Ref<T>` carries target identity, expected type/kind, and
+  provenance only. Consumers cannot infer containment, ownership, dependency,
+  readiness, or order from it; those require explicit domain-owned relationship
+  nodes.
 
 ## 14. Compiler and IR API capabilities
 
@@ -876,6 +907,13 @@ resolver and capture their exact content in the source closure. A bundle
 declares its identity, owner assertion, schema and behavior versions,
 compatibility range, dependencies, allowed structures and values, reference
 targets, operation contracts, static constraints, and resource bounds.
+
+The bundle format is a fixed, versioned, Neutral-owned closed declarative schema
+with predefined bounded constraint kinds. It contains no scripts, callbacks,
+arbitrary expressions, executable validators, custom code, bytecode,
+native/Wasm modules, or entry points. Required features are computed
+transitively through every applied/defaulted/schema dependency and recorded with
+their inclusion reasons.
 
 The compiler validates bundles using built-in bounded machinery. Source cannot
 activate an unapproved profile or cause ambient network access. Signatures are

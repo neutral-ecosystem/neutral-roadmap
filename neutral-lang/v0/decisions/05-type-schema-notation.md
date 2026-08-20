@@ -18,6 +18,17 @@ provenance. All zero spellings normalize to coefficient `0`, scale `0`. Logical
 IR preserves this mathematical value losslessly and does not inherit an
 encoder's or host's numeric type. Contract-required integer and decimal
 conversion must be exact.
+
+Numeric handling has three non-interchangeable layers:
+
+1. the Neutral logical value: the exact normalized decimal rational in IR;
+2. contract lowering: validation and deterministic conversion for a named target
+   representation without mutating the logical value; and
+3. encoded target representation: for example, binary32 bits owned by the
+   lowered consumer artifact.
+
+A rounded target value is a lowering result linked to the exact source value and
+contract. It never replaces that exact `num` in Neutral IR.
 Named IEEE binary conversion uses deterministic round-to-nearest, ties-to-even
 by default, matching Python's nearest-representable model without inheriting its
 host format. A contract may require exact representation instead. Subnormal
@@ -48,6 +59,8 @@ record ImageConfig {
 Records are nominal: equal fields do not make two record declarations the same
 type. Field names are unique. Declaration order is retained for presentation
 but does not affect logical type equality. v0 has no anonymous structural type.
+Fields have no independent visibility modifier. Once a record declaration is
+accessible, every field is part of its visible structural contract.
 Every nominal recursive record cycle is invalid unless the cycle is broken by a
 `Ref<T>` edge. `Node?` and `List<Node>` still embed `Node` and therefore do not
 make recursion valid; `Ref<Node>` links identity without embedding and is
@@ -137,9 +150,11 @@ provenance, and required-feature support. Unknown required types fail closed.
 ## Required evidence
 
 Fixtures MUST cover scalars, nearest-even and exact-required numeric conversions
-and their failures,
+and their failures while proving the exact IR value survives rounded lowering,
 nominal mismatch, duplicates, every null/default combination, nullable elements
 versus nullable collections, permitted outer nullability widening, rejected
 nullable narrowing and generic covariance, closed-constant defaults, rejected
 binding/identity/secret defaults, empty/nested lists, wrong-kind type references,
 generic secret-delivery types, and unsupported required domain types.
+Visibility fixtures also prove that an accessible record exposes its complete
+field contract and that fields reject visibility modifiers.

@@ -20,6 +20,11 @@ Numeric source values are exact within configured digit/scale limits. A
 wrong type, failed numeric conversion, and resource exhaustion are separate
 diagnostics.
 
+The exact logical `num`, a contract-lowering result, and its encoded machine
+representation are distinct records. Lowering may produce rounded binary bits,
+but it retains a provenance link to the exact logical value and never rewrites
+or substitutes that value in Neutral IR.
+
 ## SYN-VAL-002 — Record construction
 
 Record values use the expected nominal type supplied by their binding, field,
@@ -62,7 +67,10 @@ The compiler preserves structural omission/default application versus explicit
 `null` in provenance and IR. v0 has no `absent` token and no optional-field
 modifier. A vocabulary-owned field follows the same rule as a Neutral record
 field: it may be omitted only when its captured schema supplies a default.
-Omission is still not a source value. User-record defaults are closed constants
+Omission is still not a source value. An applied vocabulary default records its
+bundle field/default identity and version, application site, behavioral
+classification, introduced-feature reasons, and whether behavior came from the
+default rather than source. User-record defaults are closed constants
 under `SYN-TYP-004`; applying one copies that constant into the constructed value
 and records both the construction site and field-default declaration as origin.
 It creates no ordinary binding dependency.

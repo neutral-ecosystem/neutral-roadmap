@@ -33,7 +33,6 @@ parser example.
 
 ## 6. Literal values and value construction
 
-- [ ] **SYN-VAL-014 · v2** — Define update/copy construction for immutable values and its provenance behavior.
 - [ ] **SYN-VAL-015 · v2** — Decide whether comprehensions exist or whether bounded expansion syntax fully replaces them.
 - [ ] **SYN-VAL-016 · v2** — Define source rendering for unknown or opaque schema-designated ignorable non-behavioral values without pretending the compiler understands them.
 

@@ -42,10 +42,11 @@ v0 has no `mut` modifier and no assignment production. A bare form such as
 `retry_count = 4` is invalid even if a binding already exists. Declaration order
 does not select or update a value.
 
-Mutation remains a possible future feature only if concrete Flow and
-independently designed Neux cases show that composition, a new derived binding,
-or an explicit override model cannot express the requirement. Such evidence
-would require a new versioned semantic decision; v0 reserves no mutation syntax.
+Future design proceeds in order: immutable derivation/composition, explicit
+override with deterministic provenance, and only then investigation of actual
+mutation if both are insufficient. v1 must test the immutable capability using
+real Flow configuration and an independently designed Neux case before choosing
+surface syntax. v0 reserves none of those spellings.
 
 ## SYN-DEC-003 — Explicit types
 
@@ -89,6 +90,8 @@ are declarations, not arbitrary values.
 
 Two declarations of any kind cannot share a name in one scope, including when
 the declarations come from different source units merged into one module.
+This includes namespaces: a namespace cannot be reopened by repeating its
+declaration in the same or another source unit.
 Vocabulary use names occupy the root namespace. v0 prohibits shadowing outer
 declarations. Predeclared core names (`bool`, `num`, `string`, `List`, `Ref`, and
 `SecretRef`) cannot be declared or shadowed in any scope. Sibling namespaces may
