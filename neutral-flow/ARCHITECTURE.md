@@ -1455,8 +1455,6 @@ until these are answered:
 
 Supporting analysis created for this architecture:
 
-- [requirements and milestone audit](agents/requirements-audit.md)
-- [ecosystem and project-boundary audit](agents/ecosystem-audit.md)
 - [architecture research and primary bibliography](docs/architecture-research.md)
 
 Important primary references include:
