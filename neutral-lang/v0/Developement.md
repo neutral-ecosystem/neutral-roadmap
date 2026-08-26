@@ -45,7 +45,9 @@ neutral-probe
 neutral-cli
 ├── effectful host, filesystem adapter, compile/validate/inspect commands
 neutral-test-support
-└── fixtures, golden projections, alpha-equivalence and test builders
+├── fixtures, golden projections, alpha-equivalence and test builders
+xtask
+└── cross-platform developer, test, CI, evidence, and release automation
 ```
 
 These are implementation packages, not new ecosystem layers. Do not expose
@@ -110,6 +112,334 @@ implementation → test traceability table required during development.
 | 9 | Robustness and evidence obligations in `NL-DIA-001..006`, `NL-API-004`, `SYN-DIA-*`, and `SYN-EVO-002` |
 | 10 | Every v0 requirement, master-checklist item, architecture completion gate, explicit exclusion, and release artifact |
 
+## Quality and testing standards alignment
+
+Neutral v0 uses the following standards as an engineering alignment profile:
+
+- [ISO/IEC/IEEE 29119-1:2022](https://www.iso.org/standard/81291.html) for
+  common software-testing concepts and terminology;
+- [ISO/IEC/IEEE 29119-2:2021](https://www.iso.org/standard/79428.html) for test
+  governance, management, and dynamic test processes;
+- [ISO/IEC/IEEE 29119-3:2021](https://www.iso.org/standard/79429.html) for
+  project test documentation and test-result evidence;
+- [ISO/IEC/IEEE 29119-4:2021](https://www.iso.org/standard/79430.html) for
+  systematic test-design techniques;
+- [ISO/IEC 25010:2023](https://www.iso.org/standard/78176.html) for the product
+  quality model;
+- [ISO/IEC 25023:2016](https://www.iso.org/standard/35747.html) for selected
+  quantitative product-quality measures;
+- [ISO/IEC 25040:2024](https://www.iso.org/standard/83467.html) for planning,
+  executing, and concluding quality evaluations;
+- [ISO/IEC 20246:2017](https://www.iso.org/standard/67407.html) for static work
+  product reviews; and
+- [ISO/IEC 5055:2021](https://www.iso.org/standard/80623.html) for selected
+  automated source-code quality measures.
+
+The project must maintain an edition register because standards can be revised,
+confirmed, or withdrawn. ISO currently lists ISO/IEC 25023:2016 as published and
+to be revised, and ISO/IEC 5055:2021 at close of review; their status must be
+checked before a release claim is approved.
+
+This plan claims alignment intent only. It does not claim ISO conformity,
+accreditation, or certification. Such a claim requires access to the complete
+licensed standards, an approved applicability/tailoring statement, objective
+evidence for every applicable requirement, qualified review, and any required
+independent conformity assessment.
+
+### Standards applicability record
+
+- [ ] Create `quality/standards-register.md` with standard, edition, status,
+      owner, applicability, tailoring decision, evidence location, and review
+      date.
+- [ ] Record every excluded or tailored clause with rationale and approving
+      reviewer.
+- [ ] Review the register at least before each release candidate and whenever an
+      applicable standard changes status.
+- [ ] Keep standards-derived process requirements distinct from Neutral language
+      semantics.
+- [ ] Do not copy restricted standards text into the repository; record
+      project-specific procedures and evidence in original wording.
+- [ ] Prohibit badges or release notes that imply ISO certification without
+      documented authority.
+
+## Product quality model
+
+The project tailors the ISO/IEC 25010 product quality characteristics to a
+compiler, IR reader, and CLI. Every release quality goal needs a measurable
+acceptance criterion; names alone are not evidence.
+
+| Quality characteristic | Neutral v0 interpretation | Primary evidence |
+| --- | --- | --- |
+| Functional suitability | Source acceptance/rejection and public IR exactly implement the v0 contracts | Requirement traceability, conformance fixtures, golden logical projections |
+| Performance efficiency | Work, memory, output, and latency remain within named profiles | Complexity tests, benchmarks, peak-memory measurements, limit tests |
+| Compatibility | Supported hosts and independently versioned language/IR/encoding contracts behave as documented | Host matrix, compatibility fixtures, old-artifact reader tests |
+| Interaction capability | CLI and diagnostics are understandable, safe, consistent, and source-linked | CLI system tests, diagnostic review, accessibility/readability review |
+| Reliability | Repeated/concurrent work is deterministic; failures never look successful | Determinism, cancellation, recovery, soak, and no-partial-output tests |
+| Security | Untrusted source, bundles, and IR cannot gain authority, execute code, leak secrets, or cause unbounded work | Threat model, fuzzing, adversarial tests, dependency review, static analysis |
+| Maintainability | Boundaries, code, tests, documentation, and decisions remain understandable and changeable | Reviews, linting, complexity measures, mutation testing, architecture checks |
+| Flexibility | Public host contracts and independent versions permit bounded adaptation without changing language meaning | API tests, resolver substitution tests, encoding/reader separation tests |
+| Safety | Invalid or indeterminate input fails closed and cannot produce authoritative partial output or external effects | Negative tests, fault injection, cancellation tests, effect-boundary audit |
+
+### Quality measurement rules
+
+- [ ] Define each measure with a name, purpose, unit, calculation, data source,
+      collection tool/version, sampling policy, threshold, owner, and response to
+      failure.
+- [ ] Store thresholds in versioned `config/quality-gates.toml`, not only in CI
+      UI configuration.
+- [ ] Store fast/PR/nightly/release budgets in versioned
+      `config/test-profiles.toml`.
+- [ ] Establish baselines on controlled hardware before setting performance
+      regression thresholds.
+- [ ] Treat a metric as evidence for its stated quality question only; code
+      coverage is not a substitute for correct assertions or conformance.
+- [ ] Review metrics for gaming, blind spots, instability, and obsolete targets.
+- [ ] Require rationale and review for threshold reductions; silently lowering a
+      gate is forbidden.
+- [ ] Preserve signed or checksummed release quality reports with toolchain,
+      commit, host, configuration, and test-data identities.
+
+## Test-driven development policy
+
+All production behavior follows test-driven development. Documentation-only,
+build-metadata, and mechanical refactors may use a documented exception when no
+observable behavior changes, but they still run the complete affected gate.
+
+### Red → green → refactor workflow
+
+1. **Select behavior.** Choose one accepted requirement/decision and one small
+   observable outcome. Record the requirement IDs, risk, affected boundary, and
+   intended test level.
+2. **Write the test first.** Add the smallest test and fixture that expresses the
+   behavior through the lowest stable interface that owns it.
+3. **Prove red.** Run the narrow test and confirm it fails for the intended
+   missing behavior—not because of a broken harness, typo, or unrelated defect.
+   Preserve the failing command and result in the change evidence.
+4. **Implement minimally.** Add only enough production code to satisfy the test
+   while respecting existing contracts and resource boundaries.
+5. **Prove green.** Run the narrow test, then the affected unit, integration,
+   conformance, and smoke suites.
+6. **Refactor.** Improve names, duplication, boundaries, and complexity while
+   keeping the tests green. Do not alter a golden result without explicit review.
+7. **Complete the slice.** Add negative, boundary, misleading-lookalike,
+   source-map, provenance, diagnostic, reader, and limit tests required by the
+   vertical-slice rules.
+8. **Run the gate.** Run the PR-equivalent local task before review.
+
+### TDD enforcement
+
+- [ ] Every behavior change identifies at least one governing `NL-*` or `SYN-*`
+      ID and the first failing test.
+- [ ] Every defect fix begins with a minimal regression test that fails on the
+      defective revision and passes on the fix.
+- [ ] New parser acceptance is prohibited until semantics, lowering, reader, and
+      conformance obligations are identified.
+- [ ] Tests assert public behavior or a private module invariant; they do not
+      freeze incidental implementation layout.
+- [ ] Tests remain deterministic, isolated, order-independent, and parallel-safe.
+- [ ] Unit tests perform no network access, sleep-based synchronization, or
+      dependence on wall clock, locale, current directory, or developer state.
+- [ ] Randomized tests record seeds and minimize failures into stable regression
+      cases.
+- [ ] Golden changes use a separate explicit task and require semantic review.
+- [ ] Deleting, weakening, ignoring, or quarantining a test requires a linked
+      rationale, risk decision, owner, and expiration/reinstatement condition.
+- [ ] A flaky test is a defect. CI retries may collect evidence but cannot turn a
+      failed required test into a passing gate.
+- [ ] Production code may not be merged with skipped `todo!` branches,
+      test-only behavior switches, or unreachable error handling for required
+      paths.
+- [ ] Reviewers verify the test oracle, boundary cases, and red-phase evidence,
+      not only that tests exist.
+
+## Test architecture
+
+Test levels have distinct purposes and should overlap only where a higher-level
+contract needs independent evidence.
+
+| Suite | Scope and isolation | Required cadence | Target budget |
+| --- | --- | --- | --- |
+| Smoke | A few critical happy/fail-closed paths through built public artifacts | Every local gate, commit, and PR | Seconds; hard PR gate |
+| Unit | One pure function/module invariant with controlled collaborators | During every TDD cycle and every PR | Fast; hard PR gate |
+| Integration | Two or more crates/public boundaries in one process | Every PR and supported-host CI | Minutes; hard PR gate |
+| System | Built CLI as a black box with real process/filesystem boundaries in an isolated temporary root | Every PR on primary host; nightly on full host matrix | Minutes; hard primary-host gate |
+| Conformance | Normative source/bundle/IR fixtures and traceability oracles | Every PR and release | Hard gate |
+| Property/metamorphic | General invariants across generated inputs and transformations | Bounded PR run; extended nightly/release | Hard bounded gate |
+| Security/adversarial | Malformed input, disclosure, resource, authority, and dependency cases | Every PR for deterministic cases; extended nightly | Hard gate for deterministic cases |
+| Fuzz | Coverage-guided untrusted-boundary exploration | Smoke on PR; time-boxed nightly and release campaign | Crash/hang finding blocks release |
+| Performance | Microbenchmarks, end-to-end latency, throughput, memory, growth, and regression | Smoke on PR; controlled nightly/release runner | Release threshold gate |
+| Soak/stress | Repetition, concurrency, cancellation, and resource stability | Nightly and release candidate | Release threshold gate |
+| Mutation | Test-oracle strength for critical pure/compiler modules | Scheduled and before release | Threshold/risk gate |
+
+Target budgets are configured values, not semantic promises. If the suite grows
+beyond a budget, split/shard it or revise the reviewed profile; do not silently
+drop cases.
+
+### Smoke suite
+
+- [ ] Build all release-facing binaries and libraries from a clean target.
+- [ ] Compile and inspect the minimal scalar fixture end to end.
+- [ ] Compile one full core fixture with records, defaults, lists, reuse, and
+      references.
+- [ ] Compile and inspect the captured vocabulary fixture.
+- [ ] Decode and inspect one valid external IR artifact.
+- [ ] Reject one malformed source, one invalid vocabulary, and one malformed IR
+      artifact with no authoritative output.
+- [ ] Run formatter idempotence on one representative fixture.
+- [ ] Verify `--help`, version output, stable exit classes, and no-argument CLI
+      behavior.
+- [ ] Keep the suite small enough to run before every local commit.
+
+### Unit suite
+
+- [ ] Co-locate unit tests with private modules under `#[cfg(test)]`.
+- [ ] Test UTF-8/newline mapping, span arithmetic, safe rendering, checked limits,
+      cancellation state, and identity constructors.
+- [ ] Test tokenization, layout decisions, parser productions, recovery limits,
+      exact-number normalization, symbol collection, type compatibility, graph
+      algorithms, lowering, alpha-equivalence, and validators independently.
+- [ ] Use table-driven tests for equivalence partitions and decision tables.
+- [ ] Use exact boundary tests for every minimum, maximum, at-limit, and
+      one-over-limit case.
+- [ ] Prefer small in-memory builders; do not mock private implementation details
+      merely to achieve isolation.
+- [ ] Assert typed outputs, codes, safe parameters, and spans—not unstable
+      rendered messages unless rendering itself is under test.
+
+### Integration suite
+
+- [ ] Test resolver → capture while keeping semantic compilation I/O-free.
+- [ ] Test captured source → compiler → logical IR → in-process reader.
+- [ ] Test logical IR → encoding → decoder/validator → reader.
+- [ ] Test captured vocabulary contract across capture, compiler, IR, decoder,
+      and reader boundaries.
+- [ ] Test reader → probe without any compiler dependency.
+- [ ] Test source map/provenance/derivation consistency across crate boundaries.
+- [ ] Test cancellation and limits at every component handoff.
+- [ ] Test independent concurrent compilations with shuffled insertion and
+      scheduling conditions.
+- [ ] Use only in-memory or isolated temporary adapters; integration tests must
+      not require public networks or ambient developer services.
+
+### System suite
+
+- [ ] Build release-mode CLI artifacts once per system-test job.
+- [ ] Invoke binaries as child processes, never by calling CLI internals.
+- [ ] Create a unique temporary root per test with controlled permissions,
+      environment, locale, clock inputs, and working directory.
+- [ ] Test compile, validate, inspect, and format commands through files and
+      standard streams.
+- [ ] Test Unicode paths, spaces, long paths, read-only input, missing input,
+      unwritable output, existing output, broken pipes, cancellation, and
+      interrupted atomic writes.
+- [ ] Verify stdout/stderr separation, stable exit classes, safe diagnostics,
+      and absence of partial authoritative output.
+- [ ] Run on every supported OS/filesystem combination declared by the host
+      matrix.
+- [ ] Deny external network access during system tests unless a separately
+      authorized resolver-adapter test uses a local ephemeral service.
+
+### Performance suite
+
+- [ ] Maintain small, representative, boundary, and adversarial benchmark corpora
+      with immutable identities.
+- [ ] Measure cold/warm compile latency, throughput, peak resident memory,
+      allocation count/bytes where supported, artifact size, decode latency, and
+      reader/probe traversal.
+- [ ] Benchmark each compiler phase and the end-to-end public path.
+- [ ] Measure growth against source bytes, tokens, nesting, declarations, fields,
+      list items, references, numeric digits/scale, diagnostics, and IR elements.
+- [ ] Include concurrent independent compilation and cancellation responsiveness.
+- [ ] Use a dedicated controlled runner with pinned toolchain, CPU governor,
+      power profile, background-load policy, and benchmark configuration.
+- [ ] Warm up, sample repeatedly, record dispersion/confidence, and compare to a
+      reviewed baseline instead of one timing.
+- [ ] Separate informational PR measurements from release-blocking controlled
+      measurements.
+- [ ] Block unexplained regression beyond versioned absolute and relative
+      thresholds.
+- [ ] Require conformance tests after every performance optimization.
+
+### Test design techniques
+
+- [ ] Use equivalence partitioning for token, type, value, and result classes.
+- [ ] Use boundary value analysis for bytes, spans, counts, nesting, scale, and
+      every structural limit.
+- [ ] Use decision tables for field presence/nullability/default combinations,
+      type compatibility, diagnostics, and reader validity rules.
+- [ ] Use state-transition testing for cancellation, recovery, CLI writes, and
+      any lifecycle state introduced by tooling.
+- [ ] Use syntax/grammar-based testing for accepted forms, explicit exclusions,
+      malformed lookalikes, and decoder structures.
+- [ ] Use pairwise or higher-strength combinatorial testing where host, line
+      ending, input form, limits, and feature combinations are too numerous for
+      exhaustive tests.
+- [ ] Use property/metamorphic testing for normalization, formatting,
+      alpha-equivalence, determinism, encode/decode, and ordering invariants.
+- [ ] Use fault injection for resolver failures, allocation/limit boundaries,
+      cancellation points, short writes, broken pipes, and truncated artifacts.
+- [ ] Use static review for specifications, grammar, unsafe assumptions, public
+      APIs, threat boundaries, tests, and generated/golden changes.
+- [ ] Record the selected technique and risk rationale in each nontrivial test
+      specification.
+
+## Test evidence and acceptance policy
+
+### Required test metadata
+
+Every normative or risk-significant test records:
+
+- [ ] Stable test-case ID and title.
+- [ ] Governing requirement/decision IDs.
+- [ ] Test level and design technique.
+- [ ] Product/project risk addressed and priority.
+- [ ] Preconditions, fixture identities, configuration, and structural limits.
+- [ ] Action/input and an independently reviewable oracle.
+- [ ] Expected typed result, diagnostic, source span, resource result, and side
+      effects or explicit absence of effects.
+- [ ] Timeout/budget and cleanup behavior.
+- [ ] Automation status, owner, and review state.
+- [ ] First implementation version and latest regression result.
+
+### Coverage and test-strength gates
+
+- [ ] Maintain 100% requirement coverage: every accepted `NL-*` and `SYN-*` ID
+      maps to executable evidence.
+- [ ] Maintain 100% diagnostic-code coverage for success/failure ownership,
+      parameter schema, ordering, rendering safety, and span behavior.
+- [ ] Maintain 100% explicit-exclusion coverage with at least one rejection
+      fixture per excluded form.
+- [ ] Set measured line, function, and region/branch coverage thresholds in
+      `quality-gates.toml` after the first vertical slice; never use coverage as
+      the sole release criterion.
+- [ ] Require changed production lines to be exercised unless a reviewed
+      exception explains why execution is impossible or meaningless.
+- [ ] Set a mutation-score target for critical pure modules after calibrating the
+      selected Rust mutation tool; surviving non-equivalent mutants require a
+      test, a justified exception, or a release risk.
+- [ ] Ratchet stable coverage and mutation thresholds upward; reductions require
+      an approved quality decision.
+- [ ] Track flaky, ignored, quarantined, and nondeterministic tests as release
+      risks with owner and deadline.
+
+### Test result and completion evidence
+
+- [ ] Produce machine-readable JUnit-compatible results for every dynamic suite.
+- [ ] Produce coverage, mutation, fuzz, benchmark, dependency, static-analysis,
+      and documentation reports with tool versions.
+- [ ] Record commit, source tree cleanliness, lockfile digest, toolchain, target,
+      host image, profile, random seed, fixture digest, start/end time, and exit
+      status for every CI test run.
+- [ ] Retain PR evidence long enough to diagnose regressions and retain release
+      evidence for the supported release lifetime.
+- [ ] Summarize planned/executed/passed/failed/skipped tests, unresolved defects,
+      deviations, quality measures, residual risks, and release recommendation in
+      a release test-completion report.
+- [ ] Treat missing, corrupt, expired, or internally inconsistent evidence as a
+      failed gate.
+- [ ] Never include credentials, host secrets, or unsafe source excerpts in test
+      artifacts.
+
 ---
 
 ## Stage 1: initialize the repository
@@ -131,14 +461,20 @@ implementation → test traceability table required during development.
 - [ ] Create `neutral-lang/.cargo/config.toml` only for target-neutral Cargo
       settings; do not encode a developer's paths, linker, credentials, or host
       environment.
+- [ ] Create `neutral-lang/xtask/` as a non-published workspace automation
+      package and configure `cargo xtask` as the single cross-platform task
+      interface.
+- [ ] Create `neutral-lang/config/`, `neutral-lang/quality/`,
+      `neutral-lang/scripts/`, and `neutral-lang/.devcontainer/`.
+- [ ] Create `neutral-lang/.env.example` containing test-harness variables and
+      safe defaults only; no variable may alter Neutral source semantics.
 - [ ] Create `neutral-lang/crates/`, `neutral-lang/tests/`,
-      `neutral-lang/conformance/`, `neutral-lang/fuzz/`, and
-      `neutral-lang/benches/`.
+      `neutral-lang/conformance/`, and `neutral-lang/fuzz/`.
 - [ ] Create one directory under `crates/` for each initial crate named in the
       implementation assumption.
-- [ ] Create repository-root `.github/workflows/neutral-lang-ci.yml`; if
-      `neutral-lang` becomes a standalone repository, move the workflow to that
-      repository root without changing its gates.
+- [ ] Create repository-root workflows for PR, nightly, and release testing; if
+      `neutral-lang` becomes a standalone repository, move them to that
+      repository root without changing their gates.
 - [ ] Record the minimum supported Rust version, supported host matrix, and
       dependency policy in `neutral-lang/CONTRIBUTING.md`.
 
@@ -170,8 +506,37 @@ neutral-lang/
 ├── rustfmt.toml
 ├── deny.toml
 ├── CONTRIBUTING.md
+├── .env.example
 ├── .cargo/
 │   └── config.toml
+├── .devcontainer/
+│   ├── devcontainer.json
+│   └── Dockerfile
+├── config/
+│   ├── quality-gates.toml
+│   └── test-profiles.toml
+├── quality/
+│   ├── README.md
+│   ├── quality-model.md
+│   ├── standards-register.md
+│   ├── test-policy.md
+│   ├── test-plan.md
+│   ├── test-case-template.md
+│   ├── test-completion-template.md
+│   ├── risk-register.md
+│   └── traceability.md
+├── scripts/
+│   ├── bootstrap.sh
+│   └── bootstrap.ps1
+├── xtask/
+│   ├── Cargo.toml
+│   └── src/
+│       ├── main.rs
+│       ├── command.rs
+│       ├── environment.rs
+│       ├── evidence.rs
+│       ├── quality.rs
+│       └── test.rs
 ├── crates/
 │   ├── neutral-core/
 │   │   ├── Cargo.toml
@@ -249,29 +614,45 @@ neutral-lang/
 │   │       └── host.rs
 │   └── neutral-test-support/
 │       ├── Cargo.toml
-│       └── src/
-│           ├── lib.rs
-│           ├── assertions.rs
-│           ├── fixtures.rs
-│           └── golden.rs
+│       ├── src/
+│       │   ├── lib.rs
+│       │   ├── assertions.rs
+│       │   ├── fixtures.rs
+│       │   └── golden.rs
+│       ├── tests/
+│       │   ├── smoke.rs
+│       │   ├── integration.rs
+│       │   ├── system.rs
+│       │   ├── conformance.rs
+│       │   ├── determinism.rs
+│       │   └── security.rs
+│       └── benches/
+│           ├── compile.rs
+│           └── decode.rs
 ├── tests/
 │   ├── api/
 │   ├── conformance/
 │   ├── determinism/
-│   └── security/
+│   ├── performance/
+│   ├── security/
+│   └── system/
 ├── conformance/
 │   ├── diagnostics/
 │   ├── ir/
 │   ├── source-map/
 │   └── vocabulary/
 ├── fuzz/
+│   ├── Cargo.toml
 │   └── fuzz_targets/
-└── benches/
-    ├── compile.rs
-    └── decode.rs
+│       ├── source.rs
+│       ├── vocabulary.rs
+│       ├── encoded_ir.rs
+│       └── formatter.rs
+└── test-results/                 # generated and ignored
 ```
 
-- [ ] Create all directories in the target tree.
+- [ ] Create all non-generated directories in the target tree;
+      `test-results/` is created only by automation.
 - [ ] Create all placeholder Rust source files in the target tree.
 - [ ] Keep placeholder Rust source files empty until Step 3.
 - [ ] Create valid crate manifests with names, versions, edition, publication
@@ -335,6 +716,9 @@ neutral-lang/
 - [ ] Permit `neutral-cli` to compose compiler, reader, and probe APIs as the
       effectful host boundary.
 - [ ] Restrict `neutral-test-support` to development/test use.
+- [ ] Keep `xtask` non-published and outside production dependency graphs; it
+      may orchestrate tools and test-support APIs but must not become required at
+      runtime by compiler, reader, probe, or CLI artifacts.
 - [ ] Add minimal library shells and a `fn main() -> ExitCode` CLI shell so the
       entire workspace compiles without placeholder panics.
 - [ ] Add one dependency-direction test or metadata script that rejects forbidden
@@ -381,6 +765,155 @@ neutral-lang/
       fail.
 - [ ] Deliberately adding a forbidden probe-to-compiler dependency makes CI fail.
 
+### Step 6: create the reproducible development and test environment
+
+- [ ] Define one environment contract for local development, CI, containers,
+      benchmarks, and releases.
+- [ ] Pin the Rust toolchain, Cargo lockfile, container base by immutable digest,
+      system packages, and versions of test/quality tools.
+- [ ] Make `scripts/bootstrap.sh` and `scripts/bootstrap.ps1` thin entry points
+      that validate prerequisites and invoke `cargo xtask bootstrap`; keep task
+      logic in Rust rather than duplicating it across shells.
+- [ ] Require explicit approval before bootstrap downloads or installs tools;
+      verify downloaded artifacts with a trusted checksum/signature where the
+      supplier provides one.
+- [ ] Configure the development container to run as a non-root user with the
+      repository mounted read/write and credentials, host sockets, and networks
+      absent by default.
+- [ ] Define environment variables in `.env.example` for test profile, result
+      directory, random seed, benchmark baseline, and optional verbosity only.
+- [ ] Prefix project variables with `NEUTRAL_`; never repurpose standard process
+      variables such as `HOME`.
+- [ ] Prohibit environment variables from changing lexing, parsing, semantics,
+      logical IR, diagnostic ordering, or reader validity.
+- [ ] Make test roots, Cargo target directories, caches, and result directories
+      explicit and unique per concurrent job.
+- [ ] Use isolated temporary directories with automatic cleanup for tests; retain
+      a failed test root only through an explicit diagnostic option.
+- [ ] Pin locale/timezone for CLI rendering tests while separately testing that
+      semantic APIs are independent of both.
+- [ ] Default tests to no external network and no ambient filesystem discovery.
+- [ ] Document supported, tested, experimental, and unsupported host/toolchain
+      combinations.
+- [ ] Generate a machine-readable environment manifest for every CI/release run.
+
+#### Step validation
+
+- [ ] A fresh supported host can bootstrap and run smoke tests using only the
+      documented commands.
+- [ ] The development container builds from its pinned definition and passes the
+      same smoke suite as the host environment.
+- [ ] `cargo xtask environment verify` detects missing, wrong, or unpinned tools.
+- [ ] `cargo xtask environment manifest` records tool, target, OS/container, and
+      configuration identities without secrets.
+- [ ] Two concurrent test jobs use distinct temporary, target, cache, and result
+      paths.
+- [ ] Semantic and logical outputs are equal under varied locale, timezone,
+      working directory, and irrelevant environment variables.
+- [ ] A network-denial test proves the compiler, reader, probe, unit tests, and
+      integration tests do not require external connectivity.
+- [ ] Repository cleanliness is unchanged after a successful local CI run except
+      for ignored test results and build artifacts.
+
+### Step 7: implement one automated task interface
+
+Implement these commands in `xtask`; exact underlying tools may change only
+through reviewed configuration while command meaning remains stable.
+
+- [ ] `cargo xtask bootstrap` — validate/install approved development tools.
+- [ ] `cargo xtask environment verify|manifest` — validate and record the
+      execution environment.
+- [ ] `cargo xtask format` — check formatting by default; require an explicit
+      `--write` to modify files.
+- [ ] `cargo xtask lint` — run Rust, dependency, documentation, Markdown, link,
+      ID, architecture, and repository-coherence checks.
+- [ ] `cargo xtask build --profile <dev|test|release>` — build selected artifacts
+      with recorded configuration.
+- [ ] `cargo xtask test smoke|unit|integration|system|conformance|property|security|all`
+      — run exactly one named suite or the complete deterministic set.
+- [ ] `cargo xtask test performance --profile <pr|nightly|release>` — run the
+      configured performance campaign.
+- [ ] `cargo xtask fuzz smoke|campaign` — run bounded or extended fuzzing.
+- [ ] `cargo xtask coverage` — collect and enforce configured coverage measures.
+- [ ] `cargo xtask mutate` — run mutation analysis for selected critical crates.
+- [ ] `cargo xtask golden check|update` — verify goldens or update them only with
+      an explicit reviewed command.
+- [ ] `cargo xtask quality report` — assemble traceability, test, coverage,
+      mutation, fuzz, benchmark, static-analysis, and deviation evidence.
+- [ ] `cargo xtask ci pr|nightly|release` — reproduce the corresponding CI gate
+      locally.
+- [ ] `cargo xtask clean-results` — remove only the resolved generated result
+      directory, never source or fixture trees.
+- [ ] Make every task fail fast on invalid arguments, but preserve all available
+      evidence for tests already executed.
+- [ ] Make every task propagate the first meaningful nonzero status and produce
+      a final machine-readable task summary.
+- [ ] Do not hide failed tests with automatic retry, filtering, or fallback.
+- [ ] Print the exact underlying commands and relevant nonsecret configuration
+      in verbose mode.
+
+#### Step validation
+
+- [ ] Every documented task has `--help`, stable argument validation, and at
+      least one automation unit test.
+- [ ] Local and CI workflows invoke the same `cargo xtask` commands.
+- [ ] A deliberately failing subcommand makes the aggregate task and CI job fail.
+- [ ] An empty/misconfigured test selection fails instead of reporting zero tests
+      as success.
+- [ ] Result files are written beneath one resolved `test-results/<run-id>/`
+      directory and cannot escape it through path traversal.
+- [ ] Interrupted tasks leave a marked incomplete report rather than a passing
+      summary.
+- [ ] `golden check` never writes and `golden update` prints every changed case.
+- [ ] `clean-results` rejects unresolved, root, parent, symlink-escaped, or
+      non-result targets.
+
+### Step 8: establish test governance and the initial suite skeleton
+
+- [ ] Write `quality/test-policy.md` with scope, independence, TDD, test levels,
+      defect handling, deviations, evidence retention, and release authority.
+- [ ] Write `quality/test-plan.md` with test items, risks, levels, techniques,
+      environment, entry/exit criteria, schedule/cadence, roles, and deliverables.
+- [ ] Write the tailored product quality model and measurable objectives in
+      `quality/quality-model.md`.
+- [ ] Create the standards applicability register and quality/test risk register.
+- [ ] Create concise test-case and test-completion-report templates without
+      copying standards text.
+- [ ] Define stable IDs for test cases, test runs, defects, risks, deviations,
+      environments, fixtures, benchmarks, and reports.
+- [ ] Define severity, priority, likelihood, impact, and release-blocking rules.
+- [ ] Define entry and exit criteria for smoke, unit, integration, system,
+      conformance, property, security, fuzz, performance, soak, and mutation
+      suites.
+- [ ] Add executable suite skeletons that fail with a clear "not implemented"
+      status until each required initial test exists; zero-test success is
+      forbidden.
+- [ ] Add the first automation unit tests for task parsing, environment
+      validation, suite discovery, result aggregation, and safe cleanup.
+- [ ] Configure PR, nightly, and release workflows with least-privilege tokens,
+      concurrency cancellation, timeouts, artifact retention, and no execution
+      of untrusted code with write-capable secrets.
+- [ ] Make release quality approval distinct from the developer who authored the
+      behavior when project staffing permits; otherwise require an explicit
+      documented self-review exception.
+
+#### Step validation
+
+- [ ] Test policy and plan are reviewed and all tailoring/deviations have owners.
+- [ ] Every suite has a unique discovery rule, command, result schema, timeout,
+      and entry/exit criterion.
+- [ ] Every test result can be traced to its commit, environment, profile, and
+      fixture identities.
+- [ ] The PR workflow runs static gates, smoke, unit, integration, system on the
+      primary host, conformance, bounded property/security/fuzz checks, and an
+      informational performance smoke.
+- [ ] The nightly workflow runs the full host matrix, extended property/fuzz,
+      performance, soak/stress, mutation, dependency, and quality-report jobs.
+- [ ] The release workflow reruns all release gates from a clean signed/tagged
+      candidate and publishes immutable evidence only after success.
+- [ ] CI permissions and secret exposure are reviewed for pull requests,
+      protected branches, scheduled runs, and release events.
+
 ### Stage 1 validation
 
 - [ ] The clean workspace builds, lints, tests, and documents successfully.
@@ -388,6 +921,13 @@ neutral-lang/
 - [ ] Public/private and effect/pure dependency boundaries are enforced.
 - [ ] Toolchain, host, dependency, security, and contribution policies are
       recorded.
+- [ ] Host and container environments are pinned, reproducible, isolated, and
+      described by machine-readable manifests.
+- [ ] The task interface runs the same gates locally and in CI.
+- [ ] TDD, ISO alignment, quality model, test plan, risk, traceability, evidence,
+      deviation, and retention policies are approved.
+- [ ] Every required test level has an executable nonempty skeleton and a
+      documented entry/exit gate.
 - [ ] No Neutral syntax or semantics have been invented during scaffolding.
 - [ ] A fresh clone can run every Stage 1 command using only documented setup.
 
@@ -1239,6 +1779,78 @@ diagnostics, source map, provenance, limits, and probe behavior.
 - [ ] Peak-memory measurements include decode-before-validation cases.
 - [ ] Performance changes pass the complete conformance suite.
 
+### Step 6: complete every dynamic test level
+
+- [ ] Finalize the smoke suite around the smallest critical end-to-end paths and
+      enforce its local/PR time budget.
+- [ ] Finalize unit suites for every pure module, invariant, error class, and
+      boundary calculation.
+- [ ] Finalize integration suites for capture/compiler/IR/reader/vocabulary/probe
+      interactions.
+- [ ] Finalize black-box system suites for all CLI commands and supported hosts.
+- [ ] Finalize conformance suites for every normative form, exclusion,
+      diagnostic, source map, provenance, derivation, and invalid IR state.
+- [ ] Finalize performance suites for phase and end-to-end latency, throughput,
+      memory, artifact size, scalability, concurrency, and cancellation.
+- [ ] Finalize stress/soak scenarios for repeated compilation, concurrent
+      isolation, cancellation storms, diagnostic caps, and hostile decode loads.
+- [ ] Verify each suite uses its own intended interface and does not gain access
+      to private state merely to simplify assertions.
+- [ ] Eliminate test-order dependencies, shared mutable fixtures, ambient ports,
+      fixed temporary paths, sleeps as synchronization, and external services.
+
+#### Step validation
+
+- [ ] `cargo xtask test smoke` passes within its configured budget from a clean
+      build and from an incremental build.
+- [ ] `cargo xtask test unit` passes with randomized order where supported.
+- [ ] `cargo xtask test integration` passes without public network access.
+- [ ] `cargo xtask test system` passes against built binaries on the primary
+      host and the declared matrix passes in CI.
+- [ ] `cargo xtask test conformance` reports no missing or orphan fixtures.
+- [ ] `cargo xtask test performance --profile release` meets all controlled
+      release thresholds.
+- [ ] The stress/soak profile completes without leak, hang, cross-request state,
+      nondeterministic logical output, or partial authoritative success.
+- [ ] `cargo xtask test all` selects every deterministic required suite exactly
+      once and produces one aggregate result.
+
+### Step 7: evaluate test strength and static quality
+
+- [ ] Collect line, function, and region/branch coverage with path remapping and
+      stable exclusions documented in `quality-gates.toml`.
+- [ ] Review every uncovered production region in parser, semantic, lowering,
+      vocabulary, decoder, limit, diagnostic, and cancellation code.
+- [ ] Run mutation testing on exact-number, layout, compatibility, graph,
+      alpha-equivalence, limits, diagnostic ordering, and decoder validation
+      modules.
+- [ ] Classify surviving mutants as missing test, equivalent mutant, tool
+      limitation, or accepted residual risk.
+- [ ] Run automated source-code measures and record tool/version/limitations;
+      do not equate a tool report alone with ISO/IEC 5055 conformity.
+- [ ] Conduct static work-product reviews of normative specifications, grammar,
+      public APIs, architecture boundaries, threat model, tests, test oracles,
+      and release evidence.
+- [ ] Require independent review of security-sensitive and externally decoded IR
+      paths when staffing permits.
+- [ ] Assemble a quality evaluation that defines scope, quality characteristics,
+      measures, thresholds, evidence, deviations, and conclusion.
+
+#### Step validation
+
+- [ ] `cargo xtask coverage` meets all configured thresholds and reports no
+      unreviewed exclusions.
+- [ ] `cargo xtask mutate` meets the configured critical-module target or lists
+      approved surviving-mutant risks.
+- [ ] Every required review has identified participants, scope, findings,
+      decisions, and closure evidence.
+- [ ] Every quality measure is reproducible from retained source evidence.
+- [ ] The quality evaluation concludes each selected characteristic as pass,
+      fail, or explicitly indeterminate; missing evidence cannot be inferred as
+      pass.
+- [ ] No ISO conformity or certification claim appears in generated reports
+      unless separately approved under the standards applicability process.
+
 ### Stage 9 validation
 
 - [ ] No known input causes unbounded work, panic, stack overflow, invalid typed
@@ -1247,6 +1859,10 @@ diagnostics, source map, provenance, limits, and probe behavior.
       `ElementId` renaming.
 - [ ] Threat model, dependency review, fuzzing status, and measured resource
       profiles are published.
+- [ ] Smoke, unit, integration, system, conformance, property, security, fuzz,
+      performance, soak/stress, mutation, and static-review evidence is complete.
+- [ ] Coverage, mutation, quality-measure, and ISO-alignment records satisfy the
+      approved project-specific gates.
 - [ ] All correctness, security, performance, and earlier-stage gates pass.
 
 ---
@@ -1266,6 +1882,9 @@ diagnostics, source map, provenance, limits, and probe behavior.
 - [ ] Package the generic probe and complete conformance suite.
 - [ ] Publish compatibility, security, supported-host, and resource-profile
       notes.
+- [ ] Publish the approved quality model, standards applicability record, test
+      plan, traceability matrix, release test-completion report, quality
+      evaluation, deviations, and residual-risk decision.
 
 #### Step validation
 
@@ -1273,17 +1892,22 @@ diagnostics, source map, provenance, limits, and probe behavior.
 - [ ] Release builds use the locked dependency graph and documented toolchain.
 - [ ] A consumer can build the probe using only published public contracts.
 - [ ] All examples run against the release artifacts.
+- [ ] Quality/test evidence identifies the exact release artifacts and can be
+      independently reconciled with their digests.
 
 ### Step 2: execute the release matrix
 
 - [ ] Run formatting and lint gates from a clean checkout.
-- [ ] Run unit, integration, conformance, property, determinism, documentation,
-      security, and fuzz-smoke suites.
+- [ ] Run smoke, unit, integration, system, conformance, property, determinism,
+      security, fuzz, performance, soak/stress, mutation, documentation, and
+      static-analysis suites at their release profiles.
 - [ ] Run every positive, negative, ambiguity, adversarial, and resource fixture.
 - [ ] Run repeated and concurrent builds.
 - [ ] Run in-process and encoded probe comparisons.
 - [ ] Run dependency, license, advisory, and repository coherence checks.
 - [ ] Run on every supported host/toolchain combination.
+- [ ] Generate the aggregate release quality report from the machine-readable
+      suite evidence.
 
 #### Step validation
 
@@ -1291,6 +1915,11 @@ diagnostics, source map, provenance, limits, and probe behavior.
 - [ ] No golden file changes during test execution.
 - [ ] Release output is reproducible at the claimed logical level.
 - [ ] Failures cannot leave or publish partial authoritative artifacts.
+- [ ] Coverage, mutation, benchmark, fuzz, soak, and quality thresholds pass on
+      the approved release environment.
+- [ ] No required test is skipped, ignored, quarantined, flaky, retried into a
+      pass, missing evidence, or indeterminate without an approved blocking risk
+      decision.
 
 ### Step 3: perform final scope and boundary audit
 
@@ -1303,6 +1932,10 @@ diagnostics, source map, provenance, limits, and probe behavior.
       rewriting, ambient lookup, application semantics, or external effects.
 - [ ] Verify all accepted documents are coherent and use the same terminology.
 - [ ] Resolve or explicitly block on every release-risk entry.
+- [ ] Recheck current status/editions of every standard in the applicability
+      register and review any change.
+- [ ] Verify release notes describe standards alignment honestly and make no
+      unsupported certification claim.
 
 #### Step validation
 
@@ -1312,6 +1945,8 @@ diagnostics, source map, provenance, limits, and probe behavior.
 - [ ] No known contradiction remains between normative documents and behavior.
 - [ ] Release approval records the exact language, IR, encoding, vocabulary,
       compiler, and reader versions independently.
+- [ ] Release approval records the independent test/quality reviewer, or an
+      explicit staffing exception and compensating review evidence.
 
 ### Stage 10 validation
 
@@ -1323,13 +1958,45 @@ diagnostics, source map, provenance, limits, and probe behavior.
       authoritative IR.
 - [ ] The release includes the compiler, reader, CLI, formatter, probe, captured
       fixture vocabulary, conformance suite, and required specifications.
+- [ ] The release evidence includes complete smoke, unit, integration, system,
+      conformance, security, performance, and ISO-alignment evaluation results.
 - [ ] Neutral language v0 is released only after all unchecked items that affect
       the release boundary are completed or the release is explicitly blocked.
 
 ## Standard validation commands
 
-Run these from the repository root unless the contributor guide specifies a
-more exact wrapper:
+After Stage 1 automation exists, run these from the `neutral-lang/`
+implementation root. They are the stable developer/CI interface:
+
+```bash
+cargo xtask environment verify
+cargo xtask format
+cargo xtask lint
+cargo xtask test smoke
+cargo xtask test unit
+cargo xtask test integration
+cargo xtask test system
+cargo xtask test conformance
+cargo xtask test property
+cargo xtask test security
+cargo xtask test performance --profile pr
+cargo xtask fuzz smoke
+cargo xtask coverage
+cargo xtask quality report
+cargo xtask ci pr
+```
+
+Nightly and release automation additionally run:
+
+```bash
+cargo xtask ci nightly
+cargo xtask test performance --profile release
+cargo xtask fuzz campaign
+cargo xtask mutate
+cargo xtask ci release
+```
+
+Before `xtask` exists, these bootstrap commands are the minimum direct checks:
 
 ```bash
 cargo metadata --manifest-path neutral-lang/Cargo.toml --no-deps
@@ -1340,10 +2007,10 @@ cargo test --manifest-path neutral-lang/Cargo.toml --workspace --all-features
 RUSTDOCFLAGS="-D warnings" cargo doc --manifest-path neutral-lang/Cargo.toml --workspace --all-features --no-deps
 ```
 
-The dependency-policy, conformance, fuzz-smoke, coherence, determinism, and
-release-matrix commands must be added to `CONTRIBUTING.md` when their harnesses
-are introduced. Do not document a command as a release gate until CI executes
-the same command.
+The contributor guide must define prerequisites, profiles, expected duration,
+result locations, cleanup, and failure interpretation. Do not document a command
+as a release gate until CI executes the same command. Do not maintain a separate
+CI-only implementation of any local task.
 
 ## Deliberately postponed work
 
