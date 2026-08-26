@@ -6,6 +6,10 @@ This roadmap orders the work required to create Neutral v0. It is intentionally
 limited to the v0 contract in [ARCHITECTURE.md](../ARCHITECTURE.md). It does not
 allocate features to later versions.
 
+The split, implementation-level gates and checklists begin at
+[Developement.md](Developement.md). This roadmap remains the dependency and
+milestone summary; the development documents must not expand its v0 scope.
+
 The target outcome is one complete, reproducible boundary:
 
 ```text
