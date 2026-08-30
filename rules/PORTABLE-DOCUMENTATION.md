@@ -21,10 +21,10 @@ neutral-lang/v0/portable/        portable implementation seed
 ```
 
 The website can discover and render both views independently. The current
-publication profile emits only `vN/portable/` views; host pages remain
-unpublished until the publication profile is expanded. It labels the view near
-the page title and never redirects one to the other merely because source text
-is similar.
+publication profile publishes each project's top-level contracts and emits only
+`vN/portable/` content beneath each version index. Host files under a version
+directory remain unpublished. It labels the view near the page title and never
+redirects one to the other merely because source text is similar.
 
 ## 2. Required portable seed structure
 

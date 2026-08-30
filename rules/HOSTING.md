@@ -63,12 +63,15 @@ read canonical sources outside `website/`. It must:
 1. Discover sources using `website/docs.config.ts`.
 2. Exclude drafts, generated files, dependencies, private tool directories, and
    every directory whose name starts with `_`.
-3. Classify versioned language sources as `host` or `portable` from their paths.
-4. Derive metadata when optional frontmatter is absent.
-5. Build a unique source-path to public-route manifest.
-6. Rewrite links between published Markdown sources through that manifest.
-7. Validate source links, public routes, assets, redirects, and navigation.
-8. Generate a static site in `website/dist/`.
+3. Publish project-root `ARCHITECTURE.md`, `REQUIREMENTS.md`, and `ROADMAP.md`
+   when present.
+4. Classify versioned sources as `host` or `portable` from their paths.
+5. Publish only matching `vN/portable/` content below a version route.
+6. Derive metadata when optional frontmatter is absent.
+7. Build a unique source-path to public-route manifest.
+8. Rewrite links between published Markdown sources through that manifest.
+9. Validate source links, public routes, assets, redirects, and navigation.
+10. Generate a static site in `website/dist/`.
 
 The build must fail instead of publishing ambiguous routes, broken internal
 links, missing public assets, or an unclassified source.

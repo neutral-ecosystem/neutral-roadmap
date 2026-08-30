@@ -48,10 +48,11 @@ Install and run it from this directory with `pnpm install`, `pnpm dev`,
 `pnpm check`, and `pnpm build`. The package manager lockfile is generated when
 dependencies are installed in a networked development or CI environment.
 
-The content loader recognizes both host and portable version views. It reads a
-portable seeds from `vN/portable/` using their standalone paths and does not
-merge that navigation with the host view. Until a project has a versioned
-portable seed, its landing page displays “Documentation is still being built.”
+The content loader publishes each project's top-level `ARCHITECTURE.md`,
+`REQUIREMENTS.md`, and `ROADMAP.md` when present. Version index pages only link
+to their matching `vN/portable/` content; host files under a version directory
+are not rendered. Until a version has a portable seed, its index displays
+“Documentation is still being built.”
 
 Cloudflare and build configuration must follow the single operational contract
 in [documentation hosting rules](../rules/HOSTING.md). In particular,

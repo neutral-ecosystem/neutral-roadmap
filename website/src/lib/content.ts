@@ -1,7 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { dirname, extname, normalize, relative, resolve, sep } from 'node:path';
 import { marked } from 'marked';
-import { isIgnoredDirectory, isPublishedProjectSource, projects, sectionPrefixes, sourceRoots } from '../../docs.config';
+import { isIgnoredDirectory, isPublishedProjectSource, projectDocuments, projects, sectionPrefixes, sourceRoots } from '../../docs.config';
 
 // Astro executes this module from the website project root in dev and build.
 const repositoryRoot = resolve(process.cwd(), '..');
@@ -116,22 +116,46 @@ export async function loadDocs(): Promise<DocPage[]> {
     routes.add(page.route);
   }
   for (const project of projects) {
+    const versions = [...new Set(
+      files
+        .filter((sourcePath) => sourcePath.startsWith(`${project.domain}/`))
+        .map((sourcePath) => sourcePath.match(new RegExp(`^${project.domain}/(v\\d+)/`))?.[1])
+        .filter((version): version is string => Boolean(version)),
+    )].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
+    for (const version of versions) {
+      const portableEntry = pages.find((page) => page.sourcePath === `${project.domain}/${version}/portable/README.md`);
+      pages.push({
+        sourcePath: `${project.domain}/${version}/version-index`,
+        route: `/${project.prefix}/${version}/`,
+        title: `${project.label} ${version}`,
+        description: portableEntry ? `${project.label} ${version} portable documentation.` : `${project.label} ${version} documentation is still being built.`,
+        status: portableEntry ? `${version} portable` : 'documentation in progress',
+        html: portableEntry
+          ? `<p class="doc-notice">Only the portable documentation for ${version} is published.</p><p><a href="${portableEntry.route}">Open ${version}/portable</a></p>`
+          : `<p class="doc-notice">Documentation is still being built.</p><p>The ${version}/portable seed for this project is not available yet.</p>`,
+        view: portableEntry ? 'portable' : undefined,
+        version: portableEntry ? version : undefined,
+      });
+    }
+  }
+  for (const project of projects) {
     const portableEntries = pages
       .filter((page) => new RegExp(`^${project.domain}/v\\d+/portable/README\\.md$`).test(page.sourcePath))
       .sort((a, b) => (Number(b.version?.slice(1)) || 0) - (Number(a.version?.slice(1)) || 0));
     const portableEntry = portableEntries[0];
     const portableVersion = portableEntry?.version;
+    const topDocuments = pages.filter((page) => page.sourcePath.startsWith(`${project.domain}/`) && projectDocuments.has(page.sourcePath.slice(project.domain.length + 1)));
+    const versionPages = pages.filter((page) => page.sourcePath.startsWith(`${project.domain}/v`) && page.sourcePath.endsWith('/version-index'));
+    const links = [...topDocuments, ...versionPages].map((page) => `<li><a href="${page.route}">${page.title}</a></li>`).join('');
     pages.push({
       sourcePath: `${project.domain}/${portableVersion ?? 'vN'}/project-index`,
       route: `/${project.prefix}/`,
       title: project.label,
-      description: portableEntry ? `${project.label} ${portableVersion} portable documentation.` : `${project.label} documentation is still being built.`,
-      status: portableEntry ? `${portableVersion} portable` : 'documentation in progress',
-      html: portableEntry
-        ? `<p class="doc-notice">The ${portableVersion} portable documentation is available.</p><p><a href="${portableEntry.route}">Open the ${portableVersion} portable documentation</a></p>`
+      description: links ? `${project.label} documentation and version indexes.` : `${project.label} documentation is still being built.`,
+      status: links ? 'documentation' : 'documentation in progress',
+      html: links
+        ? `<p>Choose a contract or version. Version pages publish only their matching <code>vN/portable/</code> content.</p><ul>${links}</ul>`
         : '<p class="doc-notice">Documentation is still being built.</p><p>A portable versioned seed for this project is not available yet.</p>',
-      view: portableEntry ? 'portable' : undefined,
-      version: portableVersion,
     });
   }
   return pages.sort((a, b) => a.route.localeCompare(b.route));

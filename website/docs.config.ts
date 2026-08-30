@@ -7,6 +7,8 @@ export const projects = [
   { domain: 'neux', prefix: 'neux', label: 'Neux' },
 ] as const;
 
+export const projectDocuments = new Set(['ARCHITECTURE.md', 'REQUIREMENTS.md', 'ROADMAP.md']);
+
 export const sectionPrefixes: Record<string, string> = {
   'neutral-lang': 'language',
   'neutral-editor': 'editor',
@@ -22,7 +24,10 @@ export function isIgnoredDirectory(name: string) {
 }
 
 export function isPublishedProjectSource(sourcePath: string) {
-  return projects.some(({ domain }) => new RegExp(`^${domain}/v\\d+/portable/`).test(sourcePath));
+  return projects.some(({ domain }) => {
+    if (sourcePath.startsWith(`${domain}/v`)) return new RegExp(`^${domain}/v\\d+/portable/`).test(sourcePath);
+    return sourcePath.startsWith(`${domain}/`) && projectDocuments.has(sourcePath.slice(domain.length + 1));
+  });
 }
 
 export const navOrder = ['README.md', 'ARCHITECTURE.md', 'REQUIREMENTS.md', 'choices.md', 'ROADMAP.md', 'DEVELOPMENT.md'];

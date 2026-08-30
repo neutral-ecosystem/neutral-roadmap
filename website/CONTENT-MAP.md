@@ -12,10 +12,10 @@ result rather than maintain copied Markdown.
 | Section | Canonical source group | Public URL prefix | Initial navigation |
 | --- | --- | --- | --- |
 | Overview | `/README.md` | `/` | Neutral roadmap, license, workstream entry points |
-| Neutral language | `/neutral-lang/vN/portable/**/*.md` | `/language/` | available portable version; fallback landing page until available |
-| Neutral Editor | `/neutral-editor/vN/portable/**/*.md` | `/editor/` | available portable version; fallback landing page until available |
-| Neutral Flow | `/neutral-flow/vN/portable/**/*.md` | `/flow/` | available portable version; fallback landing page until available |
-| Neux | `/neux/vN/portable/**/*.md` | `/neux/` | available portable version; fallback landing page until available |
+| Neutral language | `ARCHITECTURE.md`, `REQUIREMENTS.md`, `ROADMAP.md`, and `/neutral-lang/vN/portable/**/*.md` | `/language/` | three contracts plus version indexes limited to matching portable content |
+| Neutral Editor | `ARCHITECTURE.md`, `REQUIREMENTS.md`, `ROADMAP.md`, and `/neutral-editor/vN/portable/**/*.md` | `/editor/` | three contracts plus version indexes limited to matching portable content |
+| Neutral Flow | `ARCHITECTURE.md`, `REQUIREMENTS.md`, `ROADMAP.md`, and `/neutral-flow/vN/portable/**/*.md` | `/flow/` | three contracts plus version indexes limited to matching portable content |
+| Neux | `ARCHITECTURE.md`, `REQUIREMENTS.md`, `ROADMAP.md`, and `/neux/vN/portable/**/*.md` | `/neux/` | three contracts plus version indexes limited to matching portable content |
 | Repository rules | `/rules/**/*.md` | `/rules/` | Documentation rules and future shared policies |
 
 The website excludes `.agents/`, `.codex/`, build output, dependency folders,
@@ -26,8 +26,9 @@ for content that is not part of the public documentation tree.
 
 ## Host and portable views
 
-Versioned project documentation has two source views, but the current public
-site publishes only versioned portable views:
+Versioned project documentation has two source views. The public site publishes
+the project's three top-level contracts and version index pages; each version
+index exposes only its matching portable view:
 
 ```text
 host:     /neutral-lang/vN/** excluding /portable/**
@@ -38,8 +39,8 @@ The host view is the roadmap-repository context and remains unpublished for
 now. The portable view is the standalone implementation-seed context shown in
 `portable/`, including its `conformance/`, `development/`, `docs/`, and
 `spec/vN/` sections. The website detects both source groups for future use, but
-only emits `vN/portable/` pages today. If a project has no portable versioned
-seed, its project landing route remains available and displays a
+only emits `vN/portable/` pages under a version index. If a version has no
+portable seed, that version route remains available and displays a
 documentation-in-progress state.
 
 See [portable documentation rules](../rules/PORTABLE-DOCUMENTATION.md) for the
@@ -55,7 +56,9 @@ Examples:
 | Source | Public route |
 | --- | --- |
 | `/README.md` | `/` |
-| `/neutral-lang/ARCHITECTURE.md` | not published yet |
+| `/neutral-lang/ARCHITECTURE.md` | `/language/architecture/` |
+| `/neutral-lang/REQUIREMENTS.md` | `/language/requirements/` |
+| `/neutral-lang/ROADMAP.md` | `/language/roadmap/` |
 | `/neutral-lang/v0/ROADMAP.md` | not published yet |
 | `/neutral-editor/v0/REQUIREMENTS.md` | not published yet |
 | `/neutral-editor/docs/node-editor-research.md` | not published yet |

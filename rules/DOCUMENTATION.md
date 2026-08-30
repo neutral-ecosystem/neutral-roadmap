@@ -95,6 +95,24 @@ and roadmaps must not silently define normative behavior.
 
 ## 5. Directory ownership and structure
 
+Each public project follows this top-level shape:
+
+```text
+project/
+|-- ARCHITECTURE.md
+|-- REQUIREMENTS.md
+|-- ROADMAP.md
+|-- v0/
+|-- v1/
+`-- vN/
+```
+
+The three top-level documents are the project contract. Version directories
+hold version history and implementation material; their public version page is
+allowed to expose only the matching `vN/portable/` subtree when that subtree
+exists. Host files elsewhere under `vN/` remain source material, not public
+pages.
+
 | Directory | Owns | Must not contain |
 | --- | --- | --- |
 | `/` | Ecosystem entry point, shared license, cross-project discovery | Duplicated domain specifications |
