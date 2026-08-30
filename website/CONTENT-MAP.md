@@ -12,10 +12,10 @@ result rather than maintain copied Markdown.
 | Section | Canonical source group | Public URL prefix | Initial navigation |
 | --- | --- | --- | --- |
 | Overview | `/README.md` | `/` | Neutral roadmap, license, workstream entry points |
-| Neutral language | `/neutral-lang/**/*.md` | `/language/` | Architecture, requirements, choices, syntax, version host views, portable seeds, showcase |
-| Neutral Editor | `/neutral-editor/**/*.md` | `/editor/` | Overview, v0 compliance, architecture, technology stack, integration, roadmap, research |
-| Neutral Flow | `/neutral-flow/**/*.md` | `/flow/` | Architecture, requirements, roadmap, version plans, research |
-| Neux | `/neux/**/*.md` | `/neux/` | Reserved/research documents when present |
+| Neutral language | `/neutral-lang/vN/portable/**/*.md` | `/language/` | available portable version; fallback landing page until available |
+| Neutral Editor | `/neutral-editor/vN/portable/**/*.md` | `/editor/` | available portable version; fallback landing page until available |
+| Neutral Flow | `/neutral-flow/vN/portable/**/*.md` | `/flow/` | available portable version; fallback landing page until available |
+| Neux | `/neux/vN/portable/**/*.md` | `/neux/` | available portable version; fallback landing page until available |
 | Repository rules | `/rules/**/*.md` | `/rules/` | Documentation rules and future shared policies |
 
 The website excludes `.agents/`, `.codex/`, build output, dependency folders,
@@ -26,18 +26,21 @@ for content that is not part of the public documentation tree.
 
 ## Host and portable views
 
-Versioned language documentation has two independently published views:
+Versioned project documentation has two source views, but the current public
+site publishes only versioned portable views:
 
 ```text
 host:     /neutral-lang/vN/** excluding /portable/**
 portable: /neutral-lang/vN/portable/**
 ```
 
-The host view is the roadmap-repository context. The portable view is the
-standalone implementation-seed context shown in `portable/`, including its
-`conformance/`, `development/`, `docs/`, and `spec/vN/` sections. The website
-must detect both source groups, label pages with their view/version, build
-separate navigation trees, and validate their links independently.
+The host view is the roadmap-repository context and remains unpublished for
+now. The portable view is the standalone implementation-seed context shown in
+`portable/`, including its `conformance/`, `development/`, `docs/`, and
+`spec/vN/` sections. The website detects both source groups for future use, but
+only emits `vN/portable/` pages today. If a project has no portable versioned
+seed, its project landing route remains available and displays a
+documentation-in-progress state.
 
 See [portable documentation rules](../rules/PORTABLE-DOCUMENTATION.md) for the
 required seed structure and host/portable synchronization rules.
@@ -52,10 +55,10 @@ Examples:
 | Source | Public route |
 | --- | --- |
 | `/README.md` | `/` |
-| `/neutral-lang/ARCHITECTURE.md` | `/language/architecture/` |
-| `/neutral-lang/v0/ROADMAP.md` | `/language/v0/host/roadmap/` |
-| `/neutral-editor/v0/REQUIREMENTS.md` | `/editor/v0/requirements/` |
-| `/neutral-editor/docs/node-editor-research.md` | `/editor/research/node-editor/` |
+| `/neutral-lang/ARCHITECTURE.md` | not published yet |
+| `/neutral-lang/v0/ROADMAP.md` | not published yet |
+| `/neutral-editor/v0/REQUIREMENTS.md` | not published yet |
+| `/neutral-editor/docs/node-editor-research.md` | not published yet |
 | `/rules/DOCUMENTATION.md` | `/rules/documentation/` |
 | `/neutral-lang/v0/portable/README.md` | `/language/v0/portable/` |
 | `/neutral-lang/v0/portable/spec/v0/architecture.md` | `/language/v0/portable/spec/v0/architecture/` |

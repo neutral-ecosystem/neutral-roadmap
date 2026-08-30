@@ -49,8 +49,9 @@ Install and run it from this directory with `pnpm install`, `pnpm dev`,
 dependencies are installed in a networked development or CI environment.
 
 The content loader recognizes both host and portable version views. It reads a
-portable seed from `vN/portable/` using its standalone paths and does not merge
-that navigation with the host view.
+portable seeds from `vN/portable/` using their standalone paths and does not
+merge that navigation with the host view. Until a project has a versioned
+portable seed, its landing page displays “Documentation is still being built.”
 
 Cloudflare and build configuration must follow the single operational contract
 in [documentation hosting rules](../rules/HOSTING.md). In particular,

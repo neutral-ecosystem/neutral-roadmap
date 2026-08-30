@@ -20,9 +20,11 @@ neutral-lang/v0/                 host view
 neutral-lang/v0/portable/        portable implementation seed
 ```
 
-The website discovers and renders both views independently. It labels the view
-near the page title and never redirects one to the other merely because source
-text is similar.
+The website can discover and render both views independently. The current
+publication profile emits only `vN/portable/` views; host pages remain
+unpublished until the publication profile is expanded. It labels the view near
+the page title and never redirects one to the other merely because source text
+is similar.
 
 ## 2. Required portable seed structure
 

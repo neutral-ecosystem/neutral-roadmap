@@ -47,6 +47,7 @@ a { color:inherit; text-decoration:none; }
 .markdown ul,.markdown ol { padding-left:24px; }
 .markdown li + li { margin-top:8px; }
 .markdown a { text-decoration:underline; text-underline-offset:3px; }
+.doc-notice { margin:28px 0; padding:18px 20px; border-left:3px solid var(--graphite); background:rgba(244,245,243,.62); color:var(--ink); }
 .markdown code { padding:2px 5px; border-radius:4px; background:rgba(41,42,40,.08); font:13px 'DM Mono',monospace; }
 .markdown pre { overflow:auto; padding:18px; border-radius:10px; background:#292a28; color:#f2f3f1; }
 .markdown pre code { padding:0; background:none; color:inherit; }
