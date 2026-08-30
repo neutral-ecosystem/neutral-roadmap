@@ -37,6 +37,10 @@ boundary first.
   requirements.
 - [`neux/`](neux/) — reserved workspace for later operating-system abstraction
   research.
+- [Repository rules](rules/README.md) — repository-wide documentation and
+  publishing policies.
+- [`website/`](website/) — the future Astro publishing layer for canonical
+  repository documentation.
 
 ## Start here
 
@@ -58,6 +62,14 @@ For the visual editor workstream, continue with:
 4. [Editor technology stack](neutral-editor/v0/TECHNOLOGY-STACK.md)
 5. [Language integration contract](neutral-editor/v0/LANGUAGE-INTEGRATION.md)
 6. [Editor implementation roadmap](neutral-editor/v0/ROADMAP.md)
+
+For public documentation publishing, read:
+
+1. [Documentation rules](rules/DOCUMENTATION.md)
+2. [Portable documentation rules](rules/PORTABLE-DOCUMENTATION.md)
+3. [Documentation hosting rules](rules/HOSTING.md)
+4. [Website content map](website/CONTENT-MAP.md)
+5. [Website implementation entry point](website/README.md)
 
 ## License
 
