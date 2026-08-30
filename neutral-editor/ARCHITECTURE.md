@@ -36,9 +36,8 @@ editable now; nested documents or modules remain capability-driven future
 contexts.
 
 Detailed component ownership, data flow, security boundaries, and technology
-constraints are maintained in the [v0 architecture](v0/ARCHITECTURE.md),
-[language integration contract](v0/LANGUAGE-INTEGRATION.md), and
-[technology stack](v0/TECHNOLOGY-STACK.md).
+constraints remain implementation design material. This public project contract
+defines the stable boundary until an Editor portable seed is published.
 
 ## Non-goals
 

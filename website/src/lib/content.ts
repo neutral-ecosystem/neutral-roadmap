@@ -46,9 +46,13 @@ function routeFor(sourcePath: string) {
   const isReadme = stem.toLowerCase() === 'readme';
   const portableIndex = parts.indexOf('portable');
   const versionIndex = parts.findIndex((part) => /^v\d+$/.test(part));
+  const isProjectVersion = projects.some((project) => project.domain === domain);
+  if (isReadme && portableIndex === parts.length - 1 && versionIndex >= 0 && isProjectVersion) {
+    return `/${prefix}/${kebab(parts[versionIndex])}/`;
+  }
   const cleanParts = parts.filter((part) => part !== 'portable');
   const routeParts = [prefix, ...cleanParts];
-  if (versionIndex >= 0 && projects.some((project) => project.domain === domain)) {
+  if (versionIndex >= 0 && isProjectVersion) {
     const portable = portableIndex >= 0;
     const insertAt = 1 + versionIndex + 1;
     routeParts.splice(insertAt, 0, portable ? 'portable' : 'host');
@@ -66,6 +70,13 @@ function rewriteLinks(source: string, currentPath: string, routes: Map<string, s
     ).split(sep).join('/');
     const route = routes.get(normalized);
     if (route) return `](${route}${fragment})`;
+    const portableRoot = currentPath.match(/^(neutral-(?:lang|editor|flow)\/v\d+\/portable)\//)?.[1];
+    if (portableRoot && normalized.startsWith(`${portableRoot}/`)) {
+      return `](${repositoryUrl}/${normalized}${fragment})`;
+    }
+    if (/^neutral-(?:lang|editor|flow)\//.test(currentPath)) {
+      throw new Error(`Published document ${currentPath} links to non-public source ${normalized}`);
+    }
     return `](${repositoryUrl}/${normalized}${fragment})`;
   });
 }
@@ -93,7 +104,7 @@ export function catalogTitle(page: DocPage, context: 'project' | 'version' = 'pr
   if (page.sourcePath.endsWith('/version-index')) {
     const version = page.sourcePath.match(/\/(v\d+)\/version-index$/)?.[1];
     if (!version) return 'Version overview';
-    return context === 'version' ? `Back to ${version}` : version;
+    return context === 'version' ? 'Version overview' : version;
   }
   const portableMarker = page.sourcePath.indexOf('/portable/');
   if (portableMarker >= 0) {
@@ -158,6 +169,7 @@ export async function loadDocs(): Promise<DocPage[]> {
     )].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
     for (const version of versions) {
       const portableEntry = pages.find((page) => page.sourcePath === `${project.domain}/${version}/portable/README.md`);
+      if (portableEntry) continue;
       pages.push({
         sourcePath: `${project.domain}/${version}/version-index`,
         route: `/${project.prefix}/${version}/`,
@@ -178,7 +190,7 @@ export async function loadDocs(): Promise<DocPage[]> {
       .sort((a, b) => (Number(b.version?.slice(1)) || 0) - (Number(a.version?.slice(1)) || 0));
     const portableVersion = portableEntries[0]?.version;
     const topDocuments = pages.filter((page) => page.sourcePath.startsWith(`${project.domain}/`) && projectDocuments.has(page.sourcePath.slice(project.domain.length + 1)));
-    const versionPages = pages.filter((page) => page.sourcePath.startsWith(`${project.domain}/v`) && page.sourcePath.endsWith('/version-index'));
+    const versionPages = pages.filter((page) => new RegExp(`^/${project.prefix}/v\\d+/$`).test(page.route));
     const hasDocumentation = topDocuments.length > 0 || versionPages.length > 0;
     pages.push({
       sourcePath: `${project.domain}/${portableVersion ?? 'vN'}/project-index`,

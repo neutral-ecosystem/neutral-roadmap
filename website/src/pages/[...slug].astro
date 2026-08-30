@@ -13,11 +13,13 @@ const project = projects.find((item) => doc.sourcePath.startsWith(`${item.domain
 const compactProjectLabel = project?.label.replace(/^Neutral\s+/i, '').replace(/^\w/, (letter) => letter.toUpperCase());
 const selectedVersion = doc.sourcePath.match(project ? new RegExp(`^${project.domain}/(v\\d+)/`) : /^$/)?.[1];
 const isProjectIndex = doc.sourcePath.endsWith('/project-index');
-const versionIndex = project && selectedVersion ? docs.find((item) => item.sourcePath === `${project.domain}/${selectedVersion}/version-index`) : undefined;
 const portablePages = project && selectedVersion
   ? docs.filter((item) => item.sourcePath.startsWith(`${project.domain}/${selectedVersion}/portable/`))
   : [];
 const portableRoot = portablePages.find((item) => item.sourcePath.endsWith('/portable/README.md'));
+const versionIndex = project && selectedVersion
+  ? docs.find((item) => item.sourcePath === `${project.domain}/${selectedVersion}/version-index`) ?? portableRoot
+  : undefined;
 const portablePrefix = project && selectedVersion ? `${project.domain}/${selectedVersion}/portable/` : '';
 const portableRelativePath = portablePrefix && doc.sourcePath.startsWith(portablePrefix) ? doc.sourcePath.slice(portablePrefix.length) : '';
 const portableDirectory = portableRelativePath.toLowerCase().endsWith('/readme.md')
@@ -25,9 +27,13 @@ const portableDirectory = portableRelativePath.toLowerCase().endsWith('/readme.m
   : portableRelativePath.includes('/')
     ? portableRelativePath.slice(0, portableRelativePath.lastIndexOf('/'))
     : '';
-const portableSiblings = portablePages.filter((item) => {
+const portableEntryPoints = portablePages.filter((item) => {
   const path = item.sourcePath.slice(portablePrefix.length);
-  if (!portableDirectory) return !path.includes('/') || /^[^/]+\/README\.md$/i.test(path);
+  return !path.includes('/') || /^[^/]+\/README\.md$/i.test(path);
+});
+const portableSectionPages = portablePages.filter((item) => {
+  const path = item.sourcePath.slice(portablePrefix.length);
+  if (!portableDirectory) return false;
   const parent = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
   return parent === portableDirectory;
 });
@@ -36,21 +42,21 @@ const topPages = project
   ? docs.filter((item) => item.sourcePath.startsWith(`${project.domain}/`) && projectDocuments.has(item.sourcePath.slice(project.domain.length + 1)))
   : [];
 const versionPages = project
-  ? docs.filter((item) => item.sourcePath.startsWith(`${project.domain}/v`) && item.sourcePath.endsWith('/version-index'))
+  ? docs.filter((item) => new RegExp(`^/${project.prefix}/v\\d+/$`).test(item.route))
   : [];
 const rulePages = doc.sourcePath.startsWith('rules/') ? docs.filter((item) => item.sourcePath.startsWith('rules/')) : [];
 const catalog = doc.sourcePath.startsWith('rules/')
   ? rulePages
   : project && selectedVersion && !isProjectIndex
-    ? [versionIndex, portableRoot, ...portableSiblings].filter((item, index, items): item is NonNullable<typeof item> => Boolean(item) && items.indexOf(item) === index)
+    ? [versionIndex, portableRoot, ...portableEntryPoints, ...portableSectionPages].filter((item, index, items): item is NonNullable<typeof item> => Boolean(item) && items.indexOf(item) === index)
     : project
       ? [projectLanding, ...topPages, ...versionPages].filter((item): item is NonNullable<typeof item> => Boolean(item))
       : [];
 const catalogLabel = doc.sourcePath.startsWith('rules/')
   ? 'Repository rules'
   : compactProjectLabel ?? 'Documentation';
-const isVersionIndex = doc.sourcePath.endsWith('/version-index');
-const isGeneratedPage = isProjectIndex || isVersionIndex;
+const isVersionIndex = doc.sourcePath.endsWith('/version-index') || doc.sourcePath.endsWith('/portable/README.md');
+const isGeneratedPage = isProjectIndex || doc.sourcePath.endsWith('/version-index');
 const backHref = doc.sourcePath.startsWith('rules/')
   ? doc.route === '/rules/' ? '/' : '/rules/'
   : isProjectIndex
@@ -70,13 +76,23 @@ const backLabel = doc.sourcePath.startsWith('rules/')
         ? selectedVersion
         : compactProjectLabel ?? 'Project';
 const documentSourceUrl = sourceUrl(doc.sourcePath);
+function normalCatalogCase(value: string) {
+  return value
+    .replace(/[-_]+/g, ' ')
+    .toLowerCase()
+    .replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
+}
 function localCatalogTitle(item: typeof doc) {
-  if (!portablePrefix || !item.sourcePath.startsWith(portablePrefix)) return catalogTitle(item, selectedVersion ? 'version' : 'project');
+  if (isProjectIndex && item.sourcePath.endsWith('/portable/README.md')) {
+    return item.sourcePath.match(/\/(v\d+)\/portable\//)?.[1] ?? 'Version';
+  }
+  if (item === versionIndex && selectedVersion && !isProjectIndex) return 'Version overview';
+  if (!portablePrefix || !item.sourcePath.startsWith(portablePrefix)) return catalogTitle(item, selectedVersion && !isProjectIndex ? 'version' : 'project');
   const path = item.sourcePath.slice(portablePrefix.length);
   const segments = path.replace(/\.md$/, '').split('/');
   const stem = segments.at(-1) ?? '';
-  if (stem.toLowerCase() === 'readme') return segments.length === 1 ? 'Portable overview' : segments.at(-2)?.replace(/[-_]+/g, ' ') ?? 'Overview';
-  return stem.replace(/[-_]+/g, ' ');
+  if (stem.toLowerCase() === 'readme') return segments.length === 1 ? 'Portable overview' : normalCatalogCase(segments.at(-2) ?? 'Overview');
+  return normalCatalogCase(stem);
 }
 ---
 <Layout title={doc.title} description={doc.description}>

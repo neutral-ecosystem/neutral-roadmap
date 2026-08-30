@@ -66,7 +66,7 @@ Examples:
 | `/neutral-editor/v0/REQUIREMENTS.md` | not published yet |
 | `/neutral-editor/docs/node-editor-research.md` | not published yet |
 | `/rules/DOCUMENTATION.md` | `/rules/documentation/` |
-| `/neutral-lang/v0/portable/README.md` | `/language/v0/portable/` |
+| `/neutral-lang/v0/portable/README.md` | `/language/v0/` |
 | `/neutral-lang/v0/portable/spec/v0/architecture.md` | `/language/v0/portable/spec/v0/architecture/` |
 
 The content loader creates a source-path to public-route index before Markdown

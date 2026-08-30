@@ -481,14 +481,13 @@ v0 is complete only after:
 
 - [REQUIREMENTS.md](REQUIREMENTS.md) is the merged v0 requirements, syntax,
   architectural-choice, and showcase contract.
-- [v0/design/proposed-syntax-guide.md](v0/design/proposed-syntax-guide.md) is the author-facing
-  proposal.
+- [v0/portable/spec/v0/proposed-syntax-guide.md](v0/portable/spec/v0/proposed-syntax-guide.md)
+  is the author-facing proposal.
 - [v0/portable/spec/v0/decisions/README.md](v0/portable/spec/v0/decisions/README.md)
   indexes normative decisions.
-- [v0/design/ROADMAP.md](v0/design/ROADMAP.md) orders specification, implementation, and
-  release work without expanding the v0 feature set.
-- [_docs/](_docs/README.md) contains supporting research; it is not a competing
-  authority.
+- [v0/portable/ROADMAP.md](v0/portable/ROADMAP.md) orders specification,
+  implementation, and release work without expanding the v0 feature set.
+- Supporting research is not a competing authority.
 - [v0/portable/spec/v0/fixtures/README.md](v0/portable/spec/v0/fixtures/README.md)
   indexes conformance fixtures.
 

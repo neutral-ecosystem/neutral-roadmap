@@ -31,9 +31,10 @@ discover profile
 
 ## Version plan
 
-The [v0 roadmap](v0/ROADMAP.md) owns detailed stages, exit criteria, evidence,
-and implementation sequencing. Later editor versions remain undefined until a
-language capability profile or product requirement creates a concrete boundary.
+Detailed v0 stages, exit criteria, evidence, and implementation sequencing
+remain implementation design material. Later editor versions remain undefined
+until a language capability profile or product requirement creates a concrete
+boundary.
 
 ## Exit condition
 

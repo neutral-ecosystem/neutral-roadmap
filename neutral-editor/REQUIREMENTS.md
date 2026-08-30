@@ -36,11 +36,10 @@ surface for one file and one module.
 
 ## Current conformance target
 
-The detailed v0 obligations and evidence matrix are maintained in the
-[Neutral Editor v0 compliance requirements](v0/REQUIREMENTS.md). They are
-derived from the canonical [Neutral language requirements](../neutral-lang/REQUIREMENTS.md)
-and accepted v0 language decisions; this project contract does not redefine
-those semantics.
+The detailed v0 obligations and evidence matrix remain implementation design
+material. They are derived from the canonical
+[Neutral language requirements](../neutral-lang/REQUIREMENTS.md) and accepted
+v0 language decisions; this project contract does not redefine those semantics.
 
 ## Acceptance boundary
 

@@ -150,6 +150,12 @@ The website publishing layer resolves source links through its content map and
 rewrites them to public routes. A raw relative repository link must not be
 assumed to work unchanged after rendering at a website URL.
 
+A deployed Neutral project document may link only to another deployed project
+contract (`ARCHITECTURE.md`, `REQUIREMENTS.md`, or `ROADMAP.md`) or to matching
+`vN/portable/` content. `vN/design/`, underscore-prefixed directories, research,
+and implementation-only material are private and must not be linked by public
+content. Design documents may link to repository material outside `design/`.
+
 Images belong under the owning domain's `img/` or a shared path in `assets/`.
 Every public image needs meaningful alt text. Generated diagrams and screenshots
 must identify their source or regeneration procedure when that affects review.
@@ -173,6 +179,7 @@ The documentation pipeline must fail for:
 - missing or duplicate H1 titles;
 - invalid or duplicate public slugs;
 - broken local source links;
+- a deployed Neutral document that links to a non-public source;
 - a public document without a source owner;
 - unknown required frontmatter fields;
 - a missing asset referenced by a public page; or

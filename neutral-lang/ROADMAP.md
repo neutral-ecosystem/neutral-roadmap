@@ -68,7 +68,7 @@ diagnostic, and resource-boundary tests.
 ### 6. Portable v0 seed and release
 
 Keep the standalone implementation seed under
-[`v0/portable/`](v0/portable/). Verify its repository-relative links, required
+[`v0/portable/README.md`](v0/portable/README.md). Verify its repository-relative links, required
 entry points, conformance manifests, and host/portable counterpart map. Record
 the compiler, reader, fixture, and probe evidence needed to call v0 complete.
 
@@ -98,4 +98,3 @@ The v0 roadmap is complete when the requirements, decisions, syntax and
 semantic fixtures, compiler, reader, source-map/provenance artifacts, public
 probe, and portable seed all pass their documented evidence gates. New language
 work then starts as a versioned proposal rather than by expanding v0 silently.
-

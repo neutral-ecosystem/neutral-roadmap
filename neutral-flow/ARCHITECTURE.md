@@ -7,7 +7,7 @@ Date: 2026-08-14
 Scope: product and system architecture; no implementation, configuration syntax,
 Neutral language syntax, or Neutral language semantics are defined here.
 
-Visual companion: [architecture diagram set](_img/architecture/README.md).
+Visual architecture diagrams are maintained as private design material.
 
 ### Ecosystem premise
 
@@ -98,9 +98,9 @@ release numbering:
 
 | File | Present contents | Why it is not a release |
 | --- | ---: | --- |
-| [v0 checklist](v0/v0-checklist.md) | 41 sections, 282 checks | Includes a durable, secure, provider-neutral execution and deployment platform |
-| [v1 checklist](v1/v1-checklist.md) | 37 sections, 184 checks | Mixes foundations, policy, UX, integrations, optimizations, and scale |
-| [v2 checklist](v2/v2-checklist.md) | 17 sections, 64 checks | Bundles unrelated research programmes because all are speculative |
+| v0 checklist | 41 sections, 282 checks | Includes a durable, secure, provider-neutral execution and deployment platform |
+| v1 checklist | 37 sections, 184 checks | Mixes foundations, policy, UX, integrations, optimizations, and scale |
+| v2 checklist | 17 sections, 64 checks | Bundles unrelated research programmes because all are speculative |
 
 “Required for an eventual strong CI/CD system” does not mean “required for the
 first coherent release.” Conversely, dry-run planning, local validation,
@@ -1453,9 +1453,7 @@ until these are answered:
 
 ## Research basis
 
-Supporting analysis created for this architecture:
-
-- [architecture research and primary bibliography](_docs/architecture-research.md)
+Supporting analysis is maintained as private design material.
 
 Important primary references include:
 
