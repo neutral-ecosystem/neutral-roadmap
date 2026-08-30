@@ -8,6 +8,12 @@ Markdown directly through a content loader or a generated build cache. It must
 not become a hand-maintained duplicate of `neutral-lang/`, `neutral-editor/`,
 `neutral-flow/`, or `neux/` documentation.
 
+The implementation follows the sibling Neutral website template: pnpm, a
+minimal Astro configuration, shared `Layout`/header/footer components, and CSS
+split into global, component, and page files. Its visual language is the
+template baseline, while the content loader and documentation routes are owned
+by this repository.
+
 Read these documents before creating application code:
 
 1. [Documentation rules](../rules/DOCUMENTATION.md)
