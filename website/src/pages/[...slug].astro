@@ -42,7 +42,7 @@ const catalogLabel = doc.sourcePath.startsWith('rules/')
       <p class="eyebrow">{catalogLabel}</p>
       {selectedVersion && !isProjectIndex && <p class="catalog-version">{selectedVersion} / portable</p>}
       {!["/project-index", "/version-index"].some((suffix) => doc.sourcePath.endsWith(suffix)) && <p class="source-path">{doc.sourcePath}</p>}
-      {catalog.length > 0 && <nav aria-label={`${catalogLabel} catalog`}>{catalog.map((item) => <a class:list-active={item.route === doc.route} href={item.route}>{catalogTitle(item, selectedVersion && !isProjectIndex ? 'version' : 'project')}</a>)}</nav>}
+      {catalog.length > 0 && <nav aria-label={`${catalogLabel} catalog`}>{catalog.map((item) => <a class:list-active={item.route === doc.route} aria-current={item.route === doc.route ? 'page' : undefined} href={item.route}>{catalogTitle(item, selectedVersion && !isProjectIndex ? 'version' : 'project')}</a>)}</nav>}
     </aside>
     <article class="document">
       <p class="eyebrow">{doc.status}</p>

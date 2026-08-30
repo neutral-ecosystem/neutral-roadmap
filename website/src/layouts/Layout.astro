@@ -13,7 +13,9 @@ const { title, description = 'Neutral ecosystem documentation.' } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#292a28" />
-    <title>{title} · Neutral</title>
+    <link rel="icon" type="image/png" sizes="256x256" href="/neutral-logo-rounded.png" />
+    <link rel="apple-touch-icon" href="/neutral-logo-rounded.png" />
+    <title>{title} • Neutral</title>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>

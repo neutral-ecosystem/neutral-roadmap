@@ -1,11 +1,19 @@
+---
+const navItems = [
+  { label: 'Main page', href: '/' },
+  { label: 'Language', href: '/language/' },
+  { label: 'Editor', href: '/editor/' },
+  { label: 'Flow', href: '/flow/' },
+  { label: 'Neux', href: '/neux/' },
+  { label: 'Rules', href: '/rules/' },
+];
+const isCurrent = (href: string) => href === '/' ? Astro.url.pathname === '/' : Astro.url.pathname.startsWith(href);
+---
 <header class="site-header">
   <div class="shell site-header-inner">
-    <a class="brand" href="/" aria-label="Neutral documentation home"><img src="/neutral-logo.png" alt="" width="32" height="32" /><span>neutral docs</span></a>
+    <a class="brand" href="/" aria-label="Neutral documentation home"><img src="/neutral-logo-rounded.png" alt="" width="36" height="36" /><span>neutral docs</span></a>
     <nav aria-label="Primary navigation">
-      <a href="/" aria-current={Astro.url.pathname === '/' ? 'page' : undefined}>Main page</a>
-      <a href="/language/">Language</a>
-      <a href="/editor/">Editor</a>
-      <a href="/rules/documentation/">Rules</a>
+      {navItems.map((item) => <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>)}
     </nav>
     <a class="source-link" href="https://github.com/neutral-ecosystem" target="_blank" rel="noreferrer">Source ↗</a>
   </div>

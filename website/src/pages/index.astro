@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { loadDocs } from '../lib/content';
 const docs = await loadDocs();
+const recentDocs = docs.filter((doc) => doc.sourcePath !== 'README.md' && !doc.sourcePath.endsWith('/project-index') && !doc.sourcePath.endsWith('/version-index'));
 const sections = [
   { label: 'Language', prefix: '/language/', description: 'Syntax, IR, version decisions, fixtures, and portable implementation seeds.' },
   { label: 'Editor', prefix: '/editor/', description: 'Capability-driven visual authoring architecture and compliance requirements.' },
@@ -24,7 +25,7 @@ const sections = [
   <section class="section shell recent" aria-labelledby="recent-title">
     <div class="section-heading"><p class="eyebrow">Generated index</p><h2 id="recent-title">Canonical sources</h2></div>
     <div class="source-list">
-      {docs.filter((doc) => doc.sourcePath !== 'README.md').slice(0, 12).map((doc) => <a href={doc.route}><span>{doc.sourcePath}</span><b>{doc.title} ↗</b></a>)}
+      {recentDocs.slice(0, 12).map((doc) => <a href={doc.route}><span>{doc.sourcePath}</span><b>{doc.title} ↗</b></a>)}
     </div>
   </section>
 </Layout>
