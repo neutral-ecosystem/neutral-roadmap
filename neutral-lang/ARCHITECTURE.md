@@ -479,16 +479,15 @@ v0 is complete only after:
 
 ## 16. Document precedence
 
-- [needed-features.md](needed-features.md) lists only v0 requirements.
-- [choices.md](choices.md) records v0 architectural choices.
-- [syntax.md](syntax.md) is the master v0 syntax checklist.
+- [REQUIREMENTS.md](REQUIREMENTS.md) is the merged v0 requirements, syntax,
+  architectural-choice, and showcase contract.
 - [v0/proposed-syntax-guide.md](v0/proposed-syntax-guide.md) is the author-facing
   proposal.
 - [v0/decisions/README.md](v0/decisions/README.md) indexes normative decisions.
 - [v0/ROADMAP.md](v0/ROADMAP.md) orders specification, implementation, and
   release work without expanding the v0 feature set.
-- [LANGUAGE-SHOWCASE.md](LANGUAGE-SHOWCASE.md) demonstrates the complete v0
-  surface.
+- [_docs/merged/](_docs/merged/) retains the former source documents as
+  review history; it is not a competing authority.
 - [v0/fixtures/README.md](v0/fixtures/README.md) indexes conformance fixtures.
 
 More specific accepted decisions govern, but contradictory accepted documents

@@ -5,7 +5,7 @@ Status: research input, not an accepted Neutral specification
 Last reviewed: 2026-08-17
 
 This directory collects language-design and IR research relevant to
-[needed-features.md](../needed-features.md). It exists to make future
+[REQUIREMENTS.md](../REQUIREMENTS.md). It exists to make future
 architecture and roadmap decisions evidence-led. Nothing in these notes defines
 `.neu` syntax, Neutral semantics, the Neutral IR encoding, or a compiler API.
 The only current language scope is the v0 contract in

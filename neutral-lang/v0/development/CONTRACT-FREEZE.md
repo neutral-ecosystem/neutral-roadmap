@@ -17,9 +17,9 @@ conformant.
 The review uses these sources in precedence order:
 
 1. [Neutral v0 architecture](../../ARCHITECTURE.md)
-2. [Neutral v0 requirements](../../needed-features.md)
+2. [Neutral v0 requirements](../../REQUIREMENTS.md)
 3. [Accepted v0 decisions](../decisions/README.md)
-4. [Master v0 syntax checklist](../../syntax.md)
+4. [Master v0 syntax checklist](../portable/spec/v0/syntax.md)
 5. [Proposed syntax guide](../proposed-syntax-guide.md), once promoted from
    proposal to the accepted author-facing guide
 6. [Identity and vocabulary encoding contract](IDENTITY-AND-VOCABULARY.md)

@@ -47,12 +47,11 @@ boundary first.
 For the current work, read these documents in order:
 
 1. [Neutral v0 architecture](neutral-lang/ARCHITECTURE.md)
-2. [Needed v0 features](neutral-lang/needed-features.md)
-3. [Architectural choices](neutral-lang/choices.md)
+2. [Neutral language requirements](neutral-lang/REQUIREMENTS.md)
+3. [Neutral language roadmap](neutral-lang/ROADMAP.md)
 4. [Proposed syntax guide](neutral-lang/v0/proposed-syntax-guide.md)
 5. [v0 decisions](neutral-lang/v0/decisions/README.md)
 6. [v0 implementation roadmap](neutral-lang/v0/ROADMAP.md)
-7. [Language showcase](neutral-lang/LANGUAGE-SHOWCASE.md)
 
 For the visual editor workstream, continue with:
 

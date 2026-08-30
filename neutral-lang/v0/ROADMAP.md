@@ -65,7 +65,7 @@ specification.
 ### Work
 
 - Adopt [ARCHITECTURE.md](../ARCHITECTURE.md),
-  [needed-features.md](../needed-features.md), and
+  [REQUIREMENTS.md](../REQUIREMENTS.md), and
   [the decision index](decisions/README.md) as the v0 baseline.
 - Give every normative requirement and diagnostic a stable ID.
 - Define document precedence and a repository coherence check.

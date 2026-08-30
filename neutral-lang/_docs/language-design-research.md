@@ -421,4 +421,4 @@ Only after these phases should version checklists allocate features to releases.
 - feature allocation beyond v0.
 
 Those decisions require concrete evidence and explicit architecture gates
-in [needed-features.md](../needed-features.md).
+in [REQUIREMENTS.md](../REQUIREMENTS.md).

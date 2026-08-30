@@ -9,7 +9,7 @@ accepted Neutral language v0 surface for exactly one captured `.neu` source
 unit containing exactly one logical module.
 
 The authoritative language requirements are
-[`neutral-lang/needed-features.md`](../../neutral-lang/needed-features.md), the
+[`neutral-lang/REQUIREMENTS.md`](../../neutral-lang/REQUIREMENTS.md), the
 accepted [v0 decisions](../../neutral-lang/v0/decisions/README.md), and the
 [v0 syntax checklist](../../neutral-lang/v0/syntax-checklist.md), with evidence
 from the [v0 fixtures](../../neutral-lang/v0/fixtures/README.md). This document

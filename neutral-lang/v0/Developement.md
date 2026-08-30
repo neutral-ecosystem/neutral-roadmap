@@ -15,9 +15,9 @@ Repository placement is not a release or language semantic decision.
 Read in this order:
 
 1. [Neutral v0 architecture](../ARCHITECTURE.md)
-2. [Neutral v0 requirements](../needed-features.md)
-3. [Architectural choices](../choices.md)
-4. [Master syntax checklist](../syntax.md)
+2. [Neutral v0 requirements](../REQUIREMENTS.md)
+3. [Neutral language roadmap](../ROADMAP.md)
+4. [Master syntax checklist](portable/spec/v0/syntax.md)
 5. [Accepted v0 decisions](decisions/README.md)
 6. [Proposed syntax guide](proposed-syntax-guide.md)
 7. [Conformance fixtures](fixtures/README.md)

@@ -2,7 +2,7 @@
 
 Status: proposed implementation checklist
 
-Authoritative master: [../syntax.md](../syntax.md)
+Authoritative master: [../REQUIREMENTS.md](../REQUIREMENTS.md)
 
 Checking an item requires normative prose, grammar, valid and invalid fixtures,
 stable diagnostics, source-to-IR lowering, and public-reader evidence.
