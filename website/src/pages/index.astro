@@ -1,31 +1,37 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { loadDocs } from '../lib/content';
-const docs = await loadDocs();
-const recentDocs = docs.filter((doc) => doc.sourcePath !== 'README.md' && !doc.sourcePath.endsWith('/project-index') && !doc.sourcePath.endsWith('/version-index'));
 const sections = [
-  { label: 'Language', prefix: '/language/', description: 'Syntax, IR, version decisions, fixtures, and portable implementation seeds.' },
-  { label: 'Editor', prefix: '/editor/', description: 'Capability-driven visual authoring architecture and compliance requirements.' },
-  { label: 'Flow', prefix: '/flow/', description: 'Workflow-oriented planning and architecture research.' },
-  { label: 'Rules', prefix: '/rules/', description: 'Authoring, portable layout, hosting, and publication policy.' },
+  { number: '01', label: 'Language', prefix: '/language/', accent: 'blue', description: 'Language contracts, architecture, decisions, and portable specifications.' },
+  { number: '02', label: 'Editor', prefix: '/editor/', accent: 'sage', description: 'Capability-driven visual authoring and editor compliance.' },
+  { number: '03', label: 'Flow', prefix: '/flow/', accent: 'warm', description: 'Execution architecture, requirements, and delivery roadmap.' },
+  { number: '04', label: 'Repository rules', prefix: '/rules/', accent: 'violet', description: 'Documentation structure, portability, hosting, and publication policy.' },
 ];
 ---
 <Layout title="Documentation" description="Neutral ecosystem documentation, generated from canonical Markdown.">
-  <section class="hero shell">
-    <p class="eyebrow">Neutral ecosystem / living documentation</p>
-    <h1>Build from the source.</h1>
-    <p class="lede">Architecture, language decisions, editor requirements, and publishing rules maintained as canonical Markdown and rendered here automatically.</p>
-  </section>
-  <section class="section shell" aria-labelledby="sections-title">
-    <div class="section-heading"><p class="eyebrow">Explore</p><h2 id="sections-title">Documentation areas</h2></div>
-    <div class="section-grid">
-      {sections.map((section) => <a class="section-card" href={section.prefix}><span>{section.label}</span><p>{section.description}</p><b>Open section ↗</b></a>)}
+  <section class="home-hero shell">
+    <img src="/neutral-logo.png" alt="" width="88" height="88" />
+    <div>
+      <p class="eyebrow">Neutral ecosystem</p>
+      <h1>Documentation</h1>
+      <p class="lede">Canonical architecture, requirements, and roadmaps for the Neutral projects.</p>
     </div>
   </section>
-  <section class="section shell recent" aria-labelledby="recent-title">
-    <div class="section-heading"><p class="eyebrow">Generated index</p><h2 id="recent-title">Canonical sources</h2></div>
-    <div class="source-list">
-      {recentDocs.slice(0, 12).map((doc) => <a href={doc.route}><span>{doc.sourcePath}</span><b>{doc.title} ↗</b></a>)}
+  <section class="directory" aria-labelledby="directory-title">
+    <div class="shell">
+      <div class="directory-heading">
+        <p class="eyebrow">Browse</p>
+        <h2 id="directory-title">Project directory</h2>
+      </div>
+      <div class="directory-list">
+        {sections.map((section) => (
+          <a class={`directory-row accent-${section.accent}`} href={section.prefix}>
+            <span class="directory-number">{section.number}</span>
+            <strong>{section.label}</strong>
+            <span>{section.description}</span>
+            <b aria-hidden="true">↗</b>
+          </a>
+        ))}
+      </div>
     </div>
   </section>
 </Layout>

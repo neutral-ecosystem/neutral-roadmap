@@ -2,7 +2,7 @@
 
 Status: proposed implementation checklist
 
-Authoritative master: [../REQUIREMENTS.md](../REQUIREMENTS.md)
+Authoritative master: [../../REQUIREMENTS.md](../../REQUIREMENTS.md)
 
 Checking an item requires normative prose, grammar, valid and invalid fixtures,
 stable diagnostics, source-to-IR lowering, and public-reader evidence.
@@ -14,7 +14,7 @@ stable diagnostics, source-to-IR lowering, and public-reader evidence.
 - [ ] SYN-GOV-003 — Acceptance is not authority or execution
 - [ ] SYN-GOV-004 — Completion evidence
 
-Decision: [governing boundaries](decisions/01-governing-boundaries.md)
+Decision: [governing boundaries](../portable/spec/v0/decisions/01-governing-boundaries.md)
 
 ## 2. Source text
 
@@ -25,7 +25,7 @@ Decision: [governing boundaries](decisions/01-governing-boundaries.md)
 - [ ] SYN-LEX-005 — `::` vocabulary qualification and rejected `.`
 - [ ] SYN-LEX-006 — Delimiters, strings, scalars, and `null`
 
-Decision: [lexical source text](decisions/02-lexical-source-text.md)
+Decision: [lexical source text](../portable/spec/v0/decisions/02-lexical-source-text.md)
 
 ## 3. Document
 
@@ -34,7 +34,7 @@ Decision: [lexical source text](decisions/02-lexical-source-text.md)
 - [ ] SYN-DOC-003 — Optional captured vocabulary use
 - [ ] SYN-DOC-004 — Root records/bindings and universal export
 
-Decision: [document shape](decisions/03-documents-modules-profiles.md)
+Decision: [document shape](../portable/spec/v0/decisions/03-documents-modules-profiles.md)
 
 ## 4. Declarations
 
@@ -44,7 +44,7 @@ Decision: [document shape](decisions/03-documents-modules-profiles.md)
 - [ ] SYN-DEC-004 — Duplicates and protected names
 - [ ] SYN-DEC-005 — Forward resolution and value cycles
 
-Decision: [declarations and names](decisions/04-declarations-bindings-names.md)
+Decision: [declarations and names](../portable/spec/v0/decisions/04-declarations-bindings-names.md)
 
 ## 5. Types
 
@@ -56,7 +56,7 @@ Decision: [declarations and names](decisions/04-declarations-bindings-names.md)
 - [ ] SYN-TYP-006 — `Ref<T>` and exact compatibility
 - [ ] SYN-TYP-007 — Vocabulary-owned nominal types
 
-Decision: [type notation](decisions/05-type-schema-notation.md)
+Decision: [type notation](../portable/spec/v0/decisions/05-type-schema-notation.md)
 
 ## 6. Values
 
@@ -67,7 +67,7 @@ Decision: [type notation](decisions/05-type-schema-notation.md)
 - [ ] SYN-VAL-005 — Logical values versus provenance
 - [ ] SYN-VAL-006 — Rejected shorthand/member/static access
 
-Decision: [literal values](decisions/06-literal-values.md)
+Decision: [literal values](../portable/spec/v0/decisions/06-literal-values.md)
 
 ## 7. References
 
@@ -76,7 +76,7 @@ Decision: [literal values](decisions/06-literal-values.md)
 - [ ] SYN-REF-003 — Identity-only semantics
 - [ ] SYN-REF-004 — Document-local IDs and alpha-equivalence
 
-Decision: [references](decisions/07-references-relationships.md)
+Decision: [references](../portable/spec/v0/decisions/07-references-relationships.md)
 
 ## 8. Vocabulary
 
@@ -86,7 +86,7 @@ Decision: [references](decisions/07-references-relationships.md)
 - [ ] SYN-VOC-004 — Payload/feature validation without execution
 - [ ] SYN-VOC-005 — Vocabulary diagnostics
 
-Decision: [vocabulary boundary](decisions/10-domain-vocabulary.md)
+Decision: [vocabulary boundary](../portable/spec/v0/decisions/10-domain-vocabulary.md)
 
 ## 9. Safety and conformance
 
@@ -98,10 +98,10 @@ Decision: [vocabulary boundary](decisions/10-domain-vocabulary.md)
 
 Decisions:
 
-- [security and limits](decisions/12-security-sensitive-syntax.md)
-- [diagnostics](decisions/13-diagnostics-invalid-syntax.md)
-- [formatting](decisions/14-documentation-formatting-tools.md)
-- [conformance](decisions/15-evolution-conformance.md)
+- [security and limits](../portable/spec/v0/decisions/12-security-sensitive-syntax.md)
+- [diagnostics](../portable/spec/v0/decisions/13-diagnostics-invalid-syntax.md)
+- [formatting](../portable/spec/v0/decisions/14-documentation-formatting-tools.md)
+- [conformance](../portable/spec/v0/decisions/15-evolution-conformance.md)
 
 ## Completion rule
 

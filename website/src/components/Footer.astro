@@ -3,14 +3,20 @@ import packageJson from '../../package.json';
 ---
 <footer class="site-footer">
   <div class="shell footer-inner">
-    <div class="footer-identity">
-      <span>Neutral ecosystem</span>
-      <span class="footer-version">v{packageJson.version}</span>
+    <div class="footer-brand">
+      <img src="/neutral-logo-rounded.png" alt="" width="40" height="40" />
+      <div>
+        <strong>Neutral documentation</strong>
+        <span>Architecture and implementation contracts</span>
+      </div>
     </div>
-    <span class="footer-note">Documentation generated from canonical Markdown</span>
-    <a class="footer-index" href="/" title="Back to documentation index">
-      <span>Back to index</span>
-      <span class="footer-index-icon" aria-hidden="true">↑</span>
-    </a>
+    <nav aria-label="Footer navigation">
+      <a href="/">Documentation</a>
+      <a href="https://github.com/neutral-ecosystem/neutral-roadmap" target="_blank" rel="noreferrer">GitHub ↗</a>
+    </nav>
+    <div class="footer-meta">
+      <span>v{packageJson.version}</span>
+      <span>Manual release</span>
+    </div>
   </div>
 </footer>

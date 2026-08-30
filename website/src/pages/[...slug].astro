@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { catalogTitle, loadDocs } from '../lib/content';
+import { catalogTitle, loadDocs, sourceUrl } from '../lib/content';
 import { projectDocuments, projects } from '../../docs.config';
 
 export async function getStaticPaths() {
@@ -17,6 +17,20 @@ const versionIndex = project && selectedVersion ? docs.find((item) => item.sourc
 const portablePages = project && selectedVersion
   ? docs.filter((item) => item.sourcePath.startsWith(`${project.domain}/${selectedVersion}/portable/`))
   : [];
+const portableRoot = portablePages.find((item) => item.sourcePath.endsWith('/portable/README.md'));
+const portablePrefix = project && selectedVersion ? `${project.domain}/${selectedVersion}/portable/` : '';
+const portableRelativePath = portablePrefix && doc.sourcePath.startsWith(portablePrefix) ? doc.sourcePath.slice(portablePrefix.length) : '';
+const portableDirectory = portableRelativePath.toLowerCase().endsWith('/readme.md')
+  ? portableRelativePath.slice(0, portableRelativePath.lastIndexOf('/'))
+  : portableRelativePath.includes('/')
+    ? portableRelativePath.slice(0, portableRelativePath.lastIndexOf('/'))
+    : '';
+const portableSiblings = portablePages.filter((item) => {
+  const path = item.sourcePath.slice(portablePrefix.length);
+  if (!portableDirectory) return !path.includes('/') || /^[^/]+\/README\.md$/i.test(path);
+  const parent = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
+  return parent === portableDirectory;
+});
 const projectLanding = project ? docs.find((item) => item.route === `/${project.prefix}/`) : undefined;
 const topPages = project
   ? docs.filter((item) => item.sourcePath.startsWith(`${project.domain}/`) && projectDocuments.has(item.sourcePath.slice(project.domain.length + 1)))
@@ -28,23 +42,55 @@ const rulePages = doc.sourcePath.startsWith('rules/') ? docs.filter((item) => it
 const catalog = doc.sourcePath.startsWith('rules/')
   ? rulePages
   : project && selectedVersion && !isProjectIndex
-    ? [versionIndex, ...portablePages].filter((item): item is NonNullable<typeof item> => Boolean(item))
+    ? [versionIndex, portableRoot, ...portableSiblings].filter((item, index, items): item is NonNullable<typeof item> => Boolean(item) && items.indexOf(item) === index)
     : project
       ? [projectLanding, ...topPages, ...versionPages].filter((item): item is NonNullable<typeof item> => Boolean(item))
       : [];
 const catalogLabel = doc.sourcePath.startsWith('rules/')
   ? 'Repository rules'
   : compactProjectLabel ?? 'Documentation';
+const isVersionIndex = doc.sourcePath.endsWith('/version-index');
+const isGeneratedPage = isProjectIndex || isVersionIndex;
+const backHref = doc.sourcePath.startsWith('rules/')
+  ? doc.route === '/rules/' ? '/' : '/rules/'
+  : isProjectIndex
+    ? '/'
+    : isVersionIndex
+      ? projectLanding?.route ?? '/'
+      : selectedVersion
+        ? versionIndex?.route ?? projectLanding?.route ?? '/'
+        : projectLanding?.route ?? '/';
+const backLabel = doc.sourcePath.startsWith('rules/')
+  ? doc.route === '/rules/' ? 'Documentation' : 'Rules'
+  : isProjectIndex
+    ? 'Documentation'
+    : isVersionIndex
+      ? compactProjectLabel ?? 'Project'
+      : selectedVersion
+        ? selectedVersion
+        : compactProjectLabel ?? 'Project';
+const documentSourceUrl = sourceUrl(doc.sourcePath);
+function localCatalogTitle(item: typeof doc) {
+  if (!portablePrefix || !item.sourcePath.startsWith(portablePrefix)) return catalogTitle(item, selectedVersion ? 'version' : 'project');
+  const path = item.sourcePath.slice(portablePrefix.length);
+  const segments = path.replace(/\.md$/, '').split('/');
+  const stem = segments.at(-1) ?? '';
+  if (stem.toLowerCase() === 'readme') return segments.length === 1 ? 'Portable overview' : segments.at(-2)?.replace(/[-_]+/g, ' ') ?? 'Overview';
+  return stem.replace(/[-_]+/g, ' ');
+}
 ---
 <Layout title={doc.title} description={doc.description}>
   <div class="doc-shell shell">
     <aside class="doc-sidebar">
       <p class="eyebrow">{catalogLabel}</p>
       {selectedVersion && !isProjectIndex && <p class="catalog-version">{selectedVersion} / portable</p>}
-      {!["/project-index", "/version-index"].some((suffix) => doc.sourcePath.endsWith(suffix)) && <p class="source-path">{doc.sourcePath}</p>}
-      {catalog.length > 0 && <nav aria-label={`${catalogLabel} catalog`}>{catalog.map((item) => <a class:list-active={item.route === doc.route} aria-current={item.route === doc.route ? 'page' : undefined} href={item.route}>{catalogTitle(item, selectedVersion && !isProjectIndex ? 'version' : 'project')}</a>)}</nav>}
+      {catalog.length > 0 && <nav aria-label={`${catalogLabel} catalog`}>{catalog.map((item) => <a class:list-active={item.route === doc.route} aria-current={item.route === doc.route ? 'page' : undefined} href={item.route}>{localCatalogTitle(item)}</a>)}</nav>}
     </aside>
     <article class="document">
+      <div class="document-toolbar">
+        <a class="back-link" href={backHref}><span aria-hidden="true">←</span> {backLabel}</a>
+        {!isGeneratedPage && documentSourceUrl && <a class="document-source" href={documentSourceUrl} target="_blank" rel="noreferrer">View source <span aria-hidden="true">↗</span></a>}
+      </div>
       <p class="eyebrow">{doc.status}</p>
       <h1>{doc.title}</h1>
       <div class="markdown" set:html={doc.html} />

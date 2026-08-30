@@ -14,13 +14,13 @@ Repository placement is not a release or language semantic decision.
 
 Read in this order:
 
-1. [Neutral v0 architecture](../ARCHITECTURE.md)
-2. [Neutral v0 requirements](../REQUIREMENTS.md)
-3. [Neutral language roadmap](../ROADMAP.md)
-4. [Master syntax checklist](portable/spec/v0/syntax.md)
-5. [Accepted v0 decisions](decisions/README.md)
+1. [Neutral v0 architecture](../../ARCHITECTURE.md)
+2. [Neutral v0 requirements](../../REQUIREMENTS.md)
+3. [Neutral language roadmap](../../ROADMAP.md)
+4. [Master syntax specification](../portable/spec/v0/syntax.md)
+5. [Accepted v0 decisions](../portable/spec/v0/decisions/README.md)
 6. [Proposed syntax guide](proposed-syntax-guide.md)
-7. [Conformance fixtures](fixtures/README.md)
+7. [Conformance fixtures](../portable/spec/v0/fixtures/README.md)
 8. [Implementation roadmap](ROADMAP.md)
 
 More specific accepted decisions govern. Development and test documents order
@@ -31,12 +31,12 @@ or vocabulary behavior.
 
 | Document | Authority and purpose |
 | --- | --- |
-| [Contract freeze](development/CONTRACT-FREEZE.md) | Mandatory gate between scaffolding and production compiler behavior |
-| [Implementation stages](development/IMPLEMENTATION-STAGES.md) | Stage and vertical-slice execution order |
-| [Identity and vocabulary](development/IDENTITY-AND-VOCABULARY.md) | Exact byte digests, semantic fingerprints, identities, strict vocabulary JSON encoding |
-| [Testing and quality](development/TESTING.md) | TDD, test ownership, suite activation, levels, evidence, quality and ISO alignment |
-| [Environment and automation](development/ENVIRONMENT-AUTOMATION.md) | Bootstrap, toolchains, containers, `xtask`, CI, offline execution, evidence paths |
-| [Release qualification](development/RELEASE.md) | Stage 10 artifacts, release matrix, audits, evidence and approvals |
+| [Contract freeze](../portable/development/CONTRACT-FREEZE.md) | Mandatory gate between scaffolding and production compiler behavior |
+| [Implementation stages](../portable/development/IMPLEMENTATION-STAGES.md) | Stage and vertical-slice execution order |
+| [Identity and vocabulary](../portable/development/IDENTITY-AND-VOCABULARY.md) | Exact byte digests, semantic fingerprints, identities, strict vocabulary JSON encoding |
+| [Testing and quality](../portable/development/TESTING.md) | TDD, test ownership, suite activation, levels, evidence, quality and ISO alignment |
+| [Environment and automation](../portable/development/ENVIRONMENT-AUTOMATION.md) | Bootstrap, toolchains, containers, `xtask`, CI, offline execution, evidence paths |
+| [Release qualification](../portable/development/RELEASE.md) | Stage 10 artifacts, release matrix, audits, evidence and approvals |
 
 Each concern has one owning document. Cross-links replace duplicated checklists.
 If two operational documents conflict, stop work and resolve them before closing
@@ -100,17 +100,17 @@ Stage 10: release qualification
 
 | Stage | Demonstrable outcome | Owning gate |
 | --- | --- | --- |
-| 1 | Reproducible workspace, automation, package/effect boundaries, and only feasible foundation tests | [Implementation Stage 1](development/IMPLEMENTATION-STAGES.md#stage-1-initialize-the-implementation-foundation) |
-| Freeze | Grammar, semantics, IR, identity, vocabulary, APIs, diagnostics, limits, fixtures, and traceability accepted | [Contract freeze](development/CONTRACT-FREEZE.md) |
-| 2 | Minimal `.neu` scalar compiles through validated IR, reader, and independent probe library | [Implementation Stage 2](development/IMPLEMENTATION-STAGES.md#stage-2-implement-the-minimal-atomic-core) |
-| 3 | Full source-text and scalar behavior complete end to end; no future constructs parsed early | [Implementation Stage 3](development/IMPLEMENTATION-STAGES.md#stage-3-complete-source-text-and-scalar-vertical-slices) |
-| 4 | Records, defaults, nullability, and lists complete as separate vertical slices | [Implementation Stage 4](development/IMPLEMENTATION-STAGES.md#stage-4-implement-records-defaults-and-lists-as-vertical-slices) |
-| 5 | Reuse, cycles, typed references, recursion boundary, and alpha-equivalence complete | [Implementation Stage 5](development/IMPLEMENTATION-STAGES.md#stage-5-implement-reuse-and-references-as-vertical-slices) |
-| 6 | Strict captured vocabulary bytes and qualified source values pass compiler/reader/probe | [Implementation Stage 6](development/IMPLEMENTATION-STAGES.md#stage-6-implement-captured-vocabulary-as-one-vertical-boundary) |
-| 7 | Valid encoded IR round-trips logically; hostile IR fails boundedly | [Implementation Stage 7](development/IMPLEMENTATION-STAGES.md#stage-7-implement-one-external-neutral-ir-encoding) |
-| 8 | Formatter, host CLI, standalone probe, docs, and traceability complete | [Implementation Stage 8](development/IMPLEMENTATION-STAGES.md#stage-8-complete-formatter-cli-standalone-probe-and-traceability) |
-| 9 | Property, fuzz, limits, security, performance, soak, mutation, and quality gates pass | [Implementation Stage 9](development/IMPLEMENTATION-STAGES.md#stage-9-harden-correctness-security-and-performance) |
-| 10 | Complete artifacts and retained release evidence approved | [Release qualification](development/RELEASE.md) |
+| 1 | Reproducible workspace, automation, package/effect boundaries, and only feasible foundation tests | [Implementation Stage 1](../portable/development/IMPLEMENTATION-STAGES.md#stage-1-initialize-the-implementation-foundation) |
+| Freeze | Grammar, semantics, IR, identity, vocabulary, APIs, diagnostics, limits, fixtures, and traceability accepted | [Contract freeze](../portable/development/CONTRACT-FREEZE.md) |
+| 2 | Minimal `.neu` scalar compiles through validated IR, reader, and independent probe library | [Implementation Stage 2](../portable/development/IMPLEMENTATION-STAGES.md#stage-2-implement-the-minimal-atomic-core) |
+| 3 | Full source-text and scalar behavior complete end to end; no future constructs parsed early | [Implementation Stage 3](../portable/development/IMPLEMENTATION-STAGES.md#stage-3-complete-source-text-and-scalar-vertical-slices) |
+| 4 | Records, defaults, nullability, and lists complete as separate vertical slices | [Implementation Stage 4](../portable/development/IMPLEMENTATION-STAGES.md#stage-4-implement-records-defaults-and-lists-as-vertical-slices) |
+| 5 | Reuse, cycles, typed references, recursion boundary, and alpha-equivalence complete | [Implementation Stage 5](../portable/development/IMPLEMENTATION-STAGES.md#stage-5-implement-reuse-and-references-as-vertical-slices) |
+| 6 | Strict captured vocabulary bytes and qualified source values pass compiler/reader/probe | [Implementation Stage 6](../portable/development/IMPLEMENTATION-STAGES.md#stage-6-implement-captured-vocabulary-as-one-vertical-boundary) |
+| 7 | Valid encoded IR round-trips logically; hostile IR fails boundedly | [Implementation Stage 7](../portable/development/IMPLEMENTATION-STAGES.md#stage-7-implement-one-external-neutral-ir-encoding) |
+| 8 | Formatter, host CLI, standalone probe, docs, and traceability complete | [Implementation Stage 8](../portable/development/IMPLEMENTATION-STAGES.md#stage-8-complete-formatter-cli-standalone-probe-and-traceability) |
+| 9 | Property, fuzz, limits, security, performance, soak, mutation, and quality gates pass | [Implementation Stage 9](../portable/development/IMPLEMENTATION-STAGES.md#stage-9-harden-correctness-security-and-performance) |
+| 10 | Complete artifacts and retained release evidence approved | [Release qualification](../portable/development/RELEASE.md) |
 
 Do not advance because a happy path works. Close the active stage's invalid
 cases, public-reader behavior, source maps, provenance, derivation, limits,
@@ -151,9 +151,9 @@ cargo xtask ci release      # release candidates only
 ```
 
 Individual tasks and evidence behavior are defined in
-[ENVIRONMENT-AUTOMATION.md](development/ENVIRONMENT-AUTOMATION.md). Test
+[ENVIRONMENT-AUTOMATION.md](../portable/development/ENVIRONMENT-AUTOMATION.md). Test
 activation and quality gates are defined in
-[TESTING.md](development/TESTING.md).
+[TESTING.md](../portable/development/TESTING.md).
 
 ## Change control
 

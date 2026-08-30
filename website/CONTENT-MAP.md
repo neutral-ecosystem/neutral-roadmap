@@ -15,7 +15,6 @@ result rather than maintain copied Markdown.
 | Neutral language | `ARCHITECTURE.md`, `REQUIREMENTS.md`, `ROADMAP.md`, and `/neutral-lang/vN/portable/**/*.md` | `/language/` | three contracts plus version indexes limited to matching portable content |
 | Neutral Editor | `ARCHITECTURE.md`, `REQUIREMENTS.md`, `ROADMAP.md`, and `/neutral-editor/vN/portable/**/*.md` | `/editor/` | three contracts plus version indexes limited to matching portable content |
 | Neutral Flow | `ARCHITECTURE.md`, `REQUIREMENTS.md`, `ROADMAP.md`, and `/neutral-flow/vN/portable/**/*.md` | `/flow/` | three contracts plus version indexes limited to matching portable content |
-| Neux | `ARCHITECTURE.md`, `REQUIREMENTS.md`, `ROADMAP.md`, and `/neux/vN/portable/**/*.md` | `/neux/` | three contracts plus version indexes limited to matching portable content |
 | Repository rules | `/rules/**/*.md` | `/rules/` | Documentation rules and future shared policies |
 
 The website excludes `.agents/`, `.codex/`, build output, dependency folders,
@@ -24,22 +23,26 @@ every directory whose name starts with `_` (for example `_notes/` or
 `draft: true`. An underscore prefix is the repository-wide directory convention
 for content that is not part of the public documentation tree.
 
-## Host and portable views
+`neux/` remains a reserved repository area. It receives a public route only
+after its project-level contracts exist and it satisfies the same publication
+rules as the other domains.
+
+## Design and portable views
 
 Versioned project documentation has two source views. The public site publishes
 the project's three top-level contracts and version index pages; each version
 index exposes only its matching portable view:
 
 ```text
-host:     /neutral-lang/vN/** excluding /portable/**
+design:   /neutral-lang/vN/design/**
 portable: /neutral-lang/vN/portable/**
 ```
 
-The host view is the roadmap-repository context and remains unpublished for
-now. The portable view is the standalone implementation-seed context shown in
+The design view is repository-only and is ignored by the website. The portable
+view is the standalone implementation-seed context shown in
 `portable/`, including its `conformance/`, `development/`, `docs/`, and
-`spec/vN/` sections. The website detects both source groups for future use, but
-only emits `vN/portable/` pages under a version index. If a version has no
+`spec/vN/` sections. The website only emits `vN/portable/` pages under a version
+index. If a version has no
 portable seed, that version route remains available and displays a
 documentation-in-progress state.
 

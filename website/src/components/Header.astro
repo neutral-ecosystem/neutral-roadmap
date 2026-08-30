@@ -1,10 +1,9 @@
 ---
 const navItems = [
-  { label: 'Main page', href: '/' },
+  { label: 'Home', href: '/' },
   { label: 'Language', href: '/language/' },
   { label: 'Editor', href: '/editor/' },
   { label: 'Flow', href: '/flow/' },
-  { label: 'Neux', href: '/neux/' },
   { label: 'Rules', href: '/rules/' },
 ];
 const isCurrent = (href: string) => href === '/' ? Astro.url.pathname === '/' : Astro.url.pathname.startsWith(href);
@@ -15,6 +14,6 @@ const isCurrent = (href: string) => href === '/' ? Astro.url.pathname === '/' : 
     <nav aria-label="Primary navigation">
       {navItems.map((item) => <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>)}
     </nav>
-    <a class="source-link" href="https://github.com/neutral-ecosystem" target="_blank" rel="noreferrer">Source ↗</a>
+    <a class="source-link" href="https://github.com/neutral-ecosystem/neutral-roadmap" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
   </div>
 </header>

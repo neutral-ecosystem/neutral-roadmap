@@ -50,8 +50,8 @@ dependencies are installed in a networked development or CI environment.
 
 The content loader publishes each project's top-level `ARCHITECTURE.md`,
 `REQUIREMENTS.md`, and `ROADMAP.md` when present. Version index pages only link
-to their matching `vN/portable/` content; host files under a version directory
-are not rendered. Until a version has a portable seed, its index displays
+to their matching `vN/portable/` content; `vN/design/` is ignored. Until a
+version has a portable seed, its index displays
 “Documentation is still being built.”
 
 Cloudflare and build configuration must follow the single operational contract
@@ -66,16 +66,13 @@ Production deployment uses Wrangler and the checked-in
 template: the Worker is named `neutral-roadmap`, and its static assets are read from
 `website/dist/` after the Astro build.
 
-In Cloudflare Workers Builds, set the project root directory to `/website`.
-Use `pnpm install --frozen-lockfile && pnpm build` as the build command and
-`npx wrangler deploy` as the deploy command. Both commands then run in this
-directory, so Wrangler discovers `wrangler.jsonc` and `./dist` directly.
-
-There is deliberately no GitHub Actions workflow in this repository. When the
-Cloudflare Workers Builds Git connection is active, pushes to its production
-branch run the same commands automatically. The local equivalents are:
+Deployment is deliberately manual. There is no GitHub Actions workflow or
+Cloudflare Git-triggered build, so pushing documentation changes does not
+publish them. Verify and deploy from the repository root with:
 
 ```sh
+pnpm --dir website check
+pnpm --dir website build
 pnpm --dir website deploy
 pnpm --dir website preview:cloudflare
 ```

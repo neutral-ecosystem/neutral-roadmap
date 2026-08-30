@@ -102,16 +102,16 @@ project/
 |-- ARCHITECTURE.md
 |-- REQUIREMENTS.md
 |-- ROADMAP.md
-|-- v0/
-|-- v1/
 `-- vN/
+    |-- design/
+    `-- portable/
 ```
 
-The three top-level documents are the project contract. Version directories
-hold version history and implementation material; their public version page is
-allowed to expose only the matching `vN/portable/` subtree when that subtree
-exists. Host files elsewhere under `vN/` remain source material, not public
-pages.
+The three top-level documents are the project contract. Every concrete version
+contains exactly two documentation views: `design/` for repository design work
+and `portable/` for the standalone implementation seed. Public version pages
+ignore `vN/design/` and expose only the matching `vN/portable/` subtree when it
+exists.
 
 | Directory | Owns | Must not contain |
 | --- | --- | --- |
@@ -120,25 +120,23 @@ pages.
 | `/assets/` | Shared visual assets with stable names and attribution/license facts where needed | Generated website output |
 | `/neutral-lang/` | Neutral language architecture, requirements, syntax, decisions, examples, and version plans | Flow, editor, runtime, or OS-specific semantics |
 | `/neutral-lang/docs/` | Supporting language reading, library material, and showcase documents | Normative v0 decisions duplicated from `v0/` |
-| `/neutral-lang/vN/` | Version-specific entry point, decisions, development rules, fixtures, and roadmap | Behavior from another language version without an explicit compatibility note |
-| `/neutral-lang/vN/decisions/` | Accepted or proposed version-specific decisions with stable IDs | General implementation logs |
-| `/neutral-lang/vN/development/` | Gates, implementation stages, environment, testing, and release evidence | New language semantics |
-| `/neutral-lang/vN/fixtures/` | Positive, negative, boundary, and adversarial source fixtures plus manifests | Unexplained scratch examples |
+| `/neutral-lang/vN/design/` | Version-specific design proposals, checklists, and roadmap material | Public website content or standalone-only paths |
 | `/neutral-lang/vN/portable/` | Copyable standalone implementation seed with its own `spec/`, `development/`, `conformance/`, and `docs/` structure | Host-only relative links, generated build output, or unrecorded divergence from the host baseline |
 | `/neutral-flow/` | Flow-specific planning, architecture, requirements, and release research | `.neu` grammar or Neutral compiler behavior |
 | `/neutral-flow/docs/` | Flow research and supporting analysis | Neutral Editor product requirements |
-| `/neutral-flow/vN/` | Flow version roadmaps and checklists | Cross-version copied requirements without disposition |
+| `/neutral-flow/vN/design/` | Flow version design roadmaps and checklists | Cross-version copied requirements without disposition |
+| `/neutral-flow/vN/portable/` | Standalone Flow implementation documentation | Repository-only design notes |
 | `/neutral-editor/` | Editor product documentation, architecture, compliance, and implementation stack | A duplicate Neutral language specification |
 | `/neutral-editor/docs/` | Node-editor research and supporting design analysis | Canonical UI code or generated website content |
-| `/neutral-editor/vN/` | Editor version overview, requirements, architecture, integration contracts, decisions, and roadmap | Neutral language behavior not owned by the editor |
-| `/neutral-editor/vN/decisions/` | Editor-specific decisions and consequences | Framework documentation copied verbatim |
+| `/neutral-editor/vN/design/` | Editor version proposals, integration design, decisions, and planning | Neutral language behavior not owned by the editor |
+| `/neutral-editor/vN/portable/` | Standalone Editor implementation documentation | Framework documentation copied verbatim |
 | `/neux/` | Future OS abstraction research | Flow/editor ownership or language changes |
 | `/neux/docs/` | Supporting Neux research | Production implementation artifacts until a Neux implementation scope exists |
 | `/website/` | Astro application, publishing configuration, themes, routes, generated build output ignored by Git | Canonical copies of domain Markdown |
 
 `vN` means a concrete version directory such as `v0`, `v1`, or `v2`.
 
-Portable seeds and their corresponding host views follow the additional
+Portable seeds and their corresponding design views follow the additional
 [portable documentation rules](PORTABLE-DOCUMENTATION.md).
 Public builds and deployment follow the
 [documentation hosting rules](HOSTING.md).

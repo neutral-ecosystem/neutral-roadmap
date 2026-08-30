@@ -7,7 +7,7 @@ Date: 2026-08-14
 Scope: product and system architecture; no implementation, configuration syntax,
 Neutral language syntax, or Neutral language semantics are defined here.
 
-Visual companion: [architecture diagram set](img/architecture/README.md).
+Visual companion: [architecture diagram set](_img/architecture/README.md).
 
 ### Ecosystem premise
 
@@ -1455,7 +1455,7 @@ until these are answered:
 
 Supporting analysis created for this architecture:
 
-- [architecture research and primary bibliography](docs/architecture-research.md)
+- [architecture research and primary bibliography](_docs/architecture-research.md)
 
 Important primary references include:
 

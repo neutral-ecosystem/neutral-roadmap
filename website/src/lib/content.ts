@@ -5,6 +5,7 @@ import { isIgnoredDirectory, isPublishedProjectSource, projectDocuments, project
 
 // Astro executes this module from the website project root in dev and build.
 const repositoryRoot = resolve(process.cwd(), '..');
+const repositoryUrl = 'https://github.com/neutral-ecosystem/neutral-roadmap/blob/main';
 
 export interface DocPage {
   sourcePath: string;
@@ -47,7 +48,7 @@ function routeFor(sourcePath: string) {
   const versionIndex = parts.findIndex((part) => /^v\d+$/.test(part));
   const cleanParts = parts.filter((part) => part !== 'portable');
   const routeParts = [prefix, ...cleanParts];
-  if (versionIndex >= 0 && domain === 'neutral-lang') {
+  if (versionIndex >= 0 && projects.some((project) => project.domain === domain)) {
     const portable = portableIndex >= 0;
     const insertAt = 1 + versionIndex + 1;
     routeParts.splice(insertAt, 0, portable ? 'portable' : 'host');
@@ -59,14 +60,18 @@ function routeFor(sourcePath: string) {
 function rewriteLinks(source: string, currentPath: string, routes: Map<string, string>) {
   return source.replace(/\]\(([^)#]+)(#[^)]*)?\)/g, (match, target: string, fragment = '') => {
     if (/^(?:https?:|mailto:|\/)/.test(target)) return match;
-    const normalized = normalize(resolve(dirname(currentPath), target)).split(sep).join('/');
+    const normalized = relative(
+      repositoryRoot,
+      normalize(resolve(repositoryRoot, dirname(currentPath), target)),
+    ).split(sep).join('/');
     const route = routes.get(normalized);
-    return route ? `](${route}${fragment})` : match;
+    if (route) return `](${route}${fragment})`;
+    return `](${repositoryUrl}/${normalized}${fragment})`;
   });
 }
 
 function classify(sourcePath: string) {
-  if (!sourcePath.startsWith('neutral-lang/')) return {};
+  if (!projects.some((project) => sourcePath.startsWith(`${project.domain}/`))) return {};
   const parts = sourcePath.split('/');
   const version = parts.find((part) => /^v\d+$/.test(part));
   if (!version) return {};
@@ -160,7 +165,7 @@ export async function loadDocs(): Promise<DocPage[]> {
         description: portableEntry ? `${project.label} ${version} portable documentation.` : `${project.label} ${version} documentation is still being built.`,
         status: portableEntry ? `${version} portable` : 'documentation in progress',
         html: portableEntry
-          ? `<p class="doc-notice">Only the portable documentation for ${version} is published.</p><p><a href="${portableEntry.route}">Open ${version}/portable</a></p>`
+          ? `<p class="doc-notice">This version publishes its portable documentation. Use the catalog to browse its sections.</p>`
           : `<p class="doc-notice">Documentation is still being built.</p><p>The ${version}/portable seed for this project is not available yet.</p>`,
         view: portableEntry ? 'portable' : undefined,
         version: portableEntry ? version : undefined,
@@ -171,19 +176,18 @@ export async function loadDocs(): Promise<DocPage[]> {
     const portableEntries = pages
       .filter((page) => new RegExp(`^${project.domain}/v\\d+/portable/README\\.md$`).test(page.sourcePath))
       .sort((a, b) => (Number(b.version?.slice(1)) || 0) - (Number(a.version?.slice(1)) || 0));
-    const portableEntry = portableEntries[0];
-    const portableVersion = portableEntry?.version;
+    const portableVersion = portableEntries[0]?.version;
     const topDocuments = pages.filter((page) => page.sourcePath.startsWith(`${project.domain}/`) && projectDocuments.has(page.sourcePath.slice(project.domain.length + 1)));
     const versionPages = pages.filter((page) => page.sourcePath.startsWith(`${project.domain}/v`) && page.sourcePath.endsWith('/version-index'));
-    const links = [...topDocuments, ...versionPages].map((page) => `<li><a href="${page.route}">${catalogTitle(page)}</a></li>`).join('');
+    const hasDocumentation = topDocuments.length > 0 || versionPages.length > 0;
     pages.push({
       sourcePath: `${project.domain}/${portableVersion ?? 'vN'}/project-index`,
       route: `/${project.prefix}/`,
       title: project.label,
-      description: links ? `${project.label} documentation and version indexes.` : `${project.label} documentation is still being built.`,
-      status: links ? 'documentation' : 'documentation in progress',
-      html: links
-        ? `<p>Choose a contract or version. Version pages publish only their matching <code>vN/portable/</code> content.</p><ul>${links}</ul>`
+      description: hasDocumentation ? `${project.label} documentation and version indexes.` : `${project.label} documentation is still being built.`,
+      status: hasDocumentation ? 'documentation' : 'documentation in progress',
+      html: hasDocumentation
+        ? `<p class="project-summary">${project.summary}</p><p>Project contracts define the shared direction. Version pages expose only their matching <code>vN/portable/</code> implementation documentation.</p>`
         : '<p class="doc-notice">Documentation is still being built.</p><p>A portable versioned seed for this project is not available yet.</p>',
     });
   }
@@ -192,4 +196,10 @@ export async function loadDocs(): Promise<DocPage[]> {
 
 export function relativeSource(from: string, to: string) {
   return relative(dirname(from), to).split(sep).join('/');
+}
+
+export function sourceUrl(sourcePath: string) {
+  return sourcePath.endsWith('/project-index') || sourcePath.endsWith('/version-index')
+    ? undefined
+    : `${repositoryUrl}/${sourcePath}`;
 }

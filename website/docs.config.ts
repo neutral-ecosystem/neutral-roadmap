@@ -1,10 +1,27 @@
 export const sourceRoots = ['README.md', 'rules', 'neutral-lang', 'neutral-editor', 'neutral-flow', 'neux'];
 
 export const projects = [
-  { domain: 'neutral-lang', prefix: 'language', label: 'Neutral language' },
-  { domain: 'neutral-editor', prefix: 'editor', label: 'Neutral Editor' },
-  { domain: 'neutral-flow', prefix: 'flow', label: 'Neutral Flow' },
-  { domain: 'neux', prefix: 'neux', label: 'Neux' },
+  {
+    domain: 'neutral-lang',
+    prefix: 'language',
+    label: 'Neutral language',
+    summary: 'The language contract, architecture, and versioned portable specification.',
+    accent: 'blue',
+  },
+  {
+    domain: 'neutral-editor',
+    prefix: 'editor',
+    label: 'Neutral Editor',
+    summary: 'A capability-driven visual editor for authoring conforming Neutral programs.',
+    accent: 'sage',
+  },
+  {
+    domain: 'neutral-flow',
+    prefix: 'flow',
+    label: 'Neutral Flow',
+    summary: 'The execution model, runtime architecture, and implementation roadmap.',
+    accent: 'warm',
+  },
 ] as const;
 
 export const projectDocuments = new Set(['ARCHITECTURE.md', 'REQUIREMENTS.md', 'ROADMAP.md']);
@@ -13,7 +30,6 @@ export const sectionPrefixes: Record<string, string> = {
   'neutral-lang': 'language',
   'neutral-editor': 'editor',
   'neutral-flow': 'flow',
-  neux: 'neux',
   rules: 'rules',
 };
 

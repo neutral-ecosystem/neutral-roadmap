@@ -49,9 +49,9 @@ For the current work, read these documents in order:
 1. [Neutral v0 architecture](neutral-lang/ARCHITECTURE.md)
 2. [Neutral language requirements](neutral-lang/REQUIREMENTS.md)
 3. [Neutral language roadmap](neutral-lang/ROADMAP.md)
-4. [Proposed syntax guide](neutral-lang/v0/proposed-syntax-guide.md)
-5. [v0 decisions](neutral-lang/v0/decisions/README.md)
-6. [v0 implementation roadmap](neutral-lang/v0/ROADMAP.md)
+4. [Proposed syntax guide](neutral-lang/v0/design/proposed-syntax-guide.md)
+5. [v0 decisions](neutral-lang/v0/portable/spec/v0/decisions/README.md)
+6. [v0 implementation roadmap](neutral-lang/v0/design/ROADMAP.md)
 
 For the visual editor workstream, continue with:
 

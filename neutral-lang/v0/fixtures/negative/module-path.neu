@@ -1,4 +1,0 @@
-neu "0.1"
-module fixture::module_path
-
-bool enabled = true

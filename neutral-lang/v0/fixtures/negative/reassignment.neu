@@ -1,5 +1,0 @@
-neu "0.1"
-module fixture_reassignment
-
-num retry_count = 0
-retry_count = 2

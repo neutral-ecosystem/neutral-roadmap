@@ -23,9 +23,8 @@ documents link here instead of restating them.
 
 ## 2. Terms
 
-`Host view` means documentation stored directly under `neutral-lang/vN/`,
-excluding `portable/`. It is a content classification and is unrelated to the
-hosting provider.
+`Design view` means repository-only documentation stored under
+`neutral-lang/vN/design/`. The website ignores it.
 
 `Portable view` means documentation stored under
 `neutral-lang/vN/portable/`, designed to remain valid when copied into a
@@ -65,7 +64,7 @@ read canonical sources outside `website/`. It must:
    every directory whose name starts with `_`.
 3. Publish project-root `ARCHITECTURE.md`, `REQUIREMENTS.md`, and `ROADMAP.md`
    when present.
-4. Classify versioned sources as `host` or `portable` from their paths.
+4. Classify versioned sources as `design` or `portable` from their paths.
 5. Publish only matching `vN/portable/` content below a version route.
 6. Derive metadata when optional frontmatter is absent.
 7. Build a unique source-path to public-route manifest.
@@ -85,22 +84,22 @@ single deployment configuration. It follows the Neutral website template:
 | --- | --- |
 | Worker name | `neutral-roadmap` |
 | Compatibility date | `2026-08-11` |
-| Root directory | `/website` |
-| Assets directory | `./dist` relative to the configured root |
+| Local working directory | `website/` |
+| Assets directory | `./dist` relative to `website/` |
 | Not-found handling | `404-page` |
-| Build command | `pnpm install --frozen-lockfile && pnpm build` |
-| Deploy command | `npx wrangler deploy` |
+| Verify command | `pnpm check && pnpm build` |
+| Deploy command | `pnpm deploy` |
 
-Cloudflare runs both commands with `/website` as the working directory. The
-config therefore resolves `./dist` to `website/dist/`, and `npx wrangler deploy`
-finds the package's `wrangler.jsonc` automatically. Authenticate with
+Run the commands from `website/`, or use their `pnpm --dir website` equivalents
+from the repository root. The config resolves `./dist` to `website/dist/` and
+Wrangler finds the package's `wrangler.jsonc` automatically. Authenticate with
 `wrangler login`, or provide `CLOUDFLARE_API_TOKEN` and
 `CLOUDFLARE_ACCOUNT_ID` in the environment. Never commit token values.
 
 This repository intentionally does not configure a GitHub Actions deploy
-workflow. When Cloudflare Workers Builds is connected to the repository, pushes
-to its production branch run these build and deploy commands automatically.
-Local Wrangler deployment remains available for trusted manual releases.
+workflow or a Git-triggered Cloudflare build. A push updates source control but
+does not publish the site. Production changes are released explicitly with
+Wrangler after local verification.
 
 See Cloudflare's [Workers Static Assets SSG guide](https://developers.cloudflare.com/workers/static-assets/routing/static-site-generation/)
 and [Wrangler configuration reference](https://developers.cloudflare.com/workers/wrangler/configuration/)
@@ -174,9 +173,8 @@ validation and produces `website/dist/`. Run `deploy` only after those checks
 pass. `preview:cloudflare` starts a local Workers Static Assets preview from
 the same output.
 
-No GitHub workflow is required. Cloudflare Workers Builds may watch the
-connected repository and run the documented commands on pushes; local Wrangler
-deployment remains deterministic and uses the same configuration.
+No GitHub workflow or Cloudflare Git trigger is required. Publishing is an
+explicit maintainer action and uses the checked-in Wrangler configuration.
 
 ## 10. Ownership boundaries
 
@@ -184,4 +182,4 @@ deployment remains deterministic and uses the same configuration.
 - The website owns discovery, rendering, route rewriting, and presentation.
 - Wrangler owns deployment, and Cloudflare Workers serves the generated output.
 - No hosting configuration may redefine language/editor requirements or choose
-  between host and portable content views.
+  between design and portable content views.

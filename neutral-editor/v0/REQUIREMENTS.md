@@ -10,9 +10,10 @@ unit containing exactly one logical module.
 
 The authoritative language requirements are
 [`neutral-lang/REQUIREMENTS.md`](../../neutral-lang/REQUIREMENTS.md), the
-accepted [v0 decisions](../../neutral-lang/v0/decisions/README.md), and the
-[v0 syntax checklist](../../neutral-lang/v0/syntax-checklist.md), with evidence
-from the [v0 fixtures](../../neutral-lang/v0/fixtures/README.md). This document
+accepted [v0 decisions](../../neutral-lang/v0/portable/spec/v0/decisions/README.md),
+and the [v0 syntax checklist](../../neutral-lang/v0/portable/spec/v0/syntax-checklist.md),
+with evidence from the
+[v0 fixtures](../../neutral-lang/v0/portable/spec/v0/fixtures/README.md). This document
 defines what the editor must do to support and preserve those contracts. It
 does not redefine Neutral syntax or semantics.
 

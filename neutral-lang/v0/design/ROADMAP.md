@@ -3,7 +3,7 @@
 Status: proposed execution plan
 
 This roadmap orders the work required to create Neutral v0. It is intentionally
-limited to the v0 contract in [ARCHITECTURE.md](../ARCHITECTURE.md). It does not
+limited to the v0 contract in [ARCHITECTURE.md](../../ARCHITECTURE.md). It does not
 allocate features to later versions.
 
 The split, implementation-level gates and checklists begin at
@@ -64,9 +64,9 @@ specification.
 
 ### Work
 
-- Adopt [ARCHITECTURE.md](../ARCHITECTURE.md),
-  [REQUIREMENTS.md](../REQUIREMENTS.md), and
-  [the decision index](decisions/README.md) as the v0 baseline.
+- Adopt [ARCHITECTURE.md](../../ARCHITECTURE.md),
+  [REQUIREMENTS.md](../../REQUIREMENTS.md), and
+  [the decision index](../portable/spec/v0/decisions/README.md) as the v0 baseline.
 - Give every normative requirement and diagnostic a stable ID.
 - Define document precedence and a repository coherence check.
 - Create a traceability table from requirement → decision → fixture → test.
