@@ -39,8 +39,8 @@ boundary first.
   research.
 - [Repository rules](rules/README.md) — repository-wide documentation and
   publishing policies.
-- [`website/`](website/) — the future Astro publishing layer for canonical
-  repository documentation.
+- [`website/`](website/) — the Astro publishing layer for canonical repository
+  documentation, with Wrangler configuration for Cloudflare deployment.
 
 ## Start here
 

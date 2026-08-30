@@ -90,6 +90,6 @@ does not become normative because it is visible in navigation.
 ## Hosting boundary
 
 This file owns content selection, public routes, and navigation only. The Astro
-build pipeline, Cloudflare Pages settings, watched paths, and update lifecycle
+build pipeline, Wrangler configuration, deployment inputs, and update lifecycle
 are defined by the
 [documentation hosting rules](../rules/HOSTING.md).

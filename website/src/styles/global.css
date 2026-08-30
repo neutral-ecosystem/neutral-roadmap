@@ -16,11 +16,14 @@ html { scroll-behavior: smooth; }
 body {
   min-height: 100vh;
   margin: 0;
+  display: flex;
+  flex-direction: column;
   background: var(--paper);
   color: var(--ink);
   font: 16px/1.65 Manrope, ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+main { flex: 1; }
 a { color: inherit; text-decoration: none; }
 a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .shell { width: var(--shell); margin-inline: auto; }
@@ -149,15 +152,46 @@ a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
   overflow-wrap: anywhere;
 }
 
-.site-footer { margin-top: 36px; padding: 32px 0; background: var(--graphite); color: #e9eae7; }
+.site-footer { margin-top: 36px; padding: 28px 0; background: var(--graphite); color: #e9eae7; }
 .footer-inner {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 24px;
   font: 11px/1.45 'DM Mono', monospace;
   text-transform: uppercase;
 }
-.footer-inner a:hover { color: #fff; }
+.footer-identity { display: inline-flex; align-items: center; gap: 12px; }
+.footer-version {
+  padding: 3px 7px;
+  border: 1px solid rgba(233, 234, 231, .28);
+  border-radius: 4px;
+  color: rgba(233, 234, 231, .78);
+  font-size: 10px;
+}
+.footer-note { color: rgba(233, 234, 231, .75); text-align: center; }
+.footer-index {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 7px 6px 12px;
+  border: 1px solid rgba(233, 234, 231, .34);
+  border-radius: 7px;
+  color: #e9eae7;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+.footer-index-icon {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 5px;
+  background: rgba(233, 234, 231, .14);
+  font: 17px/1 Manrope, sans-serif;
+  transition: transform .2s ease, background-color .2s ease;
+}
+.footer-index:hover { border-color: rgba(233, 234, 231, .72); background: rgba(233, 234, 231, .08); }
+.footer-index:hover .footer-index-icon { transform: translateY(-2px); background: rgba(233, 234, 231, .24); }
 
 .doc-shell {
   display: grid;
@@ -301,7 +335,8 @@ a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
   .section-grid { grid-template-columns: 1fr; }
   .section-card { min-height: 190px; }
   .source-list a { display: grid; gap: 7px; }
-  .footer-inner { display: grid; gap: 12px; }
+  .footer-inner { display: grid; justify-items: start; gap: 14px; }
+  .footer-note { text-align: left; }
   .document h1 { margin-bottom: 30px; font-size: 42px; }
   .markdown { font-size: 15px; }
   .markdown h2 { font-size: 28px; }

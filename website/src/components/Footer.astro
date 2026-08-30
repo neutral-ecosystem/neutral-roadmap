@@ -1,7 +1,16 @@
+---
+import packageJson from '../../package.json';
+---
 <footer class="site-footer">
   <div class="shell footer-inner">
-    <span>Neutral ecosystem</span>
-    <span>Documentation generated from canonical Markdown</span>
-    <a href="/">Back to index ↑</a>
+    <div class="footer-identity">
+      <span>Neutral ecosystem</span>
+      <span class="footer-version">v{packageJson.version}</span>
+    </div>
+    <span class="footer-note">Documentation generated from canonical Markdown</span>
+    <a class="footer-index" href="/" title="Back to documentation index">
+      <span>Back to index</span>
+      <span class="footer-index-icon" aria-hidden="true">↑</span>
+    </a>
   </div>
 </footer>

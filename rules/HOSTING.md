@@ -6,7 +6,7 @@ Status: repository-wide policy
 
 This document is the single operational contract for publishing Neutral
 documentation. It defines how canonical Markdown becomes the public Astro site
-and how Cloudflare Pages builds and deploys that site.
+and how Wrangler deploys that site to Cloudflare Workers Static Assets.
 
 The related documents have narrower ownership:
 
@@ -18,8 +18,8 @@ The related documents have narrower ownership:
   routes, and navigation.
 - [Website README](../website/README.md) is the Astro application entry point.
 
-Deployment settings, build triggers, and publishing behavior are defined here
-only. Other documents link here instead of restating them.
+Deployment settings and publishing behavior are defined here only. Other
+documents link here instead of restating them.
 
 ## 2. Terms
 
@@ -33,8 +33,8 @@ standalone implementation repository.
 
 `Website` means the Astro application under `website/`.
 
-`Hosting` means the Cloudflare Pages project that builds and serves the Astro
-output.
+`Hosting` means the Cloudflare Worker that serves the Astro output as static
+assets.
 
 ## 3. Source-of-truth model
 
@@ -44,7 +44,7 @@ canonical Markdown in repository domains
     -> validation builds a source-path/route manifest
     -> Markdown links are rewritten to public routes
     -> Astro generates website/dist/
-    -> Cloudflare Pages deploys website/dist/
+    -> Wrangler deploys website/dist/ to Cloudflare Workers Static Assets
 ```
 
 Canonical content remains in `README.md`, `rules/`, `neutral-lang/`,
@@ -52,8 +52,8 @@ Canonical content remains in `README.md`, `rules/`, `neutral-lang/`,
 rendering code and website-only assets, not copies of canonical documentation.
 
 The website must discover eligible Markdown during every build. A committed
-Markdown change therefore reaches the public site without a manual content
-copy or navigation edit.
+Markdown change therefore reaches the public site on the next explicit deploy,
+without a manual content copy or navigation edit.
 
 ## 4. Astro publishing contract
 
@@ -76,33 +76,38 @@ read canonical sources outside `website/`. It must:
 The build must fail instead of publishing ambiguous routes, broken internal
 links, missing public assets, or an unclassified source.
 
-## 5. Cloudflare Pages configuration
+## 5. Cloudflare Workers configuration
 
-Configure one Cloudflare Pages project connected to this repository:
+Use the checked-in [`website/wrangler.jsonc`](../website/wrangler.jsonc) as the
+single deployment configuration. It follows the Neutral website template:
 
 | Setting | Value |
 | --- | --- |
-| Production branch | repository default branch |
-| Root directory | leave unset so the build runs from the repository root |
-| Build command | `pnpm --dir website install --frozen-lockfile && pnpm --dir website build` |
-| Build output directory | `website/dist` |
-| Framework preset | Astro, or None when the fields above are set explicitly |
+| Worker name | `neutral-roadmap` |
+| Compatibility date | `2026-08-11` |
+| Assets directory | `./dist` relative to `website/` |
+| Not-found handling | `404-page` |
+| Build command | `pnpm --dir website build` |
+| Deploy command | `pnpm --dir website deploy` |
 
-Do not configure `website/` as the Cloudflare root directory. The build command
-runs from the repository root, invokes the package under `website/`, reads the
-canonical Markdown from sibling directories, and publishes only
-`website/dist/`.
+The deploy script builds the Astro site and then runs `wrangler deploy` from
+`website/`, so the config resolves `./dist` to `website/dist/`. Authenticate
+with `wrangler login`, or provide `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID` in the environment. Never commit token values.
+
+This repository intentionally does not configure Cloudflare Pages Git
+integration or a GitHub Actions deploy workflow. Pushes do not deploy by
+themselves; run the deploy command from a trusted workstation or CI system when
+the canonical Markdown has changed.
+
+See Cloudflare's [Workers Static Assets SSG guide](https://developers.cloudflare.com/workers/static-assets/routing/static-site-generation/)
+and [Wrangler configuration reference](https://developers.cloudflare.com/workers/wrangler/configuration/)
+for provider-side behavior and available options.
 
 The Astro project is static by default. Add a Cloudflare adapter only if a later
 requirement introduces server-side rendering or runtime functions.
 
-The reference Neutral website template also contains `wrangler.jsonc` for direct
-Cloudflare Workers Static Assets deployment. That is an alternative deployment
-mode, not an additional build source: it publishes the same `website/dist/`
-directory after `pnpm build`. Choose Pages or Workers for a deployment, and do
-not configure both for the same production hostname.
-
-## 6. Template conventions and GitHub workflows
+## 6. Template conventions and deployment
 
 The reference Neutral website template establishes the implementation baseline:
 
@@ -114,19 +119,18 @@ The reference Neutral website template establishes the implementation baseline:
   styles; the roadmap site should preserve that separation.
 - `public/` contains site assets; generated `.astro/`, `dist/`, and Wrangler
   state are build artifacts.
-- `wrangler.jsonc` is used only when Workers deployment is selected.
+- `wrangler.jsonc` is the deployment configuration for the Workers Static
+  Assets runtime and local preview.
 
-The reference template currently has no `.github/workflows/` files. Its
-`deploy` script assumes that Wrangler credentials are already available. When
-this repository adds automation, the workflow must run checkout, pnpm setup,
-frozen-lockfile install, content check, and production build before invoking
-the selected Cloudflare deployment command. The workflow must not become a
+The `deploy` script must run the content check/build before invoking
+`wrangler deploy`. If a separate CI system is added later, it must reuse the
+same frozen install, check, build, and deploy commands; it must not become a
 second content synchronization mechanism.
 
-## 7. Build triggers
+## 7. Deployment inputs
 
-Cloudflare must rebuild when publishing code or canonical content changes.
-Configure these paths as included build-watch paths:
+The explicit deploy command must be rerun when website code or canonical
+content changes. These paths are the publishing inputs:
 
 ```text
 website/**
@@ -139,26 +143,23 @@ README.md
 LICENSE
 ```
 
-Changes outside these paths may skip the documentation build. A pull request
-preview uses the same build command and validation as production.
+Changes outside these paths do not affect the generated documentation site.
 
 ## 8. Update lifecycle
 
 1. Edit the canonical Markdown in its owning domain.
-2. Commit and push the change.
-3. Cloudflare detects the watched path and starts the Astro build.
-4. The loader rediscovers content and regenerates routes and navigation.
-5. Validation must pass before deployment.
-6. Cloudflare publishes the generated `website/dist/` output.
+2. Run `pnpm --dir website check` and `pnpm --dir website build`.
+3. The loader rediscovers content and regenerates routes and navigation.
+4. Run `pnpm --dir website deploy` from the repository root.
+5. Wrangler uploads the generated `website/dist/` output to the `neutral-roadmap` Worker.
 
 There is no content synchronization job and no generated Markdown committed to
 the repository. The Git commit is the publication input; `website/dist/` is a
 disposable build artifact.
 
-## 9. Local and CI verification
+## 9. Local verification
 
-After the Astro project is initialized, contributors and CI use the scripts in
-`website/package.json`:
+Contributors use the scripts in `website/package.json`:
 
 ```sh
 pnpm --dir website install --frozen-lockfile
@@ -167,17 +168,17 @@ pnpm --dir website build
 ```
 
 `check` validates content without deploying. `build` performs the same content
-validation and produces `website/dist/`. CI must run both before a change can be
-treated as publication-ready.
+validation and produces `website/dist/`. Run `deploy` only after those checks
+pass. `preview:cloudflare` starts a local Workers Static Assets preview from
+the same output.
 
-Until the Astro project exists, repository Markdown link and formatting checks
-are the available validation baseline; these commands are a required future
-application contract, not currently runnable scripts.
+The deployment is explicit by design: no GitHub workflow or Cloudflare
+repository watcher is required for the site to remain reproducible.
 
 ## 10. Ownership boundaries
 
 - Domain maintainers own canonical content and its source-relative links.
 - The website owns discovery, rendering, route rewriting, and presentation.
-- Cloudflare owns build execution, previews, and deployment of generated output.
+- Wrangler owns deployment, and Cloudflare Workers serves the generated output.
 - No hosting configuration may redefine language/editor requirements or choose
   between host and portable content views.

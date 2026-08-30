@@ -56,4 +56,26 @@ are not rendered. Until a version has a portable seed, its index displays
 
 Cloudflare and build configuration must follow the single operational contract
 in [documentation hosting rules](../rules/HOSTING.md). In particular,
-Cloudflare builds from the repository root and publishes `website/dist/`.
+the Astro build reads canonical Markdown from the repository root and publishes
+`website/dist/` for Wrangler.
+
+## Cloudflare deployment
+
+Production deployment uses Wrangler and the checked-in
+[`wrangler.jsonc`](wrangler.jsonc). The config follows the Neutral website
+template: the Worker is named `neutral-roadmap`, and its static assets are read from
+`website/dist/` after the Astro build.
+
+There is deliberately no GitHub Actions workflow in this repository. A content
+change is published by running the same build and deploy command locally (or
+from another CI system you control):
+
+```sh
+pnpm --dir website deploy
+pnpm --dir website preview:cloudflare
+```
+
+Authenticate Wrangler with `wrangler login`, or provide
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in the environment. Keep
+token values out of the repository. `preview:cloudflare` starts the local
+Workers Static Assets runtime; `deploy` publishes the generated assets.
