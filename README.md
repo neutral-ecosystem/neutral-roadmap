@@ -32,6 +32,9 @@ boundary first.
   v0 syntax decisions, fixtures, research, and implementation roadmap.
 - [`neutral-flow/`](neutral-flow/) — earlier requirements and architecture
   exploration for workflow-oriented tooling.
+- [`neutral-editor/`](neutral-editor/) — the capability-driven Tauri/React/Rust
+  visual authoring architecture and full Neutral language v0 editor-compliance
+  requirements.
 - [`neux/`](neux/) — reserved workspace for later operating-system abstraction
   research.
 
@@ -47,14 +50,16 @@ For the current work, read these documents in order:
 6. [v0 implementation roadmap](neutral-lang/v0/ROADMAP.md)
 7. [Language showcase](neutral-lang/LANGUAGE-SHOWCASE.md)
 
-## Current status
+For the visual editor workstream, continue with:
 
-The project is in specification and discovery. The next goal is to complete the
-v0 normative contracts and then implement the smallest end-to-end path:
+1. [Neutral Editor overview](neutral-editor/v0/README.md)
+2. [Editor compliance requirements](neutral-editor/v0/REQUIREMENTS.md)
+3. [Editor architecture](neutral-editor/v0/ARCHITECTURE.md)
+4. [Editor technology stack](neutral-editor/v0/TECHNOLOGY-STACK.md)
+5. [Language integration contract](neutral-editor/v0/LANGUAGE-INTEGRATION.md)
+6. [Editor implementation roadmap](neutral-editor/v0/ROADMAP.md)
 
-```text
-capture -> compileCaptured -> validated IR -> public reader -> generic probe
-```
+## License
 
-Features outside the documented v0 scope are deferred until this boundary has
-implementation and conformance evidence.
+This repository is licensed under the
+[Apache License 2.0](LICENSE).
