@@ -85,20 +85,22 @@ single deployment configuration. It follows the Neutral website template:
 | --- | --- |
 | Worker name | `neutral-roadmap` |
 | Compatibility date | `2026-08-11` |
-| Assets directory | `./dist` relative to `website/` |
+| Root directory | `/website` |
+| Assets directory | `./dist` relative to the configured root |
 | Not-found handling | `404-page` |
-| Build command | `pnpm --dir website build` |
-| Deploy command | `pnpm --dir website deploy` |
+| Build command | `pnpm install --frozen-lockfile && pnpm build` |
+| Deploy command | `npx wrangler deploy` |
 
-The deploy script builds the Astro site and then runs `wrangler deploy` from
-`website/`, so the config resolves `./dist` to `website/dist/`. Authenticate
-with `wrangler login`, or provide `CLOUDFLARE_API_TOKEN` and
+Cloudflare runs both commands with `/website` as the working directory. The
+config therefore resolves `./dist` to `website/dist/`, and `npx wrangler deploy`
+finds the package's `wrangler.jsonc` automatically. Authenticate with
+`wrangler login`, or provide `CLOUDFLARE_API_TOKEN` and
 `CLOUDFLARE_ACCOUNT_ID` in the environment. Never commit token values.
 
-This repository intentionally does not configure Cloudflare Pages Git
-integration or a GitHub Actions deploy workflow. Pushes do not deploy by
-themselves; run the deploy command from a trusted workstation or CI system when
-the canonical Markdown has changed.
+This repository intentionally does not configure a GitHub Actions deploy
+workflow. When Cloudflare Workers Builds is connected to the repository, pushes
+to its production branch run these build and deploy commands automatically.
+Local Wrangler deployment remains available for trusted manual releases.
 
 See Cloudflare's [Workers Static Assets SSG guide](https://developers.cloudflare.com/workers/static-assets/routing/static-site-generation/)
 and [Wrangler configuration reference](https://developers.cloudflare.com/workers/wrangler/configuration/)
@@ -172,8 +174,9 @@ validation and produces `website/dist/`. Run `deploy` only after those checks
 pass. `preview:cloudflare` starts a local Workers Static Assets preview from
 the same output.
 
-The deployment is explicit by design: no GitHub workflow or Cloudflare
-repository watcher is required for the site to remain reproducible.
+No GitHub workflow is required. Cloudflare Workers Builds may watch the
+connected repository and run the documented commands on pushes; local Wrangler
+deployment remains deterministic and uses the same configuration.
 
 ## 10. Ownership boundaries
 

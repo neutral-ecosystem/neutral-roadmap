@@ -66,9 +66,14 @@ Production deployment uses Wrangler and the checked-in
 template: the Worker is named `neutral-roadmap`, and its static assets are read from
 `website/dist/` after the Astro build.
 
-There is deliberately no GitHub Actions workflow in this repository. A content
-change is published by running the same build and deploy command locally (or
-from another CI system you control):
+In Cloudflare Workers Builds, set the project root directory to `/website`.
+Use `pnpm install --frozen-lockfile && pnpm build` as the build command and
+`npx wrangler deploy` as the deploy command. Both commands then run in this
+directory, so Wrangler discovers `wrangler.jsonc` and `./dist` directly.
+
+There is deliberately no GitHub Actions workflow in this repository. When the
+Cloudflare Workers Builds Git connection is active, pushes to its production
+branch run the same commands automatically. The local equivalents are:
 
 ```sh
 pnpm --dir website deploy
