@@ -9,26 +9,38 @@ const sections = [
 ---
 <Layout title="Documentation" description="Neutral ecosystem documentation, generated from canonical Markdown.">
   <section class="home-hero shell">
-    <img src="/neutral-logo.png" alt="" width="88" height="88" />
-    <div>
+    <div class="home-hero-copy">
       <p class="eyebrow">Neutral ecosystem</p>
       <h1>Documentation</h1>
-      <p class="lede">Canonical architecture, requirements, and roadmaps for the Neutral projects.</p>
+      <p class="lede">One place for the contracts, decisions, and implementation paths that shape Neutral.</p>
+      <div class="home-hero-meta" aria-label="Documentation status">
+        <span>Canonical Markdown</span>
+        <span>Portable versions</span>
+      </div>
+    </div>
+    <div class="home-hero-mark" aria-hidden="true">
+      <img src="/neutral-logo.png" alt="" width="112" height="112" />
+      <span>Read the source.<br />Build the boundary.</span>
     </div>
   </section>
   <section class="directory" aria-labelledby="directory-title">
     <div class="shell">
       <div class="directory-heading">
-        <p class="eyebrow">Browse</p>
-        <h2 id="directory-title">Project directory</h2>
+        <div>
+          <p class="eyebrow">Explore the system</p>
+          <h2 id="directory-title">Choose a workstream</h2>
+        </div>
+        <p class="directory-intro">Each area has a project contract and versioned portable documentation.</p>
       </div>
       <div class="directory-list">
         {sections.map((section) => (
           <a class={`directory-row accent-${section.accent}`} href={section.prefix}>
             <span class="directory-number">{section.number}</span>
-            <strong>{section.label}</strong>
-            <span>{section.description}</span>
-            <b aria-hidden="true">↗</b>
+            <span class="directory-copy">
+              <strong>{section.label}</strong>
+              <span>{section.description}</span>
+            </span>
+            <span class="directory-open">Open <b aria-hidden="true">↗</b></span>
           </a>
         ))}
       </div>

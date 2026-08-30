@@ -21,39 +21,6 @@ const versionIndex = project && selectedVersion
   ? docs.find((item) => item.sourcePath === `${project.domain}/${selectedVersion}/version-index`) ?? portableRoot
   : undefined;
 const portablePrefix = project && selectedVersion ? `${project.domain}/${selectedVersion}/portable/` : '';
-const portableRelativePath = portablePrefix && doc.sourcePath.startsWith(portablePrefix) ? doc.sourcePath.slice(portablePrefix.length) : '';
-const portableDirectory = portableRelativePath.toLowerCase().endsWith('/readme.md')
-  ? portableRelativePath.slice(0, portableRelativePath.lastIndexOf('/'))
-  : portableRelativePath.includes('/')
-    ? portableRelativePath.slice(0, portableRelativePath.lastIndexOf('/'))
-    : '';
-const portableEntryOrder = [
-  'conformance/README.md',
-  'development/README.md',
-  'specs/README.md',
-  'ARCHITECTURE.md',
-  'ROADMAP.md',
-  'PLAN.md',
-  'README.md',
-];
-const portableEntryRank = (path: string) => {
-  const rank = portableEntryOrder.indexOf(path);
-  return rank === -1 ? portableEntryOrder.length : rank;
-};
-const portableEntryPoints = portablePages.filter((item) => {
-  const path = item.sourcePath.slice(portablePrefix.length);
-  return !path.includes('/') || /^[^/]+\/README\.md$/i.test(path);
-}).sort((left, right) => {
-  const leftPath = left.sourcePath.slice(portablePrefix.length);
-  const rightPath = right.sourcePath.slice(portablePrefix.length);
-  return portableEntryRank(leftPath) - portableEntryRank(rightPath) || leftPath.localeCompare(rightPath);
-});
-const portableSectionPages = portablePages.filter((item) => {
-  const path = item.sourcePath.slice(portablePrefix.length);
-  if (!portableDirectory) return false;
-  const parent = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
-  return parent === portableDirectory;
-});
 const projectLanding = project ? docs.find((item) => item.route === `/${project.prefix}/`) : undefined;
 const topPages = project
   ? docs.filter((item) => item.sourcePath.startsWith(`${project.domain}/`) && projectDocuments.has(item.sourcePath.slice(project.domain.length + 1)))
@@ -65,7 +32,7 @@ const rulePages = doc.sourcePath.startsWith('rules/') ? docs.filter((item) => it
 const catalog = doc.sourcePath.startsWith('rules/')
   ? rulePages
   : project && selectedVersion && !isProjectIndex
-    ? [versionIndex, portableRoot, ...portableEntryPoints, ...portableSectionPages].filter((item, index, items): item is NonNullable<typeof item> => Boolean(item) && items.indexOf(item) === index)
+    ? []
     : project
       ? [projectLanding, ...topPages, ...versionPages].filter((item): item is NonNullable<typeof item> => Boolean(item))
       : [];
@@ -111,13 +78,87 @@ function localCatalogTitle(item: typeof doc) {
   if (stem.toLowerCase() === 'readme') return segments.length === 1 ? 'Portable overview' : normalCatalogCase(segments.at(-2) ?? 'Overview');
   return normalCatalogCase(stem);
 }
+type CatalogTreeNode = {
+  name: string;
+  path: string;
+  page?: typeof doc;
+  children: CatalogTreeNode[];
+};
+function escapeHtml(value: string) {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function buildPortableTree() {
+  const root: CatalogTreeNode = { name: '', path: '', children: [] };
+  for (const page of portablePages) {
+    const relativePath = page.sourcePath.slice(portablePrefix.length);
+    if (relativePath.toLowerCase() === 'readme.md') continue;
+    const segments = relativePath.split('/');
+    let parent = root;
+    for (let index = 0; index < segments.length; index += 1) {
+      const name = segments[index];
+      const path = segments.slice(0, index + 1).join('/');
+      let node = parent.children.find((candidate) => candidate.name === name);
+      if (!node) {
+        node = { name, path, children: [] };
+        parent.children.push(node);
+      }
+      if (index === segments.length - 1) node.page = page;
+      parent = node;
+    }
+  }
+  return root;
+}
+function treeContainsCurrent(node: CatalogTreeNode): boolean {
+  return node.page?.route === doc.route || node.children.some(treeContainsCurrent);
+}
+function nodeRank(node: CatalogTreeNode, parentPath: string) {
+  const name = node.name.toLowerCase();
+  if (!parentPath) {
+    const rootOrder = ['conformance', 'development', 'specs', 'architecture.md', 'roadmap.md', 'plan.md'];
+    const rank = rootOrder.indexOf(name);
+    return rank === -1 ? rootOrder.length : rank;
+  }
+  if (name === 'readme.md') return 0;
+  if (parentPath === 'specs') {
+    const specsOrder = ['requirements.md', 'contracts', 'decisions', 'fixtures', 'examples'];
+    const rank = specsOrder.indexOf(name);
+    if (rank >= 0) return rank + 1;
+  }
+  const numbered = name.match(/^(\d{2})-/);
+  if (numbered) return Number(numbered[1]) + 1;
+  return node.children.length ? 20 : 30;
+}
+function sortTree(node: CatalogTreeNode) {
+  node.children.sort((left, right) => nodeRank(left, node.path) - nodeRank(right, node.path) || left.name.localeCompare(right.name));
+  node.children.forEach(sortTree);
+}
+function renderTree(nodes: CatalogTreeNode[], depth = 0): string {
+  return nodes.map((node) => {
+    if (node.children.length > 0) {
+      const expanded = treeContainsCurrent(node) ? ' open' : '';
+      return `<details class="catalog-tree-group" data-folder="${escapeHtml(node.name.toLowerCase())}"${expanded}><summary>${escapeHtml(normalCatalogCase(node.name))}</summary><div class="catalog-tree-children">${renderTree(node.children, depth + 1)}</div></details>`;
+    }
+    if (!node.page) return '';
+    const title = node.name.toLowerCase() === 'readme.md' ? 'Overview' : localCatalogTitle(node.page);
+    const active = node.page.route === doc.route ? ' list-active' : '';
+    const current = node.page.route === doc.route ? ' aria-current="page"' : '';
+    return `<a class="catalog-tree-link${active}" href="${escapeHtml(node.page.route)}"${current}>${escapeHtml(title)}</a>`;
+  }).join('');
+}
+const portableTree = buildPortableTree();
+sortTree(portableTree);
+const catalogTreeHtml = project && selectedVersion && !isProjectIndex
+  ? `${versionIndex ? `<a class="catalog-tree-link${versionIndex.route === doc.route ? ' list-active' : ''}" href="${escapeHtml(versionIndex.route)}"${versionIndex.route === doc.route ? ' aria-current="page"' : ''}>Version overview</a>` : ''}${renderTree(portableTree.children)}`
+  : '';
 ---
 <Layout title={doc.title} description={doc.description}>
   <div class="doc-shell shell">
     <aside class="doc-sidebar">
       <p class="eyebrow">{catalogLabel}</p>
       {selectedVersion && !isProjectIndex && <p class="catalog-version">{selectedVersion} / portable</p>}
-      {catalog.length > 0 && <nav aria-label={`${catalogLabel} catalog`}>{catalog.map((item) => <a class:list-active={item.route === doc.route} aria-current={item.route === doc.route ? 'page' : undefined} href={item.route}>{localCatalogTitle(item)}</a>)}</nav>}
+      {catalogTreeHtml
+        ? <nav class="catalog-tree" aria-label={`${catalogLabel} catalog`} set:html={catalogTreeHtml} />
+        : catalog.length > 0 && <nav aria-label={`${catalogLabel} catalog`}>{catalog.map((item) => <a class:list-active={item.route === doc.route} aria-current={item.route === doc.route ? 'page' : undefined} href={item.route}>{localCatalogTitle(item)}</a>)}</nav>}
     </aside>
     <article class="document">
       <div class="document-toolbar">
@@ -129,4 +170,15 @@ function localCatalogTitle(item: typeof doc) {
       <div class="markdown" set:html={doc.html} />
     </article>
   </div>
+  <script>
+    document.querySelectorAll<HTMLDetailsElement>('.catalog-tree-group').forEach((group) => {
+      group.addEventListener('toggle', () => {
+        if (!group.open) return;
+        const parent = group.parentElement;
+        parent?.querySelectorAll<HTMLDetailsElement>(':scope > .catalog-tree-group').forEach((sibling) => {
+          if (sibling !== group) sibling.open = false;
+        });
+      });
+    });
+  </script>
 </Layout>
