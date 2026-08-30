@@ -121,7 +121,7 @@ exists.
 | `/neutral-lang/` | Neutral language architecture, requirements, syntax, decisions, examples, and version plans | Flow, editor, runtime, or OS-specific semantics |
 | `/neutral-lang/docs/` | Supporting language reading, library material, and showcase documents | Normative v0 decisions duplicated from `v0/` |
 | `/neutral-lang/vN/design/` | Version-specific design proposals, checklists, and roadmap material | Public website content or standalone-only paths |
-| `/neutral-lang/vN/portable/` | Copyable standalone implementation seed with its own `spec/`, `development/`, `conformance/`, and `docs/` structure | Host-only relative links, generated build output, or unrecorded divergence from the host baseline |
+| `/neutral-lang/vN/portable/` | Copyable standalone implementation seed with root `ARCHITECTURE.md`, `PLAN.md`, `ROADMAP.md`, plus `specs/`, `development/`, and `conformance/` | Host-only relative links, generated build output, or unrecorded divergence from the host baseline |
 | `/neutral-flow/` | Flow-specific planning, architecture, requirements, and release research | `.neu` grammar or Neutral compiler behavior |
 | `/neutral-flow/docs/` | Flow research and supporting analysis | Neutral Editor product requirements |
 | `/neutral-flow/vN/design/` | Flow version design roadmaps and checklists | Cross-version copied requirements without disposition |

@@ -27,9 +27,26 @@ const portableDirectory = portableRelativePath.toLowerCase().endsWith('/readme.m
   : portableRelativePath.includes('/')
     ? portableRelativePath.slice(0, portableRelativePath.lastIndexOf('/'))
     : '';
+const portableEntryOrder = [
+  'conformance/README.md',
+  'development/README.md',
+  'specs/README.md',
+  'ARCHITECTURE.md',
+  'ROADMAP.md',
+  'PLAN.md',
+  'README.md',
+];
+const portableEntryRank = (path: string) => {
+  const rank = portableEntryOrder.indexOf(path);
+  return rank === -1 ? portableEntryOrder.length : rank;
+};
 const portableEntryPoints = portablePages.filter((item) => {
   const path = item.sourcePath.slice(portablePrefix.length);
   return !path.includes('/') || /^[^/]+\/README\.md$/i.test(path);
+}).sort((left, right) => {
+  const leftPath = left.sourcePath.slice(portablePrefix.length);
+  const rightPath = right.sourcePath.slice(portablePrefix.length);
+  return portableEntryRank(leftPath) - portableEntryRank(rightPath) || leftPath.localeCompare(rightPath);
 });
 const portableSectionPages = portablePages.filter((item) => {
   const path = item.sourcePath.slice(portablePrefix.length);

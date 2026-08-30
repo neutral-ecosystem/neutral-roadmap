@@ -3,9 +3,9 @@
 Status: proposed coherent baseline
 
 These decisions specify only the minimum v0 language described by
-[architecture.md](../architecture.md). They do not plan later versions.
+[architecture.md](../../ARCHITECTURE.md). They do not plan later versions.
 Implementation order and release gates are defined in
-[the v0 roadmap](../../../ROADMAP.md).
+[the v0 roadmap](../../ROADMAP.md).
 
 ## Decision files
 

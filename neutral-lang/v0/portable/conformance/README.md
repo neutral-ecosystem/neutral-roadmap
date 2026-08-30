@@ -1,6 +1,6 @@
 # Neutral v0 conformance execution assets
 
-The normative source fixtures live in `spec/v0/fixtures/`. This directory owns
+The normative source fixtures live in `specs/fixtures/`. This directory owns
 the executable conformance manifest, expected-result metadata, generated
 reports, and runner configuration created during implementation.
 

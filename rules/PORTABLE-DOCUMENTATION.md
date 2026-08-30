@@ -32,26 +32,36 @@ The portable implementation seed follows this layout:
 ```text
 portable/
 |-- README.md                    portable entry point
-|-- DEVELOPMENT.md               operational entry point
+|-- ARCHITECTURE.md              normative version architecture
+|-- PLAN.md                      operational entry point
 |-- ROADMAP.md                   milestone summary
 |-- conformance/                 manifests and execution assets
-|-- development/                 implementation, testing, automation, release
-|-- docs/                        copied showcase and supporting reading
-`-- spec/vN/                     normative version baseline
-    |-- architecture.md
-    |-- requirements.md
-    |-- choices.md
-    |-- syntax.md
-    |-- syntax-checklist.md
-    |-- proposed-syntax-guide.md
-    |-- decisions/
-    `-- fixtures/
+|-- development/                 lifecycle documents, ordered by phase
+`-- specs/                       normative version baseline
+    |-- README.md                specification catalog
+    |-- REQUIREMENTS.md          version requirements
+    |-- contracts/               project-specific public behavior
+    |-- decisions/               accepted decision records
+    |-- fixtures/                verification inputs and expected results
+    `-- examples/                reader-facing examples
 ```
 
-`vN` is the version represented by the seed. Files may be added only when they
-have one clear owner under this layout. Generated build output, dependency
+`vN` is the version represented by the seed. `contracts/`, `fixtures/`, and
+`examples/` are optional when the version does not need them, but their names
+and ownership stay consistent when present. A language may place grammar and
+syntax documents in `contracts/`; an editor may place document-model and
+interaction contracts there; a runtime may place API and execution contracts
+there. Files may be added only when they have one clear owner under this layout.
+Generated build output, dependency
 directories, local progress notes unrelated to the seed, credentials, host
 machine paths, and directories whose names start with `_` are excluded.
+
+When a development document describes a lifecycle gate or checklist, its file
+name uses a continuous two-digit phase prefix: `00-`, `01-`, `02-`, and so on.
+The portable `development/README.md` is unnumbered and lists the pipeline in
+order. A standard progression is environment, identity and vocabulary,
+contract, implementation, testing, release, then progress; projects may add a
+clearly owned phase where it belongs in that order.
 
 ## 3. Design view structure
 
@@ -60,14 +70,14 @@ The design view remains in the version's private design directory:
 ```text
 vN/
 |-- design/
-|   |-- DEVELOPMENT.md           design entry point when needed
+|   |-- PLAN.md                  design entry point when needed
 |   |-- ROADMAP.md               milestone summary
 |   `-- supporting design documents
 `-- portable/                    standalone export seed
 ```
 
 The existing `neutral-lang/v0/design/Developement.md` filename is a legacy
-design entry point. New version work uses `DEVELOPMENT.md`.
+design entry point. New version work uses `PLAN.md`.
 
 ## 4. Synchronization rules
 

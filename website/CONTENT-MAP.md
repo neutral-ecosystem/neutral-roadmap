@@ -40,8 +40,8 @@ portable: /neutral-lang/vN/portable/**
 
 The design view is repository-only and is ignored by the website. The portable
 view is the standalone implementation-seed context shown in
-`portable/`, including its `conformance/`, `development/`, `docs/`, and
-`spec/vN/` sections. The website only emits `vN/portable/` pages under a version
+`portable/`, including its `conformance/`, `development/`, and `specs/`
+sections. The website only emits `vN/portable/` pages under a version
 index. If a version has no
 portable seed, that version route remains available and displays a
 documentation-in-progress state.
@@ -67,7 +67,7 @@ Examples:
 | `/neutral-editor/docs/node-editor-research.md` | not published yet |
 | `/rules/DOCUMENTATION.md` | `/rules/documentation/` |
 | `/neutral-lang/v0/portable/README.md` | `/language/v0/` |
-| `/neutral-lang/v0/portable/spec/v0/architecture.md` | `/language/v0/portable/spec/v0/architecture/` |
+| `/neutral-lang/v0/portable/ARCHITECTURE.md` | `/language/v0/portable/architecture/` |
 
 The content loader creates a source-path to public-route index before Markdown
 is rendered. A Markdown link to another published source resolves through this

@@ -46,4 +46,4 @@ export function isPublishedProjectSource(sourcePath: string) {
   });
 }
 
-export const navOrder = ['README.md', 'ARCHITECTURE.md', 'REQUIREMENTS.md', 'choices.md', 'ROADMAP.md', 'DEVELOPMENT.md'];
+export const navOrder = ['README.md', 'ARCHITECTURE.md', 'PLAN.md', 'ROADMAP.md'];

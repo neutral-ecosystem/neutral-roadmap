@@ -10,7 +10,7 @@ Status: planning baseline assembled; implementation has not started.
 
 ## Next actions
 
-- [ ] Read `DEVELOPMENT.md` and the governing specification in order.
+- [ ] Read `PLAN.md` and the governing specification in order.
 - [ ] Resolve contradictions and complete the freeze manifest.
 - [ ] Approve the contract-freeze gate before implementing compiler behavior.
 
@@ -26,4 +26,4 @@ No implementation stages are complete.
 
 Keep this file small. Update it when the active step, blocker, or completed
 validation changes. Completion requires the validation evidence named by the
-relevant stage or slice in `IMPLEMENTATION-STAGES.md`.
+relevant stage or slice in `03-IMPLEMENTATION-STAGES.md`.

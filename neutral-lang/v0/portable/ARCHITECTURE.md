@@ -479,17 +479,17 @@ v0 is complete only after:
 
 ## 16. Document precedence
 
-- [requirements.md](requirements.md) lists only v0 requirements.
-- [choices.md](choices.md) records v0 architectural choices.
-- [syntax.md](syntax.md) is the master v0 syntax checklist.
-- [proposed-syntax-guide.md](proposed-syntax-guide.md) is the author-facing
+- [`REQUIREMENTS.md`](specs/REQUIREMENTS.md) lists only v0 requirements.
+- [choices.md](specs/contracts/choices.md) records v0 architectural choices.
+- [syntax.md](specs/contracts/syntax.md) is the master v0 syntax checklist.
+- [proposed-syntax-guide.md](specs/contracts/proposed-syntax-guide.md) is the author-facing
   proposal.
-- [decisions/README.md](decisions/README.md) indexes normative decisions.
-- [the v0 roadmap](../../ROADMAP.md) orders specification, implementation, and
+- [decisions/README.md](specs/decisions/README.md) indexes normative decisions.
+- [the v0 roadmap](ROADMAP.md) orders specification, implementation, and
   release work without expanding the v0 feature set.
-- [the language showcase](../../docs/LANGUAGE-SHOWCASE.md) demonstrates the complete v0
+- [the language showcase](specs/examples/LANGUAGE-SHOWCASE.md) demonstrates the complete v0
   surface.
-- [conformance fixtures](fixtures/README.md) indexes conformance fixtures.
+- [conformance fixtures](specs/fixtures/README.md) indexes conformance fixtures.
 
 More specific accepted decisions govern, but contradictory accepted documents
 are a repository validation failure. All v0 documents must be synchronized

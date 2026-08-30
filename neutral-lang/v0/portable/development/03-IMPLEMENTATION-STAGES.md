@@ -53,7 +53,7 @@ xtask                 developer/CI/evidence automation
       lint, dependency, and quality/test-profile configuration.
 - [ ] Mark automation/test/benchmark packages non-published.
 - [ ] Keep unit tests colocated; use the ownership layout in
-      [TESTING.md](TESTING.md).
+      [04-TESTING.md](04-TESTING.md).
 - [ ] Add meaningful crate/module documentation describing ownership and
       prohibited effects; do not enforce an exact line count.
 - [ ] Add compilable shells without placeholder panics or fake language behavior.
@@ -95,10 +95,10 @@ xtask                 developer/CI/evidence automation
 
 ### Step 3: establish environment, automation, and Stage 1 tests
 
-- [ ] Implement [ENVIRONMENT-AUTOMATION.md](ENVIRONMENT-AUTOMATION.md) Layers
+- [ ] Implement [00-ENVIRONMENT-AUTOMATION.md](00-ENVIRONMENT-AUTOMATION.md) Layers
       0–2 and the stable `cargo xtask` interface.
 - [ ] Add only the active Stage 1 tests defined by
-      [TESTING.md](TESTING.md): automation, environment, workspace, dependency,
+      [04-TESTING.md](04-TESTING.md): automation, environment, workspace, dependency,
       package shell, and probe allowlist.
 - [ ] Record the active stage in `config/development-stage.toml`.
 - [ ] Create the conformance manifest with all known cases planned but none
@@ -129,9 +129,9 @@ xtask                 developer/CI/evidence automation
 ## Mandatory contract-freeze gate
 
 Complete and approve every gate in
-[CONTRACT-FREEZE.md](CONTRACT-FREEZE.md) before Stage 2. The freeze includes
+[02-CONTRACT-FREEZE.md](02-CONTRACT-FREEZE.md) before Stage 2. The freeze includes
 accepted identity/fingerprint and vocabulary bundle contracts from
-[IDENTITY-AND-VOCABULARY.md](IDENTITY-AND-VOCABULARY.md).
+[01-IDENTITY-AND-VOCABULARY.md](01-IDENTITY-AND-VOCABULARY.md).
 
 - [ ] Freeze manifest exists and identifies every governing contract revision.
 - [ ] Initial fixture/oracle manifest is reviewed and immutable.
@@ -437,7 +437,7 @@ it. It does not parse record, list, reuse, reference, or vocabulary productions.
 ### Slice 6.1: strict captured bundle decoder and logical contract
 
 - [ ] Implement the accepted JSON byte/schema contract and exact digest checks
-      from [IDENTITY-AND-VOCABULARY.md](IDENTITY-AND-VOCABULARY.md).
+      from [01-IDENTITY-AND-VOCABULARY.md](01-IDENTITY-AND-VOCABULARY.md).
 - [ ] Activate duplicate/unknown/executable/malformed/limit/default/recursion and
       independent digest/transcript vectors.
 - [ ] Decode into untrusted intermediate data, then validate closed schema,
@@ -615,7 +615,7 @@ it. It does not parse record, list, reuse, reference, or vocabulary productions.
 - [ ] Complete controlled phase/end-to-end performance, growth, memory,
       concurrency, stress, and soak profiles.
 - [ ] Complete coverage, mutation, static work-product reviews, threat model, and
-      quality evaluation defined in [TESTING.md](TESTING.md).
+      quality evaluation defined in [04-TESTING.md](04-TESTING.md).
 
 ### Stage 9 validation
 
@@ -628,7 +628,7 @@ it. It does not parse record, list, reuse, reference, or vocabulary productions.
 
 ## Stage 10: qualify and release v0
 
-Execute [RELEASE.md](RELEASE.md).
+Execute [05-RELEASE.md](05-RELEASE.md).
 
 ### Stage 10 validation
 

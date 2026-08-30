@@ -44,7 +44,7 @@ The future implementation repository uses one owner for each class of test
 material:
 
 ```text
-spec/v0/fixtures/
+specs/fixtures/
 └── normative source and vocabulary fixtures copied/pinned from this v0 spec
 
 conformance/
@@ -81,7 +81,7 @@ fuzz/
 
 Rules:
 
-- `spec/v0/fixtures` is the normative input source of truth.
+- `specs/fixtures` is the normative input source of truth.
 - `conformance/manifest.toml` is the sole fixture discovery and oracle index.
 - `neutral-test-support` contains no top-level integration, system, conformance,
   or benchmark tests.

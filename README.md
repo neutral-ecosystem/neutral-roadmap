@@ -28,47 +28,43 @@ boundary first.
 
 ## Repository areas
 
-- [`neutral-lang/`](neutral-lang/) — the active language and IR architecture,
-  v0 syntax decisions, fixtures, research, and implementation roadmap.
-- [`neutral-flow/`](neutral-flow/) — earlier requirements and architecture
+- [Neutral language](neutral-lang/ARCHITECTURE.md) — the active language and IR
+  project architecture, with versioned portable specifications.
+- [Neutral Flow](neutral-flow/ARCHITECTURE.md) — earlier requirements and architecture
   exploration for workflow-oriented tooling.
-- [`neutral-editor/`](neutral-editor/) — the capability-driven Tauri/React/Rust
+- [Neutral Editor](neutral-editor/ARCHITECTURE.md) — the capability-driven Tauri/React/Rust
   visual authoring architecture and full Neutral language v0 editor-compliance
   requirements.
-- [`neux/`](neux/) — reserved workspace for later operating-system abstraction
-  research.
+- `neux/` — reserved workspace for later operating-system abstraction research.
 - [Repository rules](rules/README.md) — repository-wide documentation and
   publishing policies.
-- [`website/`](website/) — the Astro publishing layer for canonical repository
+- `website/` — the Astro publishing layer for canonical repository
   documentation, with Wrangler configuration for Cloudflare deployment.
 
 ## Start here
 
 For the current work, read these documents in order:
 
-1. [Neutral v0 architecture](neutral-lang/ARCHITECTURE.md)
+1. [Neutral language architecture](neutral-lang/ARCHITECTURE.md)
 2. [Neutral language requirements](neutral-lang/REQUIREMENTS.md)
 3. [Neutral language roadmap](neutral-lang/ROADMAP.md)
-4. [Proposed syntax guide](neutral-lang/v0/design/proposed-syntax-guide.md)
-5. [v0 decisions](neutral-lang/v0/portable/spec/v0/decisions/README.md)
-6. [v0 implementation roadmap](neutral-lang/v0/design/ROADMAP.md)
+4. [Proposed syntax guide](neutral-lang/v0/portable/specs/contracts/proposed-syntax-guide.md)
+5. [v0 decisions](neutral-lang/v0/portable/specs/decisions/README.md)
+6. [v0 implementation roadmap](neutral-lang/v0/portable/ROADMAP.md)
 
 For the visual editor workstream, continue with:
 
-1. [Neutral Editor overview](neutral-editor/v0/README.md)
-2. [Editor compliance requirements](neutral-editor/v0/REQUIREMENTS.md)
-3. [Editor architecture](neutral-editor/v0/ARCHITECTURE.md)
-4. [Editor technology stack](neutral-editor/v0/TECHNOLOGY-STACK.md)
-5. [Language integration contract](neutral-editor/v0/LANGUAGE-INTEGRATION.md)
-6. [Editor implementation roadmap](neutral-editor/v0/ROADMAP.md)
+1. [Neutral Editor architecture](neutral-editor/ARCHITECTURE.md)
+2. [Editor project requirements](neutral-editor/REQUIREMENTS.md)
+3. [Editor project roadmap](neutral-editor/ROADMAP.md)
 
 For public documentation publishing, read:
 
 1. [Documentation rules](rules/DOCUMENTATION.md)
 2. [Portable documentation rules](rules/PORTABLE-DOCUMENTATION.md)
 3. [Documentation hosting rules](rules/HOSTING.md)
-4. [Website content map](website/CONTENT-MAP.md)
-5. [Website implementation entry point](website/README.md)
+4. Review the website content map and implementation entry point in the
+   repository when changing website code.
 
 ## License
 

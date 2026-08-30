@@ -16,21 +16,21 @@ conformant.
 
 The review uses these sources in precedence order:
 
-1. [Neutral v0 architecture](../spec/v0/architecture.md)
-2. [Neutral v0 requirements](../spec/v0/requirements.md)
-3. [Accepted v0 decisions](../spec/v0/decisions/README.md)
-4. [Master v0 syntax checklist](../spec/v0/syntax.md)
-5. [Proposed syntax guide](../spec/v0/proposed-syntax-guide.md), once promoted from
+1. [Neutral v0 architecture](../ARCHITECTURE.md)
+2. [Neutral v0 requirements](../specs/REQUIREMENTS.md)
+3. [Accepted v0 decisions](../specs/decisions/README.md)
+4. [Master v0 syntax checklist](../specs/contracts/syntax.md)
+5. [Proposed syntax guide](../specs/contracts/proposed-syntax-guide.md), once promoted from
    proposal to the accepted author-facing guide
-6. [Identity and vocabulary encoding contract](IDENTITY-AND-VOCABULARY.md)
-7. [Conformance fixtures](../spec/v0/fixtures/README.md)
+6. [Identity and vocabulary encoding contract](01-IDENTITY-AND-VOCABULARY.md)
+7. [Conformance fixtures](../specs/fixtures/README.md)
 
 The roadmap and development documents order work but cannot add language
 behavior. Contradictory accepted documents fail this gate.
 
 ## Freeze artifact
 
-Create `spec/v0/freeze.toml` in the future implementation repository. It must
+Create `specs/freeze.toml` in the future implementation repository. It must
 record:
 
 - freeze identifier and approval date;
@@ -137,7 +137,7 @@ does not enter logical IR equality.
       declaration fingerprint, derivation identity, and byte identity are
       distinct.
 - [ ] Digest algorithms, domain separation, transcripts, collision handling, and
-      test vectors follow [IDENTITY-AND-VOCABULARY.md](IDENTITY-AND-VOCABULARY.md).
+      test vectors follow [01-IDENTITY-AND-VOCABULARY.md](01-IDENTITY-AND-VOCABULARY.md).
 - [ ] Source maps use logical source identity plus half-open original-byte spans.
 - [ ] Provenance represents explicit source, normalization, reuse, user defaults,
       and vocabulary defaults without creating accidental logical value kinds.
@@ -157,7 +157,7 @@ does not enter logical IR equality.
 - [ ] The closed vocabulary logical schema is versioned and accepted.
 - [ ] The JSON bundle encoding, duplicate-key behavior, unknown-field behavior,
       limits, and tagged exact-value representation follow
-      [IDENTITY-AND-VOCABULARY.md](IDENTITY-AND-VOCABULARY.md).
+      [01-IDENTITY-AND-VOCABULARY.md](01-IDENTITY-AND-VOCABULARY.md).
 - [ ] `Fixture::Metadata` and its closed defaults are frozen.
 - [ ] Exact logical identity, bundle version, schema version, content digest, and
       required feature set are distinct.
