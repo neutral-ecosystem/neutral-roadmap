@@ -15,8 +15,10 @@ validates Neutral IR.
 Direct editor-to-IR generation would duplicate compiler semantics and create a
 second authoring contract.
 
-**Consequence:** v0 supports only graph constructs with a deterministic source
-projection. Arbitrary source import is deferred.
+**Consequence:** v0 supports every accepted construct advertised by the selected
+Neutral v0 authoring profile. Existing-source import and deterministic
+projection are adapter capabilities; compiler-private AST records never become
+the editor format.
 
 ## ED-ADR-002: own an editor document
 
@@ -43,7 +45,19 @@ outside the frontend graph library.
 **Consequence:** Wrap React Flow behind a narrow adapter and benchmark the
 reference graph before treating the choice as permanent.
 
-## ED-ADR-004: descriptors are data
+## ED-ADR-004: discover language capabilities
+
+**Decision:** The editor discovers installed language profiles and obtains
+document shape, constructs, types, values, compatibility, vocabulary behavior,
+operations, diagnostics, and limits through a versioned adapter.
+
+**Reason:** A version label does not describe behavior, and hard-coded v0 rules
+in the generic UI would prevent safe evolution and nested future profiles.
+
+**Consequence:** Missing or unknown required capabilities fail closed. The
+exact profile is persisted, and a different profile is never selected silently.
+
+## ED-ADR-005: descriptors are data
 
 **Decision:** Ordinary nodes and inspectors are generated from immutable,
 versioned, data-only descriptors.
@@ -51,11 +65,12 @@ versioned, data-only descriptors.
 **Reason:** Custom executable UI modules would couple trust, portability, and
 product-specific behavior to the editor.
 
-**Consequence:** v0 uses a pinned fixture because current Neutral vocabularies
-do not define executable authoring operations. Unknown required descriptor
-behavior fails visibly.
+**Consequence:** Ordinary construct/type/value descriptors come from the
+selected language profile. Captured v0 vocabularies may contribute nominal data
+descriptors only; they do not provide executable operations. Unknown required
+descriptor behavior fails visibly.
 
-## ED-ADR-005: compiler validation is authoritative
+## ED-ADR-006: compiler validation is authoritative
 
 **Decision:** Local connection checks are interaction preflight; only the
 versioned Neutral adapter establishes program validity.
@@ -65,7 +80,20 @@ versioned Neutral adapter establishes program validity.
 **Consequence:** Every local rule needs parity tests, and a disagreement is an
 adapter defect rather than permission to override the compiler.
 
-## ED-ADR-006: execution is outside v0
+## ED-ADR-007: distinguish nested values from nested documents
+
+**Decision:** Recursively nested record/list values are required v0 content.
+Nested source units, modules, namespaces, and subgraphs remain unavailable
+because the discovered v0 document profile reports one source and one module.
+
+**Reason:** Value nesting is part of current Neutral semantics, while document
+nesting would extend them.
+
+**Consequence:** The editor model retains a generic context path and breadcrumb
+mechanism, but only the root document context and nested value editors activate
+for v0.
+
+## ED-ADR-008: execution is outside v0
 
 **Decision:** v0 has Validate but no Run or Stop.
 
@@ -75,7 +103,7 @@ or executable vocabulary contract.
 
 **Consequence:** Runtime controls require a later protocol and threat model.
 
-## ED-ADR-007: desktop effects stay at the host boundary
+## ED-ADR-009: desktop effects stay at the host boundary
 
 **Decision:** High-frequency interaction remains in React. A Tauri/Rust host
 owns bounded filesystem and language-process operations through explicit,

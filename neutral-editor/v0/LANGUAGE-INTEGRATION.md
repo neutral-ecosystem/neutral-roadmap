@@ -1,91 +1,184 @@
 # Neutral Editor v0 language integration contract
 
-Status: integration proposal; blocked on concrete `neutral-lang` APIs
+Status: integration proposal; blocked on concrete `neutral-lang` authoring APIs
 
 ## Current constraint
 
-The current Neutral language v0 architecture is a small, typed, immutable,
-effect-free language. Its vocabulary boundary is closed and data-only. It
-deliberately exposes no public syntax tree, IR rewrite API, runtime authority,
-or executable vocabulary plugin model.
+The current Neutral language v0 architecture specifies compiler, reader,
+diagnostic, source-map, provenance, and data-only vocabulary contracts. It
+deliberately exposes no public syntax tree or IR rewrite API.
 
-Consequently, the editor cannot truthfully derive executable function/event
-nodes from installed Neutral v0 vocabularies, execute a graph, or round-trip
-arbitrary source using only the currently documented public contracts.
+Those public compiler contracts are sufficient for authoritative validation,
+but not by themselves for all editor requirements. Full Neutral Editor v0
+conformance additionally needs version/capability discovery and a public
+authoring projection that can import and project the complete Neutral v0 source
+surface without persisting compiler-private models.
 
-This is a dependency fact, not a reason for the editor to reach into compiler
-internals.
+This is a dependency fact, not permission for the editor to reach into compiler
+internals or hard-code one language version.
 
-## Minimum v0 adapter
+## Discovery boundary
 
-The editor needs one implementation-neutral adapter with behavior equivalent to:
+The host discovers installed adapters, then the editor explicitly selects the
+profile required by a project:
 
 ```text
-capabilities() -> {
-  adapterVersion
-  supportedLanguageVersions
-  projectionProfiles
-  diagnosticSpanSupport
-}
+LanguageRegistry.discover() -> [
+  {
+    installationId
+    adapterProtocolVersion
+    supportedLanguageProfiles[]
+  }
+]
 
-validate({
+LanguageAdapter.capabilities(profileId) -> {
+  languageIdentity
+  languageVersion
+  authoringProfileVersion
+  documentShape
+  constructs[]
+  typeConstructors[]
+  valueForms[]
+  compatibilityService
+  capturedInputRequirements
+  vocabularyCapabilities
+  operations
+  diagnosticCapabilities
+  limits
+}
+```
+
+For Neutral language v0, `documentShape` reports exactly one source unit and one
+logical module. The generic editor does not encode those numbers as permanent
+UI rules. A later profile may report nested or multiple document contexts and
+activate the same navigation abstraction differently.
+
+Capability IDs are versioned contracts with immutable meaning. Unknown required
+IDs fail closed. A language version string is display and selection data; it is
+not a substitute for capability negotiation.
+
+## Required v0 authoring capabilities
+
+The Neutral v0 profile must describe the complete accepted surface:
+
+- canonical language and module headers;
+- zero or one captured data-only vocabulary requirement;
+- record and immutable binding declarations;
+- identifier categories and protected names;
+- `num`, `string`, `bool`, nominal records, `T?`, `List<T>`, `Ref<T>`, and
+  vocabulary-owned nominal data types;
+- exact numbers, strings, Booleans, `null`, nested contextual records, ordered
+  homogeneous lists, ordinary value reuse, and `ref(name)`;
+- record fields, required/defaulted and nullable/non-nullable states, and
+  closed constant defaults;
+- forward resolution, type compatibility, reference target checks, recursion,
+  and value-cycle validation ownership;
+- comments and reference formatting behavior;
+- source-map, provenance, diagnostic, cancellation, and resource-limit support;
+  and
+- explicit exclusions so the UI cannot mistake an unavailable construct for an
+  optional control.
+
+Nested record and list values are part of this profile. Nested source units,
+modules, namespaces, and subgraphs are not.
+
+## Authoring and validation operations
+
+The editor needs behavior equivalent to:
+
+```text
+importSource({
+  profileId
   sourceBytes
   logicalSourceIdentity
   capturedVocabulary
   limits
+}) -> AuthoringProjection | ImportDiagnostics
+
+projectSource({
+  profileId
+  authoringDocument
+  limits
+}) -> {
+  sourceBytes
+  elementSourceMap
+}
+
+validate({
+  profileId
+  sourceBytes
+  logicalSourceIdentity
+  capturedVocabulary
+  behaviorVersions
+  limits
   cancellation
+  requestRevision
 }) -> {
   requestRevision
   outcome
   diagnostics[]
+  validatedIrHandle?
+  sourceMap?
+  provenance?
+  derivation?
+  resourceFacts?
 }
 ```
 
-Diagnostics should include stable code, severity, message, and original-byte
-span when available. The editor supplies its generated-span map separately and
-owns mapping those spans to nodes and ports.
+`AuthoringProjection` is a public editor-facing contract, not the compiler AST.
+It represents declarations, types, source value forms, reuse/reference intent,
+comments supported for round-tripping, stable source anchors, and opaque
+extension fields. Recovery records must never be mistaken for a valid semantic
+document.
 
-The adapter must not expose private compiler recovery nodes as a stable editor
-contract. A future editor-oriented recovery service may be proposed separately
-from authoritative compilation.
+`projectSource` owns version-specific source spelling and reference formatting.
+The generic editor owns interaction and presentation, not Neutral tokens.
 
-## Pinned descriptor fixture
+Diagnostics include stable code, layer, severity, safe parameters/message,
+primary and related original-byte spans, optional remedy, and truncation state
+when the compiler provides them. The editor maps those spans through its
+element/source table without changing diagnostic meaning or ordering.
 
-Until a Neutral-owned authoring metadata contract exists, v0 uses a small
-pinned descriptor fixture for the accepted projection profile. It is test input,
-not an installed package format or extension API.
+## Compatibility queries
 
-The fixture may describe:
+Port compatibility and property controls must use declared capability data or a
+side-effect-free adapter query. The editor may cache responses under the exact
+profile and type identities that produced them.
 
-- immutable scalar binding nodes;
-- scalar value inputs;
-- one typed output representing ordinary value reuse; and
-- documentation and property-control hints needed by the generic renderer.
+```text
+checkCompatibility(profileId, sourceType, targetType) -> {
+  compatible
+  conversionKind
+  reasonCode?
+}
+```
 
-The projector maps those descriptors only to already accepted Neutral syntax.
-It cannot add source constructs or infer runtime behavior.
+For the current v0 profile the adapter will report exact identity plus outer
+`T` to `T?` widening and invariant generic arguments. The generic editor must
+not contain those rules as permanent Neutral-specific code.
 
-## Contracts required after v0
+## Vocabulary boundary
 
-Metadata-driven installed nodes require a Neutral-owned, versioned authoring
-descriptor contract that answers:
+The adapter resolves the one optional vocabulary only from host-supplied exact
+captured inputs. The capability/profile response and vocabulary contract may
+generate generic editors for vocabulary-owned nominal records and values.
 
-- Which language construct or vocabulary symbol does the node represent?
-- Which ports are values, identities, control, events, or effects?
-- What are their exact types, cardinalities, defaults, and compatibility rules?
-- Which properties are authoring-time constants versus connected values?
-- How does a graph construct project to source without hiding meaning?
-- Which documentation and UI hints are non-semantic?
-- How are descriptor identity, version, compatibility, and integrity captured?
-- How are unknown required fields rejected?
+They cannot contribute executable function/event nodes, scripts, callbacks,
+custom validators, bytecode, native libraries, or React components. Executable
+nodes and runtime controls require separate future language/runtime contracts.
 
-Runtime controls additionally require a separate execution protocol covering
-capabilities, authorization, start/cancel semantics, event ordering, node-state
-correlation, logs, resource limits, and failure reconciliation. None of that is
-implied by successful compilation.
+## Compatibility and failure rules
 
-## Compatibility rule
+- Missing exact profile: preserve the project and open unresolved/read-only.
+- Unknown required capability: fail closed and identify the capability.
+- Adapter unavailable: distinguish service failure from invalid source.
+- Import unsupported: report the missing capability; do not parse privately.
+- Vocabulary mismatch: preserve affected values and show compatibility
+  diagnostics; never substitute a different bundle.
+- Capability/profile change: invalidate derived UI state and validation caches;
+  never migrate the project implicitly.
+- Invalid or recovered source: show diagnostics, but produce no authoritative
+  editor semantic document or IR.
 
-The editor must negotiate adapter capabilities and fail visibly when a required
-profile is absent. It must not guess from a compiler version, search ambient
-installation paths, or fall back to an older behavior silently.
+The editor must not guess from a compiler version, search ambient installation
+paths from source, or fall back to another profile silently.

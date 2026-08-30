@@ -27,13 +27,15 @@ must not silently extend those contracts.
 ## Proposed v0 outcome
 
 ```text
-pinned authoring descriptors
-        -> typed visual graph
-        -> deterministic .neu projection
-        -> neutral-lang validation
-        -> diagnostics mapped back to the graph
+discovered Neutral language profile
+        -> complete v0 visual authoring model
+        -> one deterministic .neu source/module
+        -> neutral-lang validation and conformance evidence
 ```
 
-The first proof is intentionally non-executing. It establishes the authoring
-model and the language boundary before desktop packaging, runtime integration,
-or an open-ended vocabulary node catalogue become release promises.
+The first proof is intentionally non-executing, but it covers the complete
+accepted Neutral language v0 surface. The generic editor discovers the language
+version, document limits, constructs, types, validation operations, and
+vocabulary capabilities through a versioned adapter rather than hard-coding
+them. Nested record/list values are supported; nested documents and modules are
+reserved for a later language profile.
