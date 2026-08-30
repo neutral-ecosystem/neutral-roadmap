@@ -1,6 +1,6 @@
 # Neutral documentation website
 
-Status: publishing specification; Astro implementation not initialized
+Status: Astro implementation initialized; publishing contract active
 
 This directory will contain the Astro application that publishes canonical
 Neutral documentation from the rest of the repository. It must render source
@@ -22,7 +22,7 @@ Read these documents before creating application code:
 4. [Content map](CONTENT-MAP.md)
 5. [Repository entry point](../README.md)
 
-## Planned Astro structure
+## Astro structure
 
 ```text
 website/
@@ -31,8 +31,9 @@ website/
 |   |-- layouts/             documentation and shell layouts
 |   |-- pages/               routes and route adapters
 |   |-- styles/              site theme and global styles
-|   |-- plugins/             source-link rewrite and validation plugins
-|   `-- content.config.ts    Astro content collection/loader configuration
+|   |-- lib/                 repository Markdown discovery and route mapping
+|   |-- plugins/             future source-link and validation plugins
+|   `-- env.d.ts             Astro type declarations
 |-- docs.config.ts           canonical source groups, routes, navigation
 |-- public/                  site-only static files
 |-- scripts/                 local build/publish validation helpers
@@ -40,8 +41,12 @@ website/
 `-- astro.config.mjs
 ```
 
-The future `dist/`, `.astro/`, and dependency directories are generated and
+The `dist/`, `.astro/`, and dependency directories are generated and
 ignored by Git. Canonical documentation remains outside `website/`.
+
+Install and run it from this directory with `pnpm install`, `pnpm dev`,
+`pnpm check`, and `pnpm build`. The package manager lockfile is generated when
+dependencies are installed in a networked development or CI environment.
 
 The content loader recognizes both host and portable version views. It reads a
 portable seed from `vN/portable/` using its standalone paths and does not merge

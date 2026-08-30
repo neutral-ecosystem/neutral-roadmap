@@ -1,0 +1,26 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { loadDocs } from '../lib/content';
+
+export async function getStaticPaths() {
+  const docs = await loadDocs();
+  return docs.filter((doc) => doc.route !== '/').map((doc) => ({ params: { slug: doc.route.replace(/^\//, '').replace(/\/$/, '') }, props: { doc } }));
+}
+const docs = await loadDocs();
+const { doc } = Astro.props;
+const siblings = docs.filter((item) => item.view === doc.view && item.version === doc.version).slice(0, 14);
+---
+<Layout title={doc.title} description={doc.description}>
+  <div class="doc-shell shell">
+    <aside class="doc-sidebar">
+      <p class="eyebrow">{doc.view ? `${doc.view} view · ${doc.version}` : 'Documentation'}</p>
+      <p class="source-path">{doc.sourcePath}</p>
+      {siblings.length > 0 && <nav aria-label="Version documents">{siblings.map((item) => <a class:list-active={item.route === doc.route} href={item.route}>{item.title}</a>)}</nav>}
+    </aside>
+    <article class="document">
+      <p class="eyebrow">{doc.status}</p>
+      <h1>{doc.title}</h1>
+      <div class="markdown" set:html={doc.html} />
+    </article>
+  </div>
+</Layout>
