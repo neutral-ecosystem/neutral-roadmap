@@ -73,6 +73,35 @@ function classify(sourcePath: string) {
   return { view: parts.includes('portable') ? ('portable' as const) : ('host' as const), version };
 }
 
+function titleCase(value: string) {
+  const minorWords = new Set(['a', 'an', 'and', 'or', 'the', 'of', 'to', 'in', 'on']);
+  return value
+    .replace(/[-_]+/g, ' ')
+    .toLowerCase()
+    .split(' ')
+    .map((word, index) => /^v\d+$/.test(word) || (index > 0 && minorWords.has(word)) ? word : word.replace(/^\w/, (letter) => letter.toUpperCase()))
+    .join(' ');
+}
+
+export function catalogTitle(page: DocPage, context: 'project' | 'version' = 'project') {
+  if (page.sourcePath.endsWith('/project-index')) return 'Overview';
+  if (page.sourcePath.endsWith('/version-index')) {
+    const version = page.sourcePath.match(/\/(v\d+)\/version-index$/)?.[1];
+    if (!version) return 'Version overview';
+    return context === 'version' ? `Back to ${version}` : version;
+  }
+  const portableMarker = page.sourcePath.indexOf('/portable/');
+  if (portableMarker >= 0) {
+    const path = page.sourcePath.slice(portableMarker + '/portable/'.length).replace(/\.md$/, '').split('/');
+    const file = path.pop() ?? '';
+    if (file.toLowerCase() === 'readme') return path.length ? path.map(titleCase).join(' / ') : 'Overview';
+    return [...path, file].map(titleCase).join(' / ');
+  }
+  const file = page.sourcePath.split('/').at(-1)?.replace(/\.md$/, '');
+  if (file && projectDocuments.has(`${file}.md`)) return titleCase(file);
+  return page.title;
+}
+
 async function markdownFiles(path: string, prefix = ''): Promise<string[]> {
   const entries = await readdir(path, { withFileTypes: true });
   const files: string[] = [];
@@ -98,13 +127,13 @@ export async function loadDocs(): Promise<DocPage[]> {
   const pages = await Promise.all(publishedFiles.map(async (sourcePath) => {
     const source = await readFile(resolve(repositoryRoot, sourcePath), 'utf8');
     const renderedSource = rewriteLinks(removeDocumentTitle(source), sourcePath, routeIndex);
-    const title = extractTitle(renderedSource, sourcePath.split('/').at(-1)?.replace(/\.md$/, '') ?? 'Document');
+    const title = extractTitle(source, sourcePath.split('/').at(-1)?.replace(/\.md$/, '') ?? 'Document');
     const page: DocPage = {
       sourcePath,
       route: routeFor(sourcePath),
       title,
       description: `${title} — Neutral ecosystem documentation.`,
-      status: extractStatus(renderedSource),
+      status: extractStatus(source),
       html: await marked.parse(renderedSource),
       ...classify(sourcePath),
     };
@@ -146,7 +175,7 @@ export async function loadDocs(): Promise<DocPage[]> {
     const portableVersion = portableEntry?.version;
     const topDocuments = pages.filter((page) => page.sourcePath.startsWith(`${project.domain}/`) && projectDocuments.has(page.sourcePath.slice(project.domain.length + 1)));
     const versionPages = pages.filter((page) => page.sourcePath.startsWith(`${project.domain}/v`) && page.sourcePath.endsWith('/version-index'));
-    const links = [...topDocuments, ...versionPages].map((page) => `<li><a href="${page.route}">${page.title}</a></li>`).join('');
+    const links = [...topDocuments, ...versionPages].map((page) => `<li><a href="${page.route}">${catalogTitle(page)}</a></li>`).join('');
     pages.push({
       sourcePath: `${project.domain}/${portableVersion ?? 'vN'}/project-index`,
       route: `/${project.prefix}/`,

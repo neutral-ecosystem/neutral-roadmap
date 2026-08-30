@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { loadDocs } from '../lib/content';
+import { catalogTitle, loadDocs } from '../lib/content';
+import { projectDocuments, projects } from '../../docs.config';
 
 export async function getStaticPaths() {
   const docs = await loadDocs();
@@ -8,14 +9,40 @@ export async function getStaticPaths() {
 }
 const docs = await loadDocs();
 const { doc } = Astro.props;
-const siblings = docs.filter((item) => item.view === doc.view && item.version === doc.version).slice(0, 14);
+const project = projects.find((item) => doc.sourcePath.startsWith(`${item.domain}/`));
+const compactProjectLabel = project?.label.replace(/^Neutral\s+/i, '').replace(/^\w/, (letter) => letter.toUpperCase());
+const selectedVersion = doc.sourcePath.match(project ? new RegExp(`^${project.domain}/(v\\d+)/`) : /^$/)?.[1];
+const isProjectIndex = doc.sourcePath.endsWith('/project-index');
+const versionIndex = project && selectedVersion ? docs.find((item) => item.sourcePath === `${project.domain}/${selectedVersion}/version-index`) : undefined;
+const portablePages = project && selectedVersion
+  ? docs.filter((item) => item.sourcePath.startsWith(`${project.domain}/${selectedVersion}/portable/`))
+  : [];
+const projectLanding = project ? docs.find((item) => item.route === `/${project.prefix}/`) : undefined;
+const topPages = project
+  ? docs.filter((item) => item.sourcePath.startsWith(`${project.domain}/`) && projectDocuments.has(item.sourcePath.slice(project.domain.length + 1)))
+  : [];
+const versionPages = project
+  ? docs.filter((item) => item.sourcePath.startsWith(`${project.domain}/v`) && item.sourcePath.endsWith('/version-index'))
+  : [];
+const rulePages = doc.sourcePath.startsWith('rules/') ? docs.filter((item) => item.sourcePath.startsWith('rules/')) : [];
+const catalog = doc.sourcePath.startsWith('rules/')
+  ? rulePages
+  : project && selectedVersion && !isProjectIndex
+    ? [versionIndex, ...portablePages].filter((item): item is NonNullable<typeof item> => Boolean(item))
+    : project
+      ? [projectLanding, ...topPages, ...versionPages].filter((item): item is NonNullable<typeof item> => Boolean(item))
+      : [];
+const catalogLabel = doc.sourcePath.startsWith('rules/')
+  ? 'Repository rules'
+  : compactProjectLabel ?? 'Documentation';
 ---
 <Layout title={doc.title} description={doc.description}>
   <div class="doc-shell shell">
     <aside class="doc-sidebar">
-      <p class="eyebrow">{doc.view ? `${doc.view} view · ${doc.version}` : 'Documentation'}</p>
-      <p class="source-path">{doc.sourcePath}</p>
-      {siblings.length > 0 && <nav aria-label="Version documents">{siblings.map((item) => <a class:list-active={item.route === doc.route} href={item.route}>{item.title}</a>)}</nav>}
+      <p class="eyebrow">{catalogLabel}</p>
+      {selectedVersion && !isProjectIndex && <p class="catalog-version">{selectedVersion} / portable</p>}
+      {!["/project-index", "/version-index"].some((suffix) => doc.sourcePath.endsWith(suffix)) && <p class="source-path">{doc.sourcePath}</p>}
+      {catalog.length > 0 && <nav aria-label={`${catalogLabel} catalog`}>{catalog.map((item) => <a class:list-active={item.route === doc.route} href={item.route}>{catalogTitle(item, selectedVersion && !isProjectIndex ? 'version' : 'project')}</a>)}</nav>}
     </aside>
     <article class="document">
       <p class="eyebrow">{doc.status}</p>
