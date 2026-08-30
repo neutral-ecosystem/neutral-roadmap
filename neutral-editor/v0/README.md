@@ -24,6 +24,22 @@ The complete first journey is:
 
 This is an authoring proof, not a visual runtime.
 
+## Implementation baseline
+
+```text
+Tauri 2
+|-- React + TypeScript
+|   |-- React Flow
+|   |-- Zustand
+|   |-- Radix UI
+|   `-- Tailwind CSS
+`-- Rust host services
+```
+
+The complete ownership and dependency rules are defined in
+[TECHNOLOGY-STACK.md](TECHNOLOGY-STACK.md). The Rust runtime adapter boundary is
+reserved but inactive in v0.
+
 ## Governing boundaries
 
 - Neutral language contracts own syntax, names, types, compatibility,

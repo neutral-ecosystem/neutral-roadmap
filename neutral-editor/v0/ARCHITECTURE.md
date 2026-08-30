@@ -198,14 +198,12 @@ original file remains untouched.
 - Tauri capabilities expose only required commands and scopes.
 - Validation cannot execute source, vocabulary code, or runtime effects.
 
-## 7. Proposed technology profile
+## 7. Technology profile
 
-- React and TypeScript for the application UI;
-- `@xyflow/react` for canvas interaction and rendering;
-- Zustand, or equivalently narrow external-store selectors, for editor state;
-- Zod at untrusted JSON boundaries if its cost remains justified;
-- Tauri 2 and Rust for the eventual desktop host; and
-- Serde for Rust-side project and adapter messages.
+The implementation baseline is Tauri 2 and Rust with a React/TypeScript
+frontend using React Flow, Zustand, Radix UI, and Tailwind CSS. Component,
+state-slice, host-service, IPC, dependency, and proposed folder ownership are
+defined in [TECHNOLOGY-STACK.md](TECHNOLOGY-STACK.md).
 
-Versions are selected and locked during implementation Stage 1. Technology
+Versions are selected and locked during workspace initialization. Technology
 choices are editor implementation decisions, not Neutral semantics.

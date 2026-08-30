@@ -113,3 +113,19 @@ scoped commands.
 
 **Consequence:** Host commands are coarse-grained and capability-scoped; domain
 logic remains testable without Tauri.
+
+## ED-ADR-010: adopt the v0 implementation stack
+
+**Decision:** Use Tauri 2 and Rust with a React/TypeScript frontend built from
+React Flow, Zustand, Radix UI, and Tailwind CSS.
+
+**Reason:** The stack separates high-frequency graph interaction from native
+and language effects, provides accessible UI primitives, and supports a small
+typed desktop distribution without requiring the canvas to own semantics.
+
+**Consequence:** React Flow is isolated behind a canvas adapter; Zustand uses
+separate semantic, presentation, selection, capability, validation, project,
+and UI slices; Radix and Tailwind remain presentation dependencies; and Rust
+services sit behind coarse, least-privilege Tauri commands. The runtime module
+is reserved but inactive in v0. See
+[TECHNOLOGY-STACK.md](../TECHNOLOGY-STACK.md).

@@ -32,6 +32,10 @@ the adapter response can describe v0 without generic editor constants.
 
 ## Stage 1: prove discovery and the complete authoring model
 
+- initialize the Tauri 2, Rust, React, TypeScript, React Flow, Zustand, Radix
+  UI, and Tailwind workspace with locked versions;
+- enforce the dependency and folder ownership rules in
+  [TECHNOLOGY-STACK.md](TECHNOLOGY-STACK.md);
 - discover installed adapters and select an exact language capability profile;
 - implement the framework-independent one-source/one-module document model;
 - represent headers, optional captured vocabulary, records, and bindings;
@@ -46,8 +50,10 @@ excluded construct can enter through the domain API.
 
 ## Stage 2: prove the canvas adapter
 
-- create the React/TypeScript application shell;
 - integrate React Flow behind a small view adapter;
+- build the application component layer from Radix primitives and Tailwind
+  theme tokens;
+- implement separated Zustand slices and narrow selectors;
 - render discovered language descriptors with generic node, type, value, and
   nested-value components;
 - implement selection, pan, zoom, movement, typed reuse, and identity-reference

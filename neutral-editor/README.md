@@ -15,10 +15,11 @@ It is not an application implementation or a stable product specification.
 1. [v0 overview](v0/README.md)
 2. [v0 architecture](v0/ARCHITECTURE.md)
 3. [v0 requirements](v0/REQUIREMENTS.md)
-4. [architectural decisions](v0/decisions/README.md)
-5. [language integration contract](v0/LANGUAGE-INTEGRATION.md)
-6. [implementation roadmap](v0/ROADMAP.md)
-7. [node-editor research](docs/node-editor-research.md)
+4. [technology stack](v0/TECHNOLOGY-STACK.md)
+5. [architectural decisions](v0/decisions/README.md)
+6. [language integration contract](v0/LANGUAGE-INTEGRATION.md)
+7. [implementation roadmap](v0/ROADMAP.md)
+8. [node-editor research](docs/node-editor-research.md)
 
 More specific accepted Neutral language contracts govern language syntax,
 types, diagnostics, and IR. Editor documents may order implementation work but
