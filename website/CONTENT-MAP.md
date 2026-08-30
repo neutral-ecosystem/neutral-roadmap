@@ -19,7 +19,10 @@ result rather than maintain copied Markdown.
 | Repository rules | `/rules/**/*.md` | `/rules/` | Documentation rules and future shared policies |
 
 The website excludes `.agents/`, `.codex/`, build output, dependency folders,
-private operational notes, and any future document marked `draft: true`.
+every directory whose name starts with `_` (for example `_notes/` or
+`_archive/`), private operational notes, and any future document marked
+`draft: true`. An underscore prefix is the repository-wide directory convention
+for content that is not part of the public documentation tree.
 
 ## Host and portable views
 

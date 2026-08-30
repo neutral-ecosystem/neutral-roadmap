@@ -1,7 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { dirname, extname, normalize, relative, resolve, sep } from 'node:path';
 import { marked } from 'marked';
-import { ignoredDirectories, sectionPrefixes, sourceRoots } from '../../docs.config';
+import { isIgnoredDirectory, sectionPrefixes, sourceRoots } from '../../docs.config';
 
 // Astro executes this module from the website project root in dev and build.
 const repositoryRoot = resolve(process.cwd(), '..');
@@ -27,6 +27,12 @@ function extractTitle(source: string, fallback: string) {
 
 function extractStatus(source: string) {
   return source.match(/^Status:\s*(.+)$/m)?.[1]?.trim() ?? 'published';
+}
+
+function removeDocumentTitle(source: string) {
+  return source
+    .replace(/^#\s+.+(?:\r?\n){1,2}/, '')
+    .replace(/^Status:\s*.+(?:\r?\n){1,2}/m, '');
 }
 
 function routeFor(sourcePath: string) {
@@ -71,7 +77,7 @@ async function markdownFiles(path: string, prefix = ''): Promise<string[]> {
   const entries = await readdir(path, { withFileTypes: true });
   const files: string[] = [];
   for (const entry of entries) {
-    if (ignoredDirectories.has(entry.name)) continue;
+    if (isIgnoredDirectory(entry.name)) continue;
     const entryPath = resolve(path, entry.name);
     const sourcePath = prefix ? `${prefix}/${entry.name}` : entry.name;
     if (entry.isDirectory()) files.push(...await markdownFiles(entryPath, sourcePath));
@@ -90,7 +96,7 @@ export async function loadDocs(): Promise<DocPage[]> {
   const routeIndex = new Map(files.map((sourcePath) => [sourcePath, routeFor(sourcePath)]));
   const pages = await Promise.all(files.map(async (sourcePath) => {
     const source = await readFile(resolve(repositoryRoot, sourcePath), 'utf8');
-    const renderedSource = rewriteLinks(source, sourcePath, routeIndex);
+    const renderedSource = rewriteLinks(removeDocumentTitle(source), sourcePath, routeIndex);
     const title = extractTitle(renderedSource, sourcePath.split('/').at(-1)?.replace(/\.md$/, '') ?? 'Document');
     const page: DocPage = {
       sourcePath,

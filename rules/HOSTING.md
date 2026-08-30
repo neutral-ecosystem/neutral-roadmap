@@ -61,7 +61,8 @@ The Astro application runs with the repository root available so its loader can
 read canonical sources outside `website/`. It must:
 
 1. Discover sources using `website/docs.config.ts`.
-2. Exclude drafts, generated files, dependencies, and private tool directories.
+2. Exclude drafts, generated files, dependencies, private tool directories, and
+   every directory whose name starts with `_`.
 3. Classify versioned language sources as `host` or `portable` from their paths.
 4. Derive metadata when optional frontmatter is absent.
 5. Build a unique source-path to public-route manifest.

@@ -49,8 +49,8 @@ portable/
 
 `vN` is the version represented by the seed. Files may be added only when they
 have one clear owner under this layout. Generated build output, dependency
-directories, local progress notes unrelated to the seed, credentials, and host
-machine paths are excluded.
+directories, local progress notes unrelated to the seed, credentials, host
+machine paths, and directories whose names start with `_` are excluded.
 
 ## 3. Host view structure
 

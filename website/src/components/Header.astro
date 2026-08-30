@@ -1,7 +1,8 @@
 <header class="site-header">
   <div class="shell site-header-inner">
-    <a class="brand" href="/" aria-label="Neutral documentation home"><span class="brand-mark">N</span><span>neutral docs</span></a>
+    <a class="brand" href="/" aria-label="Neutral documentation home"><img src="/neutral-logo.png" alt="" width="32" height="32" /><span>neutral docs</span></a>
     <nav aria-label="Primary navigation">
+      <a href="/" aria-current={Astro.url.pathname === '/' ? 'page' : undefined}>Main page</a>
       <a href="/language/">Language</a>
       <a href="/editor/">Editor</a>
       <a href="/rules/documentation/">Rules</a>
