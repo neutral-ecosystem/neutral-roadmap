@@ -1,6 +1,6 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { dirname, extname, normalize, relative, resolve, sep } from 'node:path';
-import { marked } from 'marked';
+import { Marked } from 'marked';
 import { isIgnoredDirectory, isPublishedProjectSource, projectDocuments, projects, sectionPrefixes, sourceRoots } from '../../docs.config';
 
 // Astro executes this module from the website project root in dev and build.
@@ -34,6 +34,22 @@ function removeDocumentTitle(source: string) {
   return source
     .replace(/^#\s+.+(?:\r?\n){1,2}/, '')
     .replace(/^Status:\s*.+(?:\r?\n){1,2}/m, '');
+}
+
+function renderMarkdown(source: string) {
+  const headingCounts = new Map<string, number>();
+  const markdown = new Marked({
+    renderer: {
+      heading({ tokens, depth, text }) {
+        const base = kebab(text) || 'section';
+        const count = headingCounts.get(base) ?? 0;
+        headingCounts.set(base, count + 1);
+        const id = count === 0 ? base : `${base}-${count + 1}`;
+        return `<h${depth} id="${id}">${this.parser.parseInline(tokens)}<a class="heading-anchor" href="#${id}" aria-label="Link to this section">§</a></h${depth}>`;
+      },
+    },
+  });
+  return markdown.parse(source);
 }
 
 function routeFor(sourcePath: string) {
@@ -150,7 +166,7 @@ export async function loadDocs(): Promise<DocPage[]> {
       title,
       description: `${title} — Neutral ecosystem documentation.`,
       status: extractStatus(source),
-      html: await marked.parse(renderedSource),
+      html: await renderMarkdown(renderedSource),
       ...classify(sourcePath),
     };
     return page;

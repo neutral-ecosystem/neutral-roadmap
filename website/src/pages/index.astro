@@ -13,14 +13,17 @@ const sections = [
       <p class="eyebrow">Neutral ecosystem</p>
       <h1>Documentation</h1>
       <p class="lede">One place for the contracts, decisions, and implementation paths that shape Neutral.</p>
-      <div class="home-hero-meta" aria-label="Documentation status">
-        <span>Canonical Markdown</span>
-        <span>Portable versions</span>
-      </div>
+      <a class="home-primary-link" href="/language/">Start with the language <span aria-hidden="true">→</span></a>
     </div>
-    <div class="home-hero-mark" aria-hidden="true">
+    <div class="home-hero-mark">
       <img src="/neutral-logo.png" alt="" width="112" height="112" />
-      <span>Read the source.<br />Build the boundary.</span>
+      <div class="home-color-map" aria-hidden="true">
+        <span class="accent-blue"></span>
+        <span class="accent-sage"></span>
+        <span class="accent-warm"></span>
+        <span class="accent-violet"></span>
+      </div>
+      <p><strong>Canonical source</strong><span>Markdown in this repository drives every page.</span></p>
     </div>
   </section>
   <section class="directory" aria-labelledby="directory-title">
@@ -30,17 +33,19 @@ const sections = [
           <p class="eyebrow">Explore the system</p>
           <h2 id="directory-title">Choose a workstream</h2>
         </div>
-        <p class="directory-intro">Each area has a project contract and versioned portable documentation.</p>
+        <p class="directory-intro">Project-level direction stays stable. Version pages publish only their matching portable implementation material.</p>
       </div>
-      <div class="directory-list">
+      <div class="directory-grid">
         {sections.map((section) => (
-          <a class={`directory-row accent-${section.accent}`} href={section.prefix}>
-            <span class="directory-number">{section.number}</span>
+          <a class={`directory-card accent-${section.accent}`} href={section.prefix}>
+            <span class="directory-card-top">
+              <span class="directory-number">{section.number}</span>
+              <span class="directory-arrow" aria-hidden="true">↗</span>
+            </span>
             <span class="directory-copy">
               <strong>{section.label}</strong>
               <span>{section.description}</span>
             </span>
-            <span class="directory-open">Open <b aria-hidden="true">↗</b></span>
           </a>
         ))}
       </div>

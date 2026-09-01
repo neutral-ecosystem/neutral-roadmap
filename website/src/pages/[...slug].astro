@@ -150,15 +150,17 @@ sortTree(portableTree);
 const catalogTreeHtml = project && selectedVersion && !isProjectIndex
   ? `${versionIndex ? `<a class="catalog-tree-link${versionIndex.route === doc.route ? ' list-active' : ''}" href="${escapeHtml(versionIndex.route)}"${versionIndex.route === doc.route ? ' aria-current="page"' : ''}>Version overview</a>` : ''}${renderTree(portableTree.children)}`
   : '';
+const hasCatalog = Boolean(catalogTreeHtml || catalog.length > 0);
 ---
 <Layout title={doc.title} description={doc.description}>
-  <div class="doc-shell shell">
+  <div class:list={['doc-shell shell', project && `project-${project.accent}`]}>
     <aside class="doc-sidebar">
       <p class="eyebrow">{catalogLabel}</p>
       {selectedVersion && !isProjectIndex && <p class="catalog-version">{selectedVersion} / portable</p>}
+      {hasCatalog && <button class="catalog-toggle" type="button" aria-expanded="false" aria-controls="doc-catalog"><span>Browse docs</span><span aria-hidden="true">⌄</span></button>}
       {catalogTreeHtml
-        ? <nav class="catalog-tree" aria-label={`${catalogLabel} catalog`} set:html={catalogTreeHtml} />
-        : catalog.length > 0 && <nav aria-label={`${catalogLabel} catalog`}>{catalog.map((item) => <a class:list-active={item.route === doc.route} aria-current={item.route === doc.route ? 'page' : undefined} href={item.route}>{localCatalogTitle(item)}</a>)}</nav>}
+        ? <nav id="doc-catalog" class="catalog-tree" aria-label={`${catalogLabel} catalog`} set:html={catalogTreeHtml} />
+        : catalog.length > 0 && <nav id="doc-catalog" aria-label={`${catalogLabel} catalog`}>{catalog.map((item) => <a class:list={{ 'list-active': item.route === doc.route }} aria-current={item.route === doc.route ? 'page' : undefined} href={item.route}>{localCatalogTitle(item)}</a>)}</nav>}
     </aside>
     <article class="document">
       <div class="document-toolbar">
@@ -171,6 +173,13 @@ const catalogTreeHtml = project && selectedVersion && !isProjectIndex
     </article>
   </div>
   <script>
+    document.querySelectorAll<HTMLElement>('.doc-sidebar').forEach((sidebar) => {
+      const toggle = sidebar.querySelector<HTMLButtonElement>('.catalog-toggle');
+      toggle?.addEventListener('click', () => {
+        const open = sidebar.classList.toggle('catalog-visible');
+        toggle.setAttribute('aria-expanded', String(open));
+      });
+    });
     document.querySelectorAll<HTMLDetailsElement>('.catalog-tree-group').forEach((group) => {
       group.addEventListener('toggle', () => {
         if (!group.open) return;
