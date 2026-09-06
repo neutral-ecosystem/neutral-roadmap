@@ -38,7 +38,7 @@ const catalog = doc.sourcePath.startsWith('rules/')
       : [];
 const catalogLabel = doc.sourcePath.startsWith('rules/')
   ? 'Repository rules'
-  : compactProjectLabel ?? 'Documentation';
+  : compactProjectLabel ?? 'Roadmap';
 const isVersionIndex = doc.sourcePath.endsWith('/version-index') || doc.sourcePath.endsWith('/portable/README.md');
 const isGeneratedPage = isProjectIndex || doc.sourcePath.endsWith('/version-index');
 const backHref = doc.sourcePath.startsWith('rules/')
@@ -51,9 +51,9 @@ const backHref = doc.sourcePath.startsWith('rules/')
         ? versionIndex?.route ?? projectLanding?.route ?? '/'
         : projectLanding?.route ?? '/';
 const backLabel = doc.sourcePath.startsWith('rules/')
-  ? doc.route === '/rules/' ? 'Documentation' : 'Rules'
+  ? doc.route === '/rules/' ? 'Roadmap' : 'Rules'
   : isProjectIndex
-    ? 'Documentation'
+    ? 'Roadmap'
     : isVersionIndex
       ? compactProjectLabel ?? 'Project'
       : selectedVersion
@@ -139,7 +139,7 @@ function renderTree(nodes: CatalogTreeNode[], depth = 0): string {
       return `<details class="catalog-tree-group" data-folder="${escapeHtml(node.name.toLowerCase())}"${expanded}><summary>${escapeHtml(normalCatalogCase(node.name))}</summary><div class="catalog-tree-children">${renderTree(node.children, depth + 1)}</div></details>`;
     }
     if (!node.page) return '';
-    const title = node.name.toLowerCase() === 'readme.md' ? 'Overview' : localCatalogTitle(node.page);
+    const title = localCatalogTitle(node.page);
     const active = node.page.route === doc.route ? ' list-active' : '';
     const current = node.page.route === doc.route ? ' aria-current="page"' : '';
     return `<a class="catalog-tree-link${active}" href="${escapeHtml(node.page.route)}"${current}>${escapeHtml(title)}</a>`;

@@ -126,7 +126,10 @@ export function catalogTitle(page: DocPage, context: 'project' | 'version' = 'pr
   if (portableMarker >= 0) {
     const path = page.sourcePath.slice(portableMarker + '/portable/'.length).replace(/\.md$/, '').split('/');
     const file = path.pop() ?? '';
-    if (file.toLowerCase() === 'readme') return path.length ? path.map(titleCase).join(' / ') : 'Overview';
+    if (file.toLowerCase() === 'readme') {
+      if (path.length) return path.map(titleCase).join(' / ');
+      return context === 'version' ? 'Version overview' : page.version ?? 'Version';
+    }
     return [...path, file].map(titleCase).join(' / ');
   }
   const file = page.sourcePath.split('/').at(-1)?.replace(/\.md$/, '');

@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+
 const navItems = [
   { label: 'Home', href: '/' },
   { label: 'Language', href: '/language/' },
@@ -10,7 +12,7 @@ const isCurrent = (href: string) => href === '/' ? Astro.url.pathname === '/' : 
 ---
 <header class="site-header">
   <div class="shell site-header-inner">
-    <a class="brand" href="/" aria-label="Neutral documentation home"><img src="/neutral-logo-rounded.png" alt="" width="36" height="36" /><span>neutral docs</span></a>
+    <a class="brand" href="/" aria-label="Neutral roadmap home"><Image src="/neutral-logo-rounded.png" alt="" width={36} height={36} /><span>neutral roadmap</span></a>
     <nav aria-label="Primary navigation">
       {navItems.map((item) => <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>)}
     </nav>

@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 const sections = [
   { number: '01', label: 'Language', prefix: '/language/', accent: 'blue', description: 'Language contracts, architecture, decisions, and portable specifications.' },
@@ -7,16 +8,16 @@ const sections = [
   { number: '04', label: 'Repository rules', prefix: '/rules/', accent: 'violet', description: 'Documentation structure, portability, hosting, and publication policy.' },
 ];
 ---
-<Layout title="Documentation" description="Neutral ecosystem documentation, generated from canonical Markdown.">
+<Layout title="Roadmap" description="The Neutral ecosystem developer roadmap, generated from canonical Markdown.">
   <section class="home-hero shell">
     <div class="home-hero-copy">
       <p class="eyebrow">Neutral ecosystem</p>
-      <h1>Documentation</h1>
-      <p class="lede">One place for the contracts, decisions, and implementation paths that shape Neutral.</p>
+      <h1>Roadmap</h1>
+      <p class="lede">One place for the development plans, decisions, and implementation paths that shape Neutral.</p>
       <a class="home-primary-link" href="/language/">Start with the language <span aria-hidden="true">→</span></a>
     </div>
     <div class="home-hero-mark">
-      <img src="/neutral-logo.png" alt="" width="112" height="112" />
+      <Image src="/neutral-logo.png" alt="" width={112} height={112} />
       <div class="home-color-map" aria-hidden="true">
         <span class="accent-blue"></span>
         <span class="accent-sage"></span>

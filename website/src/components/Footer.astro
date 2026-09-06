@@ -1,18 +1,18 @@
 ---
+import { Image } from 'astro:assets';
 import packageJson from '../../package.json';
 ---
 <footer class="site-footer">
   <div class="shell footer-inner">
     <div class="footer-brand">
-      <img src="/neutral-logo-rounded.png" alt="" width="40" height="40" />
+      <Image src="/neutral-logo-rounded.png" alt="" width={40} height={40} />
       <div>
-        <strong>Neutral documentation</strong>
-        <span>Architecture and implementation contracts</span>
+        <strong>Neutral roadmap</strong>
+        <span>Developer plans and implementation contracts</span>
       </div>
     </div>
     <nav aria-label="Footer navigation">
-      <a href="/">Documentation</a>
-      <a href="https://github.com/neutral-ecosystem/neutral-roadmap" target="_blank" rel="noreferrer">GitHub ↗</a>
+      <a href="/">Roadmap</a>
     </nav>
     <div class="footer-meta">
       <span>v{packageJson.version}</span>
