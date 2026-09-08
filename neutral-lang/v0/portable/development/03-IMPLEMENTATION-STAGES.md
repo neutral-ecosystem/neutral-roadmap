@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # Neutral v0 implementation stages
 
 Status: ordered execution checklist
@@ -41,6 +43,7 @@ neutral-ir            public logical IR, source map, provenance, derivation
 neutral-vocabulary    closed logical schema and strict bundle validation
 neutral-compiler      capture, private frontend/semantics, IR lowering
 neutral-reader        external artifact validation and immutable reader views
+neutral-encoding      validated-document external artifact encoder
 neutral-probe         reader-only library and standalone probe binary
 neutral-cli           capture/compile/validate/format host commands
 neutral-test-support  reusable test-only builders and assertions
@@ -49,80 +52,80 @@ neutral-bench         benchmark harnesses and immutable corpora
 xtask                 developer/CI/evidence automation
 ```
 
-- [ ] Create virtual workspace manifest, lockfile, pinned toolchain, formatting,
+- [x] Create virtual workspace manifest, lockfile, selected toolchain policy, formatting,
       lint, dependency, and quality/test-profile configuration.
-- [ ] Mark automation/test/benchmark packages non-published.
-- [ ] Keep unit tests colocated; use the ownership layout in
+- [x] Mark automation/test/benchmark packages non-published.
+- [x] Keep unit tests colocated; use the ownership layout in
       [04-TESTING.md](04-TESTING.md).
-- [ ] Add meaningful crate/module documentation describing ownership and
+- [x] Add meaningful crate/module documentation describing ownership and
       prohibited effects; do not enforce an exact line count.
-- [ ] Add compilable shells without placeholder panics or fake language behavior.
-- [ ] Keep package versions and public API stability at `0.x` until contract
+- [x] Add compilable shells without placeholder panics or fake language behavior.
+- [x] Keep package versions and public API stability at `0.x` until contract
       freeze/release policy says otherwise.
 
 #### Step validation
 
-- [ ] `cargo metadata`, workspace check, lint, tests, and docs pass.
-- [ ] Every package has one owner and no duplicate test/fixture tree.
-- [ ] No production package depends on automation/test/benchmark packages.
-- [ ] Tracked files remain unchanged after checks.
+- [x] `cargo metadata`, workspace check, lint, tests, and docs pass.
+- [x] Every package has one owner and no duplicate test/fixture tree.
+- [x] No production package depends on automation/test/benchmark packages.
+- [x] Tracked files remain unchanged after checks.
 
 ### Step 2: enforce dependency and effect boundaries
 
-- [ ] `neutral-core` has no compiler, reader, CLI, or host dependencies.
-- [ ] `neutral-ir` depends only on core and reviewed value utilities.
-- [ ] `neutral-vocabulary` depends only on core/public logical model contracts.
-- [ ] `neutral-compiler` depends on core, IR, and vocabulary; its frontend,
+- [x] `neutral-core` has no compiler, reader, CLI, or host dependencies.
+- [x] `neutral-ir` depends only on core and reviewed value utilities.
+- [x] `neutral-vocabulary` depends only on core/public logical model contracts.
+- [x] `neutral-compiler` depends on core, IR, and vocabulary; its frontend,
       semantic model, and lowering remain private.
-- [ ] `neutral-reader` depends on core, IR, vocabulary, and later the selected IR
+- [x] `neutral-reader` depends on core, IR, vocabulary, and later the selected IR
       encoding implementation; it performs no acquisition.
-- [ ] `neutral-probe` depends only on core/reader-facing contracts and approved
+- [x] `neutral-probe` depends only on core/reader-facing contracts and approved
       output/argument utilities.
-- [ ] `neutral-cli` owns filesystem/process-facing host behavior but does not
+- [x] `neutral-cli` owns filesystem/process-facing host behavior but does not
       become the independent probe artifact.
-- [ ] Forbid filesystem, environment, network, command, locale, and clock access
+- [x] Forbid filesystem, environment, network, command, locale, and clock access
       from `compile_captured` dependency closure.
-- [ ] Forbid unsafe code in project-owned v0 crates; audit transitive dependency
+- [x] Forbid unsafe code in project-owned v0 crates; audit transitive dependency
       unsafe separately rather than claiming it is absent.
 
 #### Step validation
 
-- [ ] Automated package-graph policy rejects every forbidden edge.
-- [ ] `cargo tree --package neutral-probe --edges all` matches the allowlist.
-- [ ] A compile-time/dependency audit proves the pure compiler closure has no
+- [x] Automated package-graph policy rejects every forbidden edge.
+- [x] `cargo tree --package neutral-probe --edges all` matches the allowlist.
+- [x] A compile-time/dependency audit proves the pure compiler closure has no
       effectful host adapter.
-- [ ] Deliberate forbidden edges fail Stage 1 CI.
+- [x] Deliberate forbidden edges fail Stage 1 CI.
 
 ### Step 3: establish environment, automation, and Stage 1 tests
 
-- [ ] Implement [00-ENVIRONMENT-AUTOMATION.md](00-ENVIRONMENT-AUTOMATION.md) Layers
+- [x] Implement [00-ENVIRONMENT-AUTOMATION.md](00-ENVIRONMENT-AUTOMATION.md) Layers
       0–2 and the stable `cargo xtask` interface.
-- [ ] Add only the active Stage 1 tests defined by
+- [x] Add only the active Stage 1 tests defined by
       [04-TESTING.md](04-TESTING.md): automation, environment, workspace, dependency,
       package shell, and probe allowlist.
-- [ ] Record the active stage in `config/development-stage.toml`.
-- [ ] Create the conformance manifest with all known cases planned but none
+- [x] Record the active stage in `config/development-stage.toml`.
+- [x] Create the conformance manifest with all known cases planned but none
       falsely active as compiler behavior.
-- [ ] Configure Stage 1, PR, nightly, and release workflow shells; later profiles
+- [x] Configure Stage 1, PR, nightly, and release workflow shells; later profiles
       select only active suites.
 
 #### Step validation
 
-- [ ] `cargo xtask ci stage1` passes from a clean checkout.
-- [ ] Every active suite is nonempty and every future suite is explicitly planned,
+- [x] `cargo xtask ci stage1` passes from a clean checkout.
+- [x] Every active suite is nonempty and every future suite is explicitly planned,
       not intentionally failing.
-- [ ] A zero-test active suite fails discovery.
-- [ ] A fresh supported host and development container pass Stage 1.
+- [x] A zero-test active suite fails discovery.
+- [x] A fresh supported host and development container pass Stage 1.
 
 ### Stage 1 validation
 
-- [ ] Workspace, environment, automation, dependency boundaries, documentation,
+- [x] Workspace, environment, automation, dependency boundaries, documentation,
       and active Stage 1 tests pass.
-- [ ] No production source parser, semantic behavior, stable Neutral diagnostic,
+- [x] No production source parser, semantic behavior, stable Neutral diagnostic,
       public IR payload, or vocabulary decoder has been implemented.
-- [ ] The standalone probe package is independently buildable even though it has
+- [x] The standalone probe package is independently buildable even though it has
       no language document to inspect yet.
-- [ ] Stage 2 remains blocked by the normative contract-freeze gate.
+- [x] Stage 2 remains blocked by the normative contract-freeze gate.
 
 ---
 
@@ -133,10 +136,10 @@ Complete and approve every gate in
 accepted identity/fingerprint and vocabulary bundle contracts from
 [01-IDENTITY-AND-VOCABULARY.md](01-IDENTITY-AND-VOCABULARY.md).
 
-- [ ] Freeze manifest exists and identifies every governing contract revision.
-- [ ] Initial fixture/oracle manifest is reviewed and immutable.
-- [ ] No blocking normative question remains.
-- [ ] Production Stage 2 tasks link frozen requirements and expected evidence.
+- [x] Approved freeze manifest identifies every governing contract revision.
+- [x] Initial fixture/oracle manifest is reviewed and immutable.
+- [x] No blocking normative question remains.
+- [x] Production Stage 2 tasks link frozen requirements and expected evidence.
 
 ---
 
@@ -153,81 +156,81 @@ num answer = 42
 
 ### Step 1: activate minimal fixtures and oracles
 
-- [ ] Add one positive minimal fixture and final-v0-invalid malformed variants.
-- [ ] Do not classify additional valid v0 declarations as a normative error.
-- [ ] Assign expected stable diagnostics only for behavior invalid in final v0.
-- [ ] Add expected logical IR, source map, provenance, derivation, resource facts,
+- [x] Add one positive minimal fixture and final-v0-invalid malformed variants.
+- [x] Do not classify additional valid v0 declarations as a normative error.
+- [x] Assign expected stable diagnostics only for behavior invalid in final v0.
+- [x] Add expected logical IR, source map, provenance, derivation, resource facts,
       and standalone probe summary.
-- [ ] Activate these cases from Stage 2 in the conformance manifest.
+- [x] Activate these cases from Stage 2 in the conformance manifest.
 
 #### Step validation
 
-- [ ] Every active case has requirement IDs and one complete oracle.
-- [ ] No milestone-only implementation limitation appears in conformance.
-- [ ] Fixture discovery is deterministic and nonempty.
+- [x] Every active case has requirement IDs and one complete oracle.
+- [x] No milestone-only implementation limitation appears in conformance.
+- [x] Fixture discovery is deterministic and nonempty.
 
 ### Step 2: implement foundational core, capture, and diagnostics
 
-- [ ] Implement typed logical source identity, exact byte content digest, checked
+- [x] Implement typed logical source identity, exact byte content digest, checked
       half-open spans, line/column derivation, diagnostics, limits, cancellation,
       and result classes.
-- [ ] Implement `CompilationRequest`, resolver contract, immutable
+- [x] Implement `CompilationRequest`, resolver contract, immutable
       `CapturedCompilation`, `capture`, I/O-free `compile_captured`, and
       convenience `compile`.
-- [ ] Apply the accepted digest/transcript contract and test vectors.
-- [ ] Ensure any diagnostic/fatal/cancellation result exposes no authoritative IR.
+- [x] Apply the accepted digest/transcript contract and test vectors.
+- [x] Ensure any diagnostic/fatal/cancellation result exposes no authoritative IR.
 
 #### Step validation
 
-- [ ] UTF-8/CRLF/BOM span and digest vectors pass.
-- [ ] Diagnostic ordering/rendering is deterministic, bounded, and safe.
-- [ ] Capture never falls back to ambient authority.
-- [ ] Recompiling one captured object is mutation-free and deterministic.
+- [x] UTF-8/CRLF/BOM span and digest vectors pass.
+- [x] Diagnostic ordering/rendering is deterministic, bounded, and safe.
+- [x] Capture never falls back to ambient authority.
+- [x] Recompiling one captured object is mutation-free and deterministic.
 
 ### Step 3: implement the minimal frontend slice
 
-- [ ] Lex only tokens needed for exact headers and one `num` binding, while
+- [x] Lex only tokens needed for exact headers and one `num` binding, while
       retaining physical newlines and original spans.
-- [ ] Normalize layout into semantic line ends for those complete constructs.
-- [ ] Parse exact language/module headers and one explicit scalar binding.
-- [ ] Keep tokens/tree/recovery private and prevent recovered syntax from
+- [x] Normalize layout into semantic line ends for those complete constructs.
+- [x] Parse exact language/module headers and one explicit scalar binding.
+- [x] Keep tokens/tree/recovery private and prevent recovered syntax from
       becoming authoritative.
-- [ ] Reject malformed final-v0-invalid variants with frozen diagnostics.
+- [x] Reject malformed final-v0-invalid variants with frozen diagnostics.
 
 #### Step validation
 
-- [ ] Token/layout/parser fixtures agree with frozen oracles.
-- [ ] LF/CRLF/lone-CR/trailing/no-trailing newline forms are logically equal.
-- [ ] Malformed UTF-8/NUL/BOM/headers/numbers terminate safely within limits.
-- [ ] Parser types cannot be imported outside compiler internals.
+- [x] Token/layout/parser fixtures agree with frozen oracles.
+- [x] LF/CRLF/lone-CR/trailing/no-trailing newline forms are logically equal.
+- [x] Malformed UTF-8/NUL/BOM/headers/numbers terminate safely within limits.
+- [x] Parser types cannot be imported outside compiler internals.
 
 ### Step 4: implement minimal semantics, IR, reader, and probe
 
-- [ ] Validate exact `0.1`, one module scope, names, protected words, explicit
+- [x] Validate exact `0.1`, one module scope, names, protected words, explicit
       `num`, and exact numeric value.
-- [ ] Implement module-symbol identity and declaration fingerprint using frozen
+- [x] Implement module-symbol identity and declaration fingerprint using frozen
       contracts.
-- [ ] Lower module/declaration/type/value plus source map, explicit/normalization
+- [x] Lower module/declaration/type/value plus source map, explicit/normalization
       provenance, derivation partitions, and resource facts.
-- [ ] Expose immutable in-process reader views.
-- [ ] Implement probe library traversal and source-linked consumer diagnostic.
-- [ ] Implement standalone probe binary shell for later encoded input without
+- [x] Expose immutable in-process reader views.
+- [x] Implement probe library traversal and source-linked consumer diagnostic.
+- [x] Implement standalone probe binary shell for later encoded input without
       linking the compiler.
 
 #### Step validation
 
-- [ ] Minimal fixture compiles through reader/probe and matches all oracles.
-- [ ] Probe dependency allowlist passes.
-- [ ] Formatting-only source changes preserve logical meaning/fingerprint where
+- [x] Minimal fixture compiles through reader/probe and matches all oracles.
+- [x] Probe dependency allowlist passes.
+- [x] Formatting-only source changes preserve logical meaning/fingerprint where
       specified and update source facts correctly.
-- [ ] Repeated/concurrent results are equal modulo `ElementId` mapping.
+- [x] Repeated/concurrent results are equal modulo `ElementId` mapping.
 
 ### Stage 2 validation
 
-- [ ] `cargo xtask ci pr` passes with newly active minimal smoke, unit,
+- [x] `cargo xtask ci pr` passes with newly active minimal smoke, unit,
       integration, system, conformance, property, security, and fuzz-smoke cases.
-- [ ] Every minimal failure returns no authoritative IR.
-- [ ] The end-to-end path remains runnable for all later stages.
+- [x] Every minimal failure returns no authoritative IR.
+- [x] The end-to-end path remains runnable for all later stages.
 
 ---
 
@@ -238,74 +241,74 @@ it. It does not parse record, list, reuse, reference, or vocabulary productions.
 
 ### Slice 3.1: complete source text, identifiers, comments, and boundaries
 
-- [ ] Add fixtures/oracles for identifiers, protected names, punctuation
+- [x] Add fixtures/oracles for identifiers, protected names, punctuation
       rejection, comments, strings' lexical boundaries, newline/comment
       ambiguity, and explicit unsupported symbols.
-- [ ] Implement full ASCII identifier categories and protected names.
-- [ ] Implement line and non-nesting block comments as nonsemantic trivia.
-- [ ] Complete raw newline/layout behavior for currently accepted scalar
+- [x] Implement full ASCII identifier categories and protected names.
+- [x] Implement line and non-nesting block comments as nonsemantic trivia.
+- [x] Complete raw newline/layout behavior for currently accepted scalar
       declarations, including malformed delimiter recovery needed by them.
-- [ ] Preserve trivia privately for later formatter work without lowering it.
-- [ ] Carry every behavior through diagnostics, source facts, reader-observable
+- [x] Preserve trivia privately for later formatter work without lowering it.
+- [x] Carry every behavior through diagnostics, source facts, reader-observable
       unchanged semantics, limits, and conformance.
 
 #### Slice validation
 
-- [ ] Comment insertion/removal preserves logical IR.
-- [ ] Identifier and boundary property tests match frozen grammar.
-- [ ] Unterminated/misleading comments fail safely and deterministically.
-- [ ] No future grammar production has become accepted.
+- [x] Comment insertion/removal preserves logical IR.
+- [x] Identifier and boundary property tests match frozen grammar.
+- [x] Unterminated/misleading comments fail safely and deterministically.
+- [x] No future grammar production has become accepted.
 
 ### Slice 3.2: strings and Booleans
 
-- [ ] Activate string/escape/Unicode/control and Boolean fixtures.
-- [ ] Implement string and Boolean tokens/parser values.
-- [ ] Type-check explicit `string`/`bool` bindings.
-- [ ] Lower exact logical values, source maps, provenance, derivation, and limits.
-- [ ] Expose values through reader and probe.
+- [x] Activate string/escape/Unicode/control and Boolean fixtures.
+- [x] Implement string and Boolean tokens/parser values.
+- [x] Type-check explicit `string`/`bool` bindings.
+- [x] Lower exact logical values, source maps, provenance, derivation, and limits.
+- [x] Expose values through reader and probe.
 
 #### Slice validation
 
-- [ ] Every escape, Unicode boundary, invalid surrogate/control, and limit case
+- [x] Every escape, Unicode boundary, invalid surrogate/control, and limit case
       passes its oracle.
-- [ ] Safe rendering never emits hostile control text unescaped.
-- [ ] Reader/probe behavior uses typed values, not source parsing.
+- [x] Safe rendering never emits hostile control text unescaped.
+- [x] Reader/probe behavior uses typed values, not source parsing.
 
 ### Slice 3.3: complete exact numbers
 
-- [ ] Activate sign, separator, fraction, exponent, equality, normalization, and
+- [x] Activate sign, separator, fraction, exponent, equality, normalization, and
       limit fixtures.
-- [ ] Implement full frozen numeric grammar and exact normalized representation.
-- [ ] Use no host floating-point conversion.
-- [ ] Apply NHT numeric fingerprint vectors.
-- [ ] Expose normalized exact values and normalization provenance.
+- [x] Implement full frozen numeric grammar and exact normalized representation.
+- [x] Use no host floating-point conversion.
+- [x] Apply NHT numeric fingerprint vectors.
+- [x] Expose normalized exact values and normalization provenance.
 
 #### Slice validation
 
-- [ ] Equivalent spellings normalize/fingerprint equally.
-- [ ] Boundary/over-limit values fail before proportional allocation.
-- [ ] Locale and host numeric types cannot affect output.
+- [x] Equivalent spellings normalize/fingerprint equally.
+- [x] Boundary/over-limit values fail before proportional allocation.
+- [x] Locale and host numeric types cannot affect output.
 
 ### Slice 3.4: nullable scalar and explicit null
 
-- [ ] Activate `T?`, outer widening, and null fixtures for scalar types.
-- [ ] Parse postfix nullability and `null` only in currently supported scalar
+- [x] Activate `T?`, outer widening, and null fixtures for scalar types.
+- [x] Parse postfix nullability and `null` only in currently supported scalar
       contexts.
-- [ ] Implement exact identity plus outer `T` → `T?` compatibility.
-- [ ] Lower/read/probe typed null and nullable values.
-- [ ] Keep null distinct from structural omission.
+- [x] Implement exact identity plus outer `T` → `T?` compatibility.
+- [x] Lower/read/probe typed null and nullable values.
+- [x] Keep null distinct from structural omission.
 
 #### Slice validation
 
-- [ ] Null without nullable expected type fails.
-- [ ] Inner/generic widening is not accidentally accepted.
-- [ ] IR/reader distinguishes null from absence.
+- [x] Null without nullable expected type fails.
+- [x] Inner/generic widening is not accidentally accepted.
+- [x] IR/reader distinguishes null from absence.
 
 ### Stage 3 validation
 
-- [ ] Every Stage 3 slice is complete through probe and conformance.
-- [ ] No record/list/reuse/reference/vocabulary syntax is accepted yet.
-- [ ] Stage 2 remains green.
+- [x] Every Stage 3 slice is complete through probe and conformance.
+- [x] No record/list/reuse/reference/vocabulary syntax is accepted yet.
+- [x] Stage 2 remains green.
 
 ---
 
@@ -313,62 +316,62 @@ it. It does not parse record, list, reuse, reference, or vocabulary productions.
 
 ### Slice 4.1: nominal record declarations and contextual values
 
-- [ ] Activate record declaration/value, field, nominal compatibility, duplicate,
+- [x] Activate record declaration/value, field, nominal compatibility, duplicate,
       wrong-kind, and recursion fixtures.
-- [ ] Add record/field/contextual-value grammar only now.
-- [ ] Collect root declarations before resolution and enforce one scope.
-- [ ] Resolve nominal types and validate contextual fields.
-- [ ] Reject missing/unknown/duplicate fields, anonymous records, shorthand,
+- [x] Add record/field/contextual-value grammar only now.
+- [x] Collect root declarations before resolution and enforce one scope.
+- [x] Resolve nominal types and validate contextual fields.
+- [x] Reject missing/unknown/duplicate fields, anonymous records, shorthand,
       structural compatibility, and embedded recursive cycles.
-- [ ] Lower record declarations/values and source/provenance/derivation facts.
-- [ ] Expose nominal records through reader/probe.
+- [x] Lower record declarations/values and source/provenance/derivation facts.
+- [x] Expose nominal records through reader/probe.
 
 #### Slice validation
 
-- [ ] Declaration order is nonsemantic.
-- [ ] Every field failure has stable ownership/span.
-- [ ] Public IR contains no parser/private semantic types.
-- [ ] Record limits fail before proportional work.
+- [x] Declaration order is nonsemantic.
+- [x] Every field failure has stable ownership/span.
+- [x] Public IR contains no parser/private semantic types.
+- [x] Record limits fail before proportional work.
 
 ### Slice 4.2: closed defaults and omission
 
-- [ ] Activate all required/defaulted × nullable/non-nullable combinations.
-- [ ] Add field-default grammar and closed-constant semantic validation.
-- [ ] Permit only scalar/null and recursively closed currently supported record
+- [x] Activate all required/defaulted × nullable/non-nullable combinations.
+- [x] Add field-default grammar and closed-constant semantic validation.
+- [x] Permit only scalar/null and recursively closed currently supported record
       constants; lists join when Slice 4.3 activates them.
-- [ ] Materialize final logical values for omitted defaulted fields.
-- [ ] Record explicit versus user-default provenance without changing logical
+- [x] Materialize final logical values for omitted defaulted fields.
+- [x] Record explicit versus user-default provenance without changing logical
       value kind.
-- [ ] Reject names, `ref`, and expressions in defaults.
+- [x] Reject names, `ref`, and expressions in defaults.
 
 #### Slice validation
 
-- [ ] Final values and provenance match frozen oracles.
-- [ ] Omission is not represented as `null`, `none`, or `absent`.
-- [ ] Defaults create no value/reference dependency edge.
+- [x] Final values and provenance match frozen oracles.
+- [x] Omission is not represented as `null`, `none`, or `absent`.
+- [x] Defaults create no value/reference dependency edge.
 
 ### Slice 4.3: ordered homogeneous lists
 
-- [ ] Activate `List<T>`, list values, empty context, nested/default list,
+- [x] Activate `List<T>`, list values, empty context, nested/default list,
       invariance, order, and size/depth fixtures.
-- [ ] Add list type/value grammar only now.
-- [ ] Implement invariant generic resolution and contextual element typing.
-- [ ] Extend closed defaults to lists.
-- [ ] Preserve logical list order through IR/reader/probe/fingerprints.
-- [ ] Enforce item/depth/traversal limits.
+- [x] Add list type/value grammar only now.
+- [x] Implement invariant generic resolution and contextual element typing.
+- [x] Extend closed defaults to lists.
+- [x] Preserve logical list order through IR/reader/probe/fingerprints.
+- [x] Enforce item/depth/traversal limits.
 
 #### Slice validation
 
-- [ ] Empty lists require expected type.
-- [ ] Generic covariance remains rejected.
-- [ ] Large lists fail before proportional allocation.
-- [ ] Record/default/list combined fixture passes end to end.
+- [x] Empty lists require expected type.
+- [x] Generic covariance remains rejected.
+- [x] Large lists fail before proportional allocation.
+- [x] Record/default/list combined fixture passes end to end.
 
 ### Stage 4 validation
 
-- [ ] Records, defaults, nullability, and lists are complete vertical slices.
-- [ ] Every newly accepted parser form has public reader/probe evidence.
-- [ ] Stage 2–3 suites remain green.
+- [x] Records, defaults, nullability, and lists are complete vertical slices.
+- [x] Every newly accepted parser form has public reader/probe evidence.
+- [x] Stage 2–3 suites remain green.
 
 ---
 
@@ -376,59 +379,59 @@ it. It does not parse record, list, reuse, reference, or vocabulary productions.
 
 ### Slice 5.1: ordinary immutable value reuse
 
-- [ ] Activate forward/transitive/nested reuse, unknown/wrong-kind, cycle, and
+- [x] Activate forward/transitive/nested reuse, unknown/wrong-kind, cycle, and
       traversal-limit fixtures.
-- [ ] Add unqualified name value grammar only now.
-- [ ] Resolve after declaration collection and build the value-dependency graph.
-- [ ] Detect every cycle deterministically with stable primary/related spans.
-- [ ] Lower the final logical value and reuse provenance, not a reuse value kind.
-- [ ] Expose final value/provenance through reader/probe.
+- [x] Add unqualified name value grammar only now.
+- [x] Resolve after declaration collection and build the value-dependency graph.
+- [x] Detect every cycle deterministically with stable primary/related spans.
+- [x] Lower the final logical value and reuse provenance, not a reuse value kind.
+- [x] Expose final value/provenance through reader/probe.
 
 #### Slice validation
 
-- [ ] Forward reuse works independent of declaration order.
-- [ ] Direct/indirect cycles fail with no IR.
-- [ ] Deep chains are bounded.
-- [ ] Fingerprints use final logical definitions as frozen.
+- [x] Forward reuse works independent of declaration order.
+- [x] Direct/indirect cycles fail with no IR.
+- [x] Deep chains are bounded.
+- [x] Fingerprints use final logical definitions as frozen.
 
 ### Slice 5.2: typed identity references and recursion boundary
 
-- [ ] Activate `Ref<T>`, `ref(name)`, forward target, unknown/wrong-kind/type,
+- [x] Activate `Ref<T>`, `ref(name)`, forward target, unknown/wrong-kind/type,
       recursion, and edge-integrity fixtures.
-- [ ] Add reference type/value grammar only now.
-- [ ] Require exact target binding type and exclude identity edges from value
+- [x] Add reference type/value grammar only now.
+- [x] Require exact target binding type and exclude identity edges from value
       dependency.
-- [ ] Permit nominal recursive cycles only through `Ref<T>`.
-- [ ] Lower typed identity edges using graph-local `ElementId` plus provenance.
-- [ ] Expose typed edge traversal through reader/probe.
+- [x] Permit nominal recursive cycles only through `Ref<T>`.
+- [x] Lower typed identity edges using graph-local `ElementId` plus provenance.
+- [x] Expose typed edge traversal through reader/probe.
 
 #### Slice validation
 
-- [ ] Field names/source position add no relationship meaning.
-- [ ] Reader validates target existence/kind/type.
-- [ ] Identity cycles do not become value cycles.
-- [ ] Probe traverses IDs, not parsed strings.
+- [x] Field names/source position add no relationship meaning.
+- [x] Reader validates target existence/kind/type.
+- [x] Identity cycles do not become value cycles.
+- [x] Probe traverses IDs, not parsed strings.
 
 ### Slice 5.3: alpha-equivalence and graph identity
 
-- [ ] Implement one-to-one whole-graph `ElementId` mapping comparison.
-- [ ] Keep logical payload equality separate from companion/envelope comparison.
-- [ ] Add property vectors for reflexivity, symmetry, transitivity, random ID
+- [x] Implement one-to-one whole-graph `ElementId` mapping comparison.
+- [x] Keep logical payload equality separate from companion/envelope comparison.
+- [x] Add property vectors for reflexivity, symmetry, transitivity, random ID
       renaming, changed edge/value/type, duplicate ID, and dangling edge.
-- [ ] Prohibit cross-document persistence of `ElementId` in public docs/APIs.
+- [x] Prohibit cross-document persistence of `ElementId` in public docs/APIs.
 
 #### Slice validation
 
-- [ ] All alpha-equivalence properties pass.
-- [ ] Fingerprints and structural equality agree on their documented scopes.
-- [ ] Invalid graph states never produce validated reader views.
+- [x] All alpha-equivalence properties pass.
+- [x] Fingerprints and structural equality agree on their documented scopes.
+- [x] Invalid graph states never produce validated reader views.
 
 ### Stage 5 validation
 
-- [ ] Reuse and identity references remain semantically distinct end to end.
-- [ ] Full core fixtures pass compiler/reader/probe and all graph adversarial
+- [x] Reuse and identity references remain semantically distinct end to end.
+- [x] Full core fixtures pass compiler/reader/probe and all graph adversarial
       cases fail closed.
-- [ ] Stage 2–4 suites remain green.
+- [x] Stage 2–4 suites remain green.
 
 ---
 
@@ -436,49 +439,49 @@ it. It does not parse record, list, reuse, reference, or vocabulary productions.
 
 ### Slice 6.1: strict captured bundle decoder and logical contract
 
-- [ ] Implement the accepted JSON byte/schema contract and exact digest checks
+- [x] Implement the accepted JSON byte/schema contract and exact digest checks
       from [01-IDENTITY-AND-VOCABULARY.md](01-IDENTITY-AND-VOCABULARY.md).
-- [ ] Activate duplicate/unknown/executable/malformed/limit/default/recursion and
+- [x] Activate duplicate/unknown/executable/malformed/limit/default/recursion and
       independent digest/transcript vectors.
-- [ ] Decode into untrusted intermediate data, then validate closed schema,
+- [x] Decode into untrusted intermediate data, then validate closed schema,
       features, names, types, fields, defaults, and recursion.
-- [ ] Expose only immutable validated logical vocabulary contracts.
-- [ ] Perform no code loading or external I/O.
+- [x] Expose only immutable validated logical vocabulary contracts.
+- [x] Perform no code loading or external I/O.
 
 #### Slice validation
 
-- [ ] All accepted/hostile bundle vectors pass.
-- [ ] Duplicate keys are detected before map collapse.
-- [ ] Raw JSON numbers and executable shapes fail closed.
-- [ ] Allocation-before-validation review passes.
+- [x] All accepted/hostile bundle vectors pass.
+- [x] Duplicate keys are detected before map collapse.
+- [x] Raw JSON numbers and executable shapes fail closed.
+- [x] Allocation-before-validation review passes.
 
 ### Slice 6.2: captured `use` and qualified values
 
-- [ ] Activate `use Fixture`, `Fixture::Metadata`, payload/default, lock mismatch,
+- [x] Activate `use Fixture`, `Fixture::Metadata`, payload/default, lock mismatch,
       missing, collision, unknown feature/type, and reader contract fixtures.
-- [ ] Add `use` and qualified-type grammar only now.
-- [ ] Resolve exclusively from exact captured lock input.
-- [ ] Validate bundle before source payloads.
-- [ ] Type-check vocabulary contextual values using ordinary binding/value rules.
-- [ ] Apply vocabulary defaults as final values with distinct provenance.
-- [ ] Record exact identity/version/schema/encoding/digest/features in IR and
+- [x] Add `use` and qualified-type grammar only now.
+- [x] Resolve exclusively from exact captured lock input.
+- [x] Validate bundle before source payloads.
+- [x] Type-check vocabulary contextual values using ordinary binding/value rules.
+- [x] Apply vocabulary defaults as final values with distinct provenance.
+- [x] Record exact identity/version/schema/encoding/digest/features in IR and
       derivation.
-- [ ] Expose qualified typed data through reader/probe without interpretation.
+- [x] Expose qualified typed data through reader/probe without interpretation.
 
 #### Slice validation
 
-- [ ] Minimal vocabulary fixture passes end to end.
-- [ ] Missing/mismatch/unknown/executable cases fail with frozen diagnostics.
-- [ ] Source cannot trigger registry/path/network acquisition.
-- [ ] Probe has no `Fixture`-specific behavior.
+- [x] Minimal vocabulary fixture passes end to end.
+- [x] Missing/mismatch/unknown/executable cases fail with frozen diagnostics.
+- [x] Source cannot trigger registry/path/network acquisition.
+- [x] Probe has no `Fixture`-specific behavior.
 
 ### Stage 6 validation
 
-- [ ] Vocabulary byte decoding, capture, source syntax, semantics, IR, reader,
+- [x] Vocabulary byte decoding, capture, source syntax, semantics, IR, reader,
       probe, diagnostics, provenance, derivation, and limits form one complete
       vertical boundary.
-- [ ] External-reader contract fixtures are ready for Stage 7 encoded IR.
-- [ ] Stage 2–5 suites remain green.
+- [x] External-reader contract fixtures are ready for Stage 7 encoded IR.
+- [x] Stage 2–5 suites remain green.
 
 ---
 
@@ -486,55 +489,56 @@ it. It does not parse record, list, reuse, reference, or vocabulary productions.
 
 ### Step 1: accept the encoding decision
 
-- [ ] Compare candidates for exact numbers, duplicate detection, unknown fields,
+- [x] Compare candidates for exact numbers, duplicate detection, unknown fields,
       bounded decoding, ecosystem tooling, and language bindings.
-- [ ] Freeze framing, versions, capabilities, sizes, payload/companion/envelope
+- [x] Freeze framing, versions, capabilities, sizes, payload/companion/envelope
       sections, malformed behavior, and all invalid encoded states.
-- [ ] State that bytes are noncanonical and logical equality remains structural.
+- [x] State that bytes are noncanonical and logical equality remains structural.
 
 #### Step validation
 
-- [ ] The decision represents every frozen logical/companion contract.
-- [ ] Exact numbers require no host floating-point conversion.
-- [ ] Every unknown/malformed/version/capability case has a specified result.
-- [ ] Security and allocation review approves the framing design.
+- [x] The decision represents every frozen logical/companion contract.
+- [x] Exact numbers require no host floating-point conversion.
+- [x] Every unknown/malformed/version/capability case has a specified result.
+- [x] Security and allocation review approves the framing design.
 
 ### Step 2: encode validated documents
 
-- [ ] Encode only fully validated in-memory documents.
-- [ ] Keep producer/build facts in the envelope.
-- [ ] Preserve all logical and companion contracts without making byte order
+- [x] Encode only fully validated in-memory documents.
+- [x] Keep producer/build facts in the envelope.
+- [x] Preserve all logical and companion contracts without making byte order
       semantic.
 
 #### Step validation
 
-- [ ] Every valid in-memory fixture encodes within configured limits.
-- [ ] Encoding does not mutate validated input.
-- [ ] Producer/envelope changes do not alter logical payload equality.
-- [ ] Byte determinism, where provided, is documented as implementation behavior
+- [x] Every valid in-memory fixture encodes within configured limits.
+- [x] Encoding does not mutate validated input.
+- [x] Producer/envelope changes do not alter logical payload equality.
+- [x] Byte determinism, where provided, is documented as implementation behavior
       rather than logical identity.
 
 ### Step 3: decode and validate hostile input
 
-- [ ] Validate framing/length/version/capability before allocation.
-- [ ] Decode into untrusted intermediate data.
-- [ ] Validate IDs, types, values, references, source maps, provenance,
+- [x] Validate framing/length/version/capability before allocation.
+- [x] Decode into untrusted intermediate data.
+- [x] Validate IDs, types, values, references, source maps, provenance,
       derivation, limits, and exact vocabulary contracts.
-- [ ] Expose reader views only after complete validation.
+- [x] Expose reader views only after complete validation.
 
 #### Step validation
 
-- [ ] Valid artifacts produce expected immutable reader observations.
-- [ ] Every invalid encoded state returns a bounded classified error.
-- [ ] No unchecked length controls proportional allocation.
-- [ ] Missing/mismatched vocabulary contracts fail without lookup.
+- [x] Valid artifacts produce expected immutable reader observations.
+- [x] Every invalid encoded state returns a bounded classified error.
+- [x] No unchecked length controls proportional allocation.
+- [x] Missing/mismatched vocabulary contracts fail without lookup.
 
 ### Stage 7 validation
 
-- [ ] Valid artifacts decode to alpha-equivalent logical IR.
-- [ ] Corrupt/truncated/oversized/duplicate/dangling/unknown cases fail boundedly.
-- [ ] Standalone probe inspects encoded artifacts without compiler linkage.
-- [ ] Decoder fuzzing and allocation review pass.
+- [x] Valid artifacts decode to alpha-equivalent logical IR.
+- [x] Corrupt/truncated/oversized/duplicate/dangling/unknown cases fail boundedly.
+- [x] Standalone probe inspects encoded artifacts without compiler linkage.
+- [x] Decoder fuzzing and
+      [allocation review](evidence/stage7-decoder-allocation-review.md) pass.
 
 ---
 
@@ -542,99 +546,445 @@ it. It does not parse record, list, reuse, reference, or vocabulary productions.
 
 ### Step 1: reference formatter vertical tool slice
 
-- [ ] Implement canonical header order, four-space indentation, field layout,
+- [x] Implement canonical header order, four-space indentation, field layout,
       spacing, commas, no semicolons, and deterministic comment placement.
-- [ ] Prove idempotence and parse/format/parse logical equality.
-- [ ] Keep formatted bytes separate from IR/source identity/signing.
+- [x] Prove idempotence and parse/format/parse logical equality.
+- [x] Keep formatted bytes separate from IR/source identity/signing.
 
 #### Step validation
 
-- [ ] Formatting is idempotent across the complete source corpus.
-- [ ] Parse/format/parse preserves logical IR and accepted provenance categories.
-- [ ] Comment placement is deterministic and comments remain nonsemantic.
+- [x] Formatting is idempotent across the complete source corpus.
+- [x] Parse/format/parse preserves logical IR and accepted provenance categories.
+- [x] Comment placement is deterministic and comments remain nonsemantic.
 
 ### Step 2: CLI host tools
 
-- [ ] Implement compile, validate, and format commands with explicit resolver,
+- [x] Implement compile, validate, and format commands with explicit resolver,
       limits, disclosure, destinations, overwrite, atomic-write, and exit policy.
-- [ ] Keep inspect proof in standalone `neutral-probe`; shared rendering may use a
+- [x] Keep inspect proof in standalone `neutral-probe`; shared rendering may use a
       reader-only public library.
-- [ ] Test child-process/filesystem/stdio/permission/cancellation behavior.
+- [x] Test child-process/filesystem/stdio/permission/cancellation behavior.
 
 #### Step validation
 
-- [ ] Every command has stable usage and exit classes.
-- [ ] Failure/cancellation leaves no authoritative partial output.
-- [ ] Host paths/credentials obey disclosure policy.
-- [ ] System tests invoke built binaries, not CLI internals.
+- [x] Every command has stable usage and exit classes.
+- [x] Failure/cancellation leaves no authoritative partial output.
+- [x] Host paths/credentials obey disclosure policy.
+- [x] System tests invoke built binaries, not CLI internals.
 
 ### Step 3: complete standalone probe
 
-- [ ] Enumerate all metadata/declarations/types/final values/references/
+- [x] Enumerate all metadata/declarations/types/final values/references/
       vocabulary/provenance through reader APIs.
-- [ ] Map one consumer diagnostic to source.
-- [ ] Compare in-process reader/probe library and external probe binary summaries.
-- [ ] Enforce dependency allowlist in release CI.
+- [x] Map one consumer diagnostic to source.
+- [x] Compare in-process reader/probe library and external probe binary summaries.
+- [x] Enforce dependency allowlist in release CI.
 
 #### Step validation
 
-- [ ] Probe package builds/tests independently from compiler packages.
-- [ ] In-process and encoded summaries match modulo envelope-only metadata.
-- [ ] Probe traversal is bounded and safe for hostile validated graphs.
-- [ ] Source-linked consumer diagnostic maps to the expected original span.
+- [x] Probe package builds/tests independently from compiler packages.
+- [x] In-process and encoded summaries match modulo envelope-only metadata.
+- [x] Probe traversal is bounded and safe for hostile validated graphs.
+- [x] Source-linked consumer diagnostic maps to the expected original span.
 
 ### Step 4: close documentation and traceability
 
-- [ ] Complete requirement → decision → fixture → implementation → test mapping.
-- [ ] Publish grammar, semantics, IR, identity, vocabulary, API, encoding,
+- [x] Complete requirement → decision → fixture → implementation → test mapping.
+- [x] Publish grammar, semantics, IR, identity, vocabulary, API, encoding,
       diagnostic, limits, formatter, and tool documentation.
-- [ ] Check master syntax items only with complete evidence.
+- [x] Check master syntax items only with complete evidence.
 
 #### Step validation
 
-- [ ] Every accepted `NL-*`/`SYN-*` ID maps to executable evidence.
-- [ ] No fixture, diagnostic, public API, or implementation behavior is orphaned.
-- [ ] Documentation examples compile and repository coherence checks pass.
+- [x] Every accepted `NL-*`/`SYN-*` ID maps to executable evidence.
+- [x] No fixture, diagnostic, public API, or implementation behavior is orphaned.
+- [x] Documentation examples compile and repository coherence checks pass.
 
 ### Stage 8 validation
 
-- [ ] Formatter, CLI, probe, docs, traceability, and all active tests pass.
-- [ ] No explicit v0 exclusion is accepted.
-- [ ] No public consumer needs source/private compiler models.
+- [x] Formatter, CLI, probe, docs, traceability, and all active tests pass.
+- [x] No explicit v0 exclusion is accepted.
+- [x] No public consumer needs source/private compiler models.
 
 ---
 
 ## Stage 9: harden correctness, security, and performance
 
-- [ ] Complete property/metamorphic suites.
-- [ ] Complete source, vocabulary, IR, formatter, and probe fuzz campaigns.
-- [ ] Test every structural limit at and one over boundary.
-- [ ] Inject cancellation/faults at every stage.
-- [ ] Complete dependency/build-script/proc-macro/native/unsafe review.
-- [ ] Complete cache poisoning/cross-request/stale-source-fact review.
-- [ ] Complete controlled phase/end-to-end performance, growth, memory,
+- [x] Complete property/metamorphic suites.
+- [x] Put all test bodies in the owning crate's `tests/` directory; production
+      sources retain only path-based test-module declarations.
+- [x] Complete source, vocabulary, IR, formatter, and probe fuzz campaigns.
+- [x] Test every structural limit at and one over boundary.
+- [x] Inject cancellation/faults at every stage.
+- [x] Complete dependency/build-script/proc-macro/native/unsafe review.
+- [x] Complete cache poisoning/cross-request/stale-source-fact review.
+- [x] Close the focused exact-number mutation subset: 34 caught, 3 unviable,
+      and no missed mutants.
+- [x] Complete controlled phase/end-to-end performance, growth, memory,
       concurrency, stress, and soak profiles.
-- [ ] Complete coverage, mutation, static work-product reviews, threat model, and
+- [x] Complete coverage, mutation, static work-product reviews, threat model, and
       quality evaluation defined in [04-TESTING.md](04-TESTING.md).
+
+#### Remaining Stage 9 evidence
+
+- [x] Run every source, vocabulary, IR, formatter, and probe fuzz target for at
+      least 900 seconds on an untraced runner without a crash, timeout, hang, or
+      sanitizer finding.
+- [x] Record controlled release and 50,000-iteration extended-soak baselines,
+      including whole-command peak RSS.
+- [x] Obtain component-level allocation evidence using Valgrind Massif and
+      Memcheck on the release and 50,000-iteration extended-soak profiles.
+- [x] Pass the configured whole-workspace coverage gate: 90.57% lines,
+      90.71% functions, and 81.72% regions against 85%/90%/80% thresholds.
+- [x] Close the broader selected mutation review: 244 caught, 27 unviable,
+      and no missed viable mutants out of 271 selected mutants.
 
 ### Stage 9 validation
 
-- [ ] No known input causes unbounded work, panic, stack exhaustion, invalid
+- [x] No known input causes unbounded work, panic, stack exhaustion, invalid
       typed IR, stale source facts, cross-request leakage, or partial success.
-- [ ] Determinism holds under repeated/concurrent/adversarial execution.
-- [ ] All approved quality gates and residual-risk reviews pass.
+- [x] Determinism holds under repeated/concurrent/adversarial execution.
+- [x] All approved quality gates and residual-risk reviews pass.
 
 ---
 
-## Stage 10: qualify and release v0
+## Stage 10: overhaul the workflow, then qualify and release v0
 
-Execute [05-RELEASE.md](05-RELEASE.md).
+This stage first replaces the manual project workflow with a durable operating
+model, then uses that model to qualify v0. Its release contract, artifact list,
+approval roles, and exit condition are in
+[05-RELEASE.md](05-RELEASE.md). This checklist owns the practical order of
+work for this repository; it must not add language features or weaken the
+frozen v0 contracts.
 
-### Stage 10 validation
+### Step 1: approve Stage 9 and identify the release candidate
 
-- [ ] All prior stage gates pass from a clean release candidate.
-- [ ] Required artifacts and complete retained evidence exist.
-- [ ] Independent probe proof passes.
-- [ ] All exclusions remain rejected.
-- [ ] Release approval records exact independent contract versions and residual
-      risks.
+- [x] The maintainer approves the completed
+      [Stage 9 residual-risk record](../../quality/residual-risks.md).
+- [x] Start from a clean, reviewed commit on `main`; record its full Git ID,
+      `Cargo.lock` digest, `rust-toolchain.toml` contents, and fixture-manifest
+      digest in the release evidence.
+- [x] Reconfirm the contract-freeze manifest and every governing language, IR,
+      vocabulary, external-encoding, digest, diagnostic, and limits revision.
+- [x] Decide the v0 distribution scope before changing version metadata:
+      source-only tag, GitHub binary assets, crates.io packages, or an explicit
+      combination. No publishing target is assumed implicitly.
+- [x] Record that qualification uses the clean current `main` `HEAD`; create
+      the annotated publication tag only after qualification and approvals.
+
+#### Step validation
+
+- [x] The candidate can be identified from its `main` source revision,
+      dependency, toolchain, fixture, and contract identities without local
+      state.
+- [x] No Stage 9 technical evidence gap or unapproved residual risk remains.
+
+### Step 2: implement the stable repository structure and command interface
+
+This step replaces the current manual/stage-dependent workflow. It is an
+implementation task, not a documentation-only audit.
+
+- [x] Make `xtask` the one platform-neutral project command interface. Its
+      public commands must be stable and stage-free: `fmt`, `lint`, `check`,
+      `test`, `coverage`, `fuzz`, `quality`, `build`, `validate`, `package`,
+      `release`, `version`, `portable`, and `clean`.
+- [x] Define subcommands only where they express a durable user purpose, for
+      example `test unit|smoke|integration|system|conformance|security`,
+      `test performance --profile pr|release|soak`, `fuzz smoke|campaign`,
+      and `build --profile dev|release`. Do not expose `stage1`, `stage9`, or
+      other implementation-stage command names to normal users.
+- [x] Implement `cargo xtask quality` as the documented composition of format,
+      lint, check, boundary/traceability checks, tests, and configured quality
+      gates. Each component must also remain runnable independently.
+- [x] Implement `cargo xtask validate` for the released CLI/probe artifact
+      checks, `cargo xtask package` for selected distribution assembly and
+      inspection, and `cargo xtask release` for release preparation. They must
+      fail closed when the distribution scope or required evidence is absent.
+- [x] Replace handwritten multi-command release instructions with those
+      commands. CI may choose a profile, but it must invoke the same public
+      `xtask` commands rather than reproduce their logic in YAML.
+- [x] Keep platform-specific setup and host integration as thin adapters under
+      this exact structure:
+
+      ```text
+      scripts/
+      ├── README.md
+      ├── linux/
+      │   ├── README.md
+      │   ├── bootstrap.sh
+      │   ├── environment.sh
+      │   └── release.sh
+      └── win/
+          ├── README.md
+          ├── bootstrap.ps1
+          ├── environment.ps1
+          └── release.ps1
+      ```
+
+      Platform scripts may install/verify host tools and invoke `cargo xtask`,
+      but must not implement compiler, test, quality, packaging, or release
+      policy themselves.
+- [x] Move or remove obsolete scripts, duplicate command wrappers, legacy
+      stage-named command paths, and manually maintained release metadata only
+      after their replacement command is tested. Preserve a short migration
+      table in the root documentation.
+- [x] Add a README to every retained script directory stating its ecosystem
+      role, ownership, inputs, outputs, supported host, and the `xtask`
+      command it delegates to.
+
+The required migration target is:
+
+| Purpose | Stable user entry point | Policy owner |
+| --- | --- | --- |
+| Host setup | `scripts/linux/bootstrap.sh` or `scripts/win/bootstrap.ps1` | platform adapter |
+| Format | `cargo xtask fmt [--write]` | `xtask` |
+| Lint/check | `cargo xtask lint`, `cargo xtask check` | `xtask` |
+| Tests | `cargo xtask test <level>` | `xtask` |
+| Performance | `cargo xtask test performance --profile <profile>` | `xtask` |
+| Coverage | `RUSTUP_TOOLCHAIN=nightly cargo xtask coverage` | `xtask` |
+| Fuzzing | `RUSTUP_TOOLCHAIN=nightly cargo xtask fuzz <mode>` | `xtask` |
+| Quality | `cargo xtask quality [--profile <profile>]` | `xtask` |
+| Build | `cargo xtask build --profile <profile>` | `xtask` |
+| Artifact validation | `cargo xtask validate <artifact>` | `xtask` |
+| Package/release preparation | `cargo xtask package`, `cargo xtask release prepare` | `xtask` |
+| Version inspection/update | `cargo xtask version show|check|prepare <version>` | `xtask` |
+| Portable lifecycle | `cargo xtask portable verify|snapshot` | `xtask` |
+| Generated evidence cleanup | `cargo xtask clean` | `xtask` |
+
+`cargo xtask ci pr` and `cargo xtask ci release` may remain internal CI
+profiles during the migration, but they must call the stable commands above and
+must not become a second user-facing command system.
+
+#### Step validation
+
+- [x] A new contributor needs one platform bootstrap command followed by the
+      stable `cargo xtask` commands; no long Cargo flag sequence is required.
+- [x] `ci.yml` and `release.yml` are thin trigger/checkout/toolchain wrappers
+      around the same stable commands used locally.
+- [x] Removing a stage from the planning documents does not change a normal
+      developer or release command name.
+- [x] The command help, root README, platform-script READMEs, and CI examples
+      all expose the same command names and argument shapes.
+
+### Step 3: centralize versioning, generated metadata, and portable lifecycle
+
+- [x] Retain `[workspace.package].version` in the root `Cargo.toml` as the
+      single authoritative package-release version. Every workspace package
+      must use `version.workspace = true`; no crate manifest, script, workflow,
+      documentation badge, package filename, or release record may become a
+      second manually synchronized package-version source.
+- [x] Keep the package-release version explicitly separate from frozen language
+      behavior, logical-IR schema, vocabulary, external-encoding, digest, and
+      fixture contract versions. The version tool must display all domains and
+      reject an attempted package bump that silently changes a normative
+      contract, or a contract bump that lacks its required freeze decision.
+- [x] Implement `cargo xtask version show`, `check`, and `prepare <version>`.
+      `prepare` must make only reviewed, deterministic derived updates, emit a
+      machine-readable change plan, reject invalid SemVer/channel transitions,
+      and never create a tag, publish, or alter frozen contracts.
+- [x] No hard coded version checking in tests and code use dynamic linking.
+- [x] Make root `Cargo.lock` the sole release dependency lock; retain only the
+      explicitly isolated non-release `fuzz/Cargo.lock` tool lock. Add automated
+      locked metadata/build checks, dependency/license/advisory review, and a
+      clear failure when the lock or its declared source policy is stale.
+- [x] Inventory generated outputs and assign each one an owner, source of
+      truth, regeneration command, validation command, and tracking policy.
+      Rustdoc, coverage, fuzz, mutation, benchmark, package, SBOM, and release
+      reports belong under ignored generated-result roots; they are never
+      hand-edited or committed accidentally.
+- [x] Distinguish immutable normative digests in freeze/fixture manifests from
+      generated lock metadata. A command may verify or propose a contract-digest
+      update, but changing it requires the governing freeze/change-control
+      review and cannot be an automatic version-bump side effect.
+- [x] Define `portable/` as the active, version-scoped execution package: it
+      contains the current version's plan, contracts, fixtures, decisions, and
+      progress records. Production crates and executable tests must never depend
+      on archived portable material.
+- [x] Implement `cargo xtask portable verify` to check active portable links,
+      fixture ownership, manifest registration, version identity, and absence
+      of test dependencies on archived/mutable roadmap material.
+- [x] Implement `cargo xtask portable snapshot` to create a deterministic,
+      digest-identified archive candidate and migration report without writing
+      to another repository. The maintainer then lands that reviewed snapshot
+      in the neutral-roadmap version archive as a separate immutable commit.
+- [x] Define the rollover procedure: after v0 release evidence is immutable,
+      archive the v0 portable snapshot in the roadmap repository, replace this
+      repository's active `portable/` package with the future v1 portable
+      package, and retain a local redirect/identity record rather than silently
+      mixing v0 and v1 planning files.
+- [x] Document and test the archive boundary: historical portable plans are
+      readable evidence, not mutable fixtures, build inputs, or CI dependencies.
+
+#### Step validation
+
+- [x] Changing a package release version requires one `Cargo.toml` edit plus
+      `cargo xtask version prepare`, and `cargo xtask version check` detects
+      every stale derived value.
+- [x] Frozen contract versions and fixture digests remain unchanged by ordinary
+      package releases and fail verification if changed without review.
+- [x] A portable snapshot can be verified from its manifest/digests, and a v1
+      rollover cannot make v0 tests, links, or release records ambiguous.
+
+### Step 4: standardize repository ownership, tests, quality, and contributor flow
+
+- [x] Publish a root repository map that assigns ownership and lifecycle to
+      `crates/`, `portable/`, `quality/`, `config/`, `scripts/`, `fuzz/`,
+      `test-results/`, and release-output roots. Every retained top-level and
+      script directory needs a concise README describing its ecosystem role.
+- [x] Move, remove, or archive obsolete/duplicate experiments, generated
+      outputs, superseded fixtures, and manual release files only after a
+      replacement owner and verification command exist. Do not delete frozen
+      evidence or mutable user work through an automated cleanup command.
+- [x] Make test levels durable and independently runnable: crate-local unit,
+      package smoke, cross-package integration/system, conformance fixture,
+      property/metamorphic, security/adversarial, fuzz regression, and
+      performance/soak. The complete suite must compose them without relying
+      on stage history or archived portable files.
+- [x] Keep production sources free of inline test bodies; test-only behavior is
+      owned by the crate's `tests/` directory, and fixtures remain grouped by
+      positive/negative feature ownership with immutable oracle manifests.
+- [x] Make coverage a documented nightly-only command with both human-readable
+      HTML and machine-readable output under ignored `test-results/analysis/`.
+      Keep the 85%/90%/80% configured gates and document any future exclusion
+      as an explicit reviewed policy rather than an ad-hoc tool filter.
+- [x] Make fuzz targets subsystem-owned (`source`, `vocabulary`, `ir`,
+      `formatter`, `probe`), preserve minimized findings as deterministic
+      regressions when relevant, and keep corpora/crashes/coverage artifacts
+      ignored and separate from normative fixtures.
+- [x] Enforce a warning-free release candidate across libraries, binaries,
+      tests, examples, benches, manifests, build scripts, and documentation.
+      Remove stale suppressions or document a narrow reason next to each one;
+      CI must fail new release-relevant warnings.
+- [x] Make the root README a new-contributor path: bootstrap, command map,
+      supported hosts, normal build/test/quality flow, coverage/fuzz setup,
+      artifact validation, packaging, release preparation, and troubleshooting.
+- [x] Keep CI orchestration thin: push-to-main and tag/manual triggers select
+      only a stable command/profile; reusable logic, summaries, error policy,
+      and path safety live in `xtask` or the platform adapter.
+
+#### Step validation
+
+- [x] A clean clone can discover the owner of every directory, run each test
+      level alone, run all quality checks, and find generated evidence without
+      reading previous-stage history.
+- [x] No generated or archived file is accidentally committed, required as a
+      mutable test input, or silently accepted as a source of truth.
+- [x] The release candidate emits no unreviewed warning, and any CI failure is
+      reproducible locally through the documented stable command.
+
+### Step 5: reproduce the supported developer and release environment
+
+- [x] Run the platform bootstrap documented in `scripts/linux/README.md` on a
+      clean supported Linux checkout; record the host image and installed tool
+      versions.
+- [x] Verify stable Rust, Rustfmt, Clippy, Cargo, LLVM coverage tools, fuzzing
+      tools, mutation tools, Valgrind, and the release shell prerequisites with
+      actionable missing-tool diagnostics.
+- [x] Recreate the normal stable build/test environment from `Cargo.lock`
+      without modifying tracked files or normative fixtures.
+- [x] Recreate the isolated nightly LLVM/fuzz environment only for the
+      configured coverage and fuzz commands; it must not replace the stable v0
+      build toolchain.
+- [x] Audit `.gitignore` so `target/`, `test-results/`, fuzz corpora/crashes,
+      profiling reports, editor state, and local release output are ignored,
+      while contracts, fixtures, lockfiles, scripts, and manifests remain
+      tracked.
+
+#### Step validation
+
+- [x] A clean checkout reaches `cargo xtask ci pr` using only documented setup.
+- [x] No release command relies on a user-specific path, ambient artifact,
+      mutable archive, or network lookup for source/vocabulary resolution.
+
+### Step 6: qualify the exact candidate
+
+- [x] Run `cargo xtask ci release` from the clean `main` candidate revision and retain its
+      task summary under ignored release evidence.
+- [x] Run `RUSTUP_TOOLCHAIN=nightly cargo xtask coverage`; retain the
+      machine-readable report and confirm the configured 85% line, 90%
+      function, and 80% region gates.
+- [x] Run the configured critical mutation target and the retained broader
+      selected mutation review when production code changed after Stage 9.
+- [x] Run all five 900-second fuzz campaigns when parser, vocabulary, IR,
+      formatter, decoder, probe, limits, or dependencies changed after Stage 9;
+      otherwise retain the exact Stage 9 corpus/toolchain evidence.
+- [x] Run the release and extended-soak benchmark profiles. Repeat Valgrind
+      Massif/Memcheck when allocation-affecting production code changed.
+- [x] Re-run the dependency, package-boundary, test-layout, traceability,
+      licensing, advisory, and static-work-product reviews on the candidate.
+
+#### Step validation
+
+- [x] All required release commands pass without lowering thresholds, reducing
+      scope, accepting viable mutants, or treating fuzz/profile failures as
+      informational.
+- [x] The evidence identifies the exact candidate revision and command/tool
+      versions used for every result.
+
+### Step 7: verify consumer-facing deliverables
+
+- [x] Build release-mode `neutral-cli`, `neutral-probe`, libraries, reference
+      formatter, and workspace documentation from the candidate.
+- [x] Compile, validate, and format representative positive fixtures through
+      the released CLI boundary; verify negative, cancellation, size-limit,
+      vocabulary-lock, and output-publication failures leave no valid output.
+- [x] Encode one successful compilation, inspect it with the in-process reader,
+      the probe library, and the standalone `neutral-probe` executable; require
+      equivalent summaries modulo envelope-only metadata.
+- [x] Confirm the standalone probe's resolved dependency graph contains no
+      compiler, frontend, or host-I/O dependency beyond its reviewed allowlist.
+- [x] Run public documentation examples and inspect generated Rustdoc from
+      `target/doc/index.html`.
+
+#### Step validation
+
+- [x] A clean consumer can use explicit source and vocabulary inputs to compile
+      or inspect an artifact without private compiler models, workspace caches,
+      or ambient lookup.
+- [x] The published CLI, reader, encoding, and probe boundaries match the
+      frozen v0 API, diagnostic, compatibility, and exclusion contracts.
+
+### Step 8: assemble only the declared distribution artifacts
+
+- [x] Produce a release manifest listing each selected artifact, exact filename,
+      SHA-256 digest, license/notices, producer version, source commit, and
+      intended distribution channel.
+- [x] If publishing Cargo packages is selected, run `cargo package --locked`
+      for each public package, inspect package contents, and test each packaged
+      artifact in a clean consumer directory before upload.
+- [x] If GitHub binary assets are selected, build only the documented supported
+      target matrix and publish checksums plus installation/verification steps.
+- [x] Generate the SBOM/dependency manifest and build provenance required by
+      [05-RELEASE.md](05-RELEASE.md); record known limitations, explicit v0
+      exclusions, supported hosts, and deferred work.
+- [x] Keep transient coverage, mutation, fuzz, profiler, and build outputs out
+      of the release artifact set; retain only the evidence required to audit
+      qualification.
+
+#### Step validation
+
+- [x] Every shipped file is intentional, license-complete, digest-identified,
+      reproducible from the candidate, and verified as the packaged form rather
+      than merely as a workspace build.
+
+### Step 9: record approvals and publish
+
+- [x] Complete the technical, test/quality, security, release, and standards
+      approval entries in [05-RELEASE.md](05-RELEASE.md). When the sole
+      maintainer fills multiple roles, record that staffing exception and its
+      compensating review honestly.
+- [x] Confirm the tag-triggered release workflow uses the same
+      `cargo xtask release prepare` command as local qualification and has no
+      credentials available to pull-request execution.
+- [ ] Publish only after all selected artifacts, evidence, and approvals pass;
+      then record immutable release URLs and artifact digests.
+- [ ] Archive the completed v0 portable plan and evidence according to the
+      roadmap policy before initializing the v1 portable plan.
+
+#### Stage 10 validation
+
+- [ ] A clean checkout can reproduce every selected artifact and its validation
+      evidence using documented commands.
+- [ ] Every release artifact passes standalone consumer/probe verification.
+- [ ] No unapproved residual risk, version/contract mismatch, missing license,
+      mutable fixture, or release-blocking issue remains.

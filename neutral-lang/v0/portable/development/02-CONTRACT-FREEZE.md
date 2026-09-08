@@ -1,6 +1,8 @@
 # Neutral v0 normative contract-freeze gate
 
-Status: mandatory pre-implementation gate
+Status: approved v0 baseline on 2026-08-26; external IR encoding amendment
+approved on 2026-09-03; path-only portable-layout amendment approved on
+2026-09-06
 
 This gate closes the gap between design exploration and production compiler
 behavior. Repository scaffolding and disposable experiments may happen before
@@ -30,7 +32,9 @@ behavior. Contradictory accepted documents fail this gate.
 
 ## Freeze artifact
 
-Create `specs/freeze.toml` in the future implementation repository. It must
+The approved freeze manifest is at [`../specs/contracts/freeze.toml`](../specs/contracts/freeze.toml).
+It identifies the accepted inputs, contract versions, fixture corpus, and
+repository-owner approval. The manifest must
 record:
 
 - freeze identifier and approval date;
@@ -47,8 +51,22 @@ record:
 - approvers and unresolved blocking issues; and
 - superseding freeze identifier, if replaced.
 
+The current manifest supersedes the original baseline to add the accepted
+[Neutral IR Framed CBOR 0.1 decision](../specs/decisions/11-external-ir-encoding.md)
+and its machine-readable limits. Its latest amendment records the homogeneous
+portable directory layout and corresponding content/path digests without
+changing logical language behavior.
+
 The freeze manifest identifies contracts; it is not itself a language input and
 does not enter logical IR equality.
+
+The companion [fixture/oracle review candidate](../conformance/fixture-oracle-review.toml)
+locks every currently known source fixture by SHA-256 and records its required
+oracle shape. Stage 2 cases additionally carry complete per-case expected
+values, diagnostics, or spans beneath `portable/conformance/oracles/stage2/`.
+
+The [contract question ledger](evidence/contract-question-ledger.md) records the approved
+resolutions for the questions found during the freeze review.
 
 ## Gate A: scope and document coherence
 
@@ -60,7 +78,7 @@ does not enter logical IR equality.
 - [ ] No Flow, Neux, runtime, authority, filesystem, network, command, secret, or
       application-specific meaning appears in Neutral core.
 - [ ] Later-version placeholders contain no implied v0 commitment.
-- [ ] Open questions are classified as blocking, implementation-only, or
+- [x] Open questions are classified as blocking, implementation-only, or
       deliberately deferred.
 - [ ] Every blocking question is resolved before approval.
 
@@ -188,7 +206,8 @@ does not enter logical IR equality.
 - [ ] Reentrancy, concurrency, cancellation, ownership, and lifetime behavior are
       specified.
 - [ ] No public AST or IR rewrite API exists in v0.
-- [ ] The standalone probe can be implemented from reader contracts alone.
+- [x] The standalone probe can be implemented from public encoding and reader
+      contracts without compiler linkage.
 
 ### Validation
 

@@ -1,11 +1,10 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # Neutral language v0 development
 
-Status: proposed implementation index
-
-This section contains the implementation gates, stages, automation, testing,
-release, and progress material for the portable v0 package. Numbered documents
-are ordered by lifecycle. Begin with the [portable plan](../PLAN.md), then use
-the active phase below.
+This directory contains implementation gates, automation, testing, release,
+progress, and retained review evidence. Numbered documents follow lifecycle
+order; begin with the [portable execution plan](../PLAN.md).
 
 - [00 Environment and automation](00-ENVIRONMENT-AUTOMATION.md)
 - [01 Identity and vocabulary](01-IDENTITY-AND-VOCABULARY.md)
@@ -14,3 +13,5 @@ the active phase below.
 - [04 Testing](04-TESTING.md)
 - [05 Release](05-RELEASE.md)
 - [06 Progress](06-PROGRESS.md)
+- [07 Portable lifecycle](07-PORTABLE-LIFECYCLE.md)
+- [Retained implementation evidence](evidence/README.md)
