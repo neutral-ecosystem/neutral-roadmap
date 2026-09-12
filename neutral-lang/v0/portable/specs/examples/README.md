@@ -1,9 +1,9 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # Neutral language v0 examples
 
-Status: proposed reader-facing example catalog
+This directory contains reader-facing explanations of the public v0 surface.
+Examples illustrate accepted behavior but cannot override requirements,
+contracts, or decisions.
 
-This directory contains explanatory examples for the public v0 contracts. An
-example may illustrate valid behavior, but it does not override
-[`REQUIREMENTS.md`](../REQUIREMENTS.md), a contract, or an accepted decision.
-
-- [Language showcase](LANGUAGE-SHOWCASE.md)
+- [Complete language showcase](LANGUAGE-SHOWCASE.md)

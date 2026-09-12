@@ -1,20 +1,18 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # Neutral language v0 specifications
 
-Status: proposed v0 specification index
+This directory owns the normative v0 material that accompanies the portable
+[architecture](../ARCHITECTURE.md), [execution plan](../PLAN.md), and
+[roadmap](../ROADMAP.md).
 
-The portable root owns the v0 [architecture](../ARCHITECTURE.md),
-[plan](../PLAN.md), and [roadmap](../ROADMAP.md). This directory owns the
-remaining normative v0 material. Its categories are reusable across Neutral
-projects: requirements state what the version must provide; contracts define
-project-specific behavior; decisions record accepted tradeoffs; fixtures support
-verification; and examples explain the contract.
+- [`REQUIREMENTS.md`](REQUIREMENTS.md) states what v0 must provide.
+- [`contracts/`](contracts/README.md) defines public project-specific behavior.
+- [`decisions/`](decisions/README.md) records accepted tradeoffs.
+- [`fixtures/`](fixtures/README.md) contains normative verification inputs.
+- [`examples/`](examples/README.md) explains the language without overriding its
+  contracts.
+- [`TRACEABILITY.md`](TRACEABILITY.md) maps every accepted requirement and
+  checked syntax item to decisions, fixtures, implementation, and tests.
 
-- [`REQUIREMENTS.md`](REQUIREMENTS.md)
-- [language contracts](contracts/README.md), including the
-  [syntax checklist](contracts/syntax-checklist.md) and
-  [architectural choices](contracts/choices.md)
-- [proposed syntax guide](contracts/proposed-syntax-guide.md)
-- [accepted decisions](decisions/README.md)
-- [conformance fixtures](fixtures/README.md)
-- [language examples](examples/README.md), including the
-  [language showcase](examples/LANGUAGE-SHOWCASE.md)
+Implementation notes and mutable progress do not belong here.

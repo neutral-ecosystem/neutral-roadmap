@@ -1,6 +1,6 @@
 # Neutral language v0 architecture
 
-Status: proposed v0 architecture
+Status: accepted v0 architecture
 
 This document defines the architecture needed to prove the first Neutral
 language boundary. It intentionally specifies only v0. Future language features
@@ -479,7 +479,7 @@ v0 is complete only after:
 
 ## 16. Document precedence
 
-- [`REQUIREMENTS.md`](specs/REQUIREMENTS.md) lists only v0 requirements.
+- [requirements.md](specs/REQUIREMENTS.md) lists only v0 requirements.
 - [choices.md](specs/contracts/choices.md) records v0 architectural choices.
 - [syntax.md](specs/contracts/syntax.md) is the master v0 syntax checklist.
 - [proposed-syntax-guide.md](specs/contracts/proposed-syntax-guide.md) is the author-facing

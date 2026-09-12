@@ -1,12 +1,17 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # Neutral language v0 development plan
 
-Status: proposed operational index
+Status: active v0 operational index — Stage 9 approved; Stage 10 workflow
+overhaul active
 
-This is the entry point for implementing Neutral language v0. This directory is
-a portable, standalone repository seed: copy its *contents* into the root of a
-new `neutral-lang` repository. It turns the v0 architecture, requirements,
-decisions, fixtures, and roadmap into gated work without adding language
-behavior.
+This is the entry point for implementing and tracking Neutral language v0 in
+this repository. The directory is a self-contained, version-scoped package of
+architecture, requirements, contracts, decisions, fixtures, executable
+conformance assets, implementation gates, and retained evidence. Archive it
+when v0 closes; initialize the next active `portable/` package from that
+version's Neutral roadmap package, then adapt its progress and repository
+evidence locally.
 
 ## Governing specification
 
@@ -50,14 +55,14 @@ the affected gate.
       models private.
 - [ ] Emit authoritative IR only after complete success.
 - [ ] Keep `compile_captured` deterministic and I/O-free.
-- [ ] Treat source, vocabulary, and encoded IR bytes as untrusted even after a
+- [x] Treat source, vocabulary, and encoded IR bytes as untrusted even after a
       digest matches.
 - [ ] Enforce structural limits before proportional allocation or conversion.
-- [ ] Keep logical IR equality independent of map order, thread scheduling,
+- [x] Keep logical IR equality independent of map order, thread scheduling,
       pretty printing, encoding bytes, and graph-local `ElementId` spelling.
-- [ ] Keep ordinary reuse/default origin in provenance, not new logical value
+- [x] Keep ordinary reuse/default origin in provenance, not new logical value
       kinds.
-- [ ] Give `Ref<T>` identity-only meaning; infer no ownership, containment,
+- [x] Give `Ref<T>` identity-only meaning; infer no ownership, containment,
       dependency, readiness, order, or runtime behavior.
 - [ ] Add no excluded syntax through parser convenience, private IR, vocabulary,
       CLI, formatter, or probe conventions.
@@ -91,8 +96,98 @@ Stage 8: formatter, CLI, standalone probe, documentation
     ↓
 Stage 9: correctness, security, determinism, performance hardening
     ↓
-Stage 10: release qualification
+Stage 10: workflow overhaul and release qualification
 ```
+
+## Current gate status
+
+Stage 1, the mandatory normative contract freeze, Stage 2, all Stage 3 slices,
+all Stage 4 slices, all Stage 5 slices, all Stage 6 slices, all three Stage 7
+steps and validation, and all Stage 8 steps and validation are complete. The
+private frontend
+retains exact nonsemantic trivia, enforces frozen ASCII/token boundaries,
+decodes bounded Unicode strings, and normalizes signed decimal exact numbers
+without floating-point conversion. It supports nullable scalar values with
+explicit typed null and collects one root scope before resolving nominal record
+schemas and contextual values. It validates closed scalar/null/record field
+defaults and materializes omitted fields. It also contextually types invariant
+ordered lists, including
+empty, nested, nullable-element, and closed-default forms, under explicit item,
+depth, and traversal limits. Ordinary immutable values now resolve after root
+collection through a deterministic dependency graph, including forward,
+transitive, nested, and outer-nullable reuse; cycles fail with stable related
+locations, while final values and reuse edges cross IR, reader, and probe
+boundaries. Typed identity references now resolve exact binding targets to
+document-local `ElementId` edges without entering value dependencies; only
+`Ref<T>` breaks nominal embedding cycles, and reader/probe consumers validate
+and traverse those typed edges by ID. Whole logical documents now compare by a
+one-to-one graph mapping independent of local ID spelling and companion records;
+duplicate and dangling graphs fail closed. Typed IR, source facts, provenance,
+reader validation, and probe output are covered by frozen oracles and generated
+property vectors. Captured vocabulary bundles now pass an exact typed-digest
+gate before a strict bounded JSON decoder validates the closed schema, immutable
+feature set, nominal type graph, and closed defaults. Captured byte identity is
+kept separate from the normalized logical vocabulary contract, and no bundle
+content can trigger code loading or external I/O. Optional `use` and qualified
+vocabulary types now resolve only from exact host-captured lock input. Closed
+payloads, vocabulary defaults, exact IR/derivation facts, reader validation,
+and generic probe enumeration form the complete Stage 6 vertical boundary.
+[Neutral IR Framed CBOR 0.1](specs/decisions/11-external-ir-encoding.md) is now
+the accepted external artifact format: a checked fixed-width frame encloses
+closed, restricted-CBOR envelope, logical payload, source-map, provenance, and
+derivation sections. Exact decimals remain normalized string/integer
+components; unknown versions, capabilities, members, and malformed or oversized
+input fail closed before a reader view exists. The validated-document encoder
+now derives exact capabilities, projects every logical and companion contract
+into five bounded restricted-CBOR sections, hashes sections 2 through 5 into an
+envelope-only integrity list, and emits the fixed frame. Producer/build facts
+affect only the envelope; deterministic emitted byte order is nonsemantic
+implementation behavior. The hostile decoder now validates the fixed frame and
+directory before CBOR allocation, retains duplicate map entries until closed
+schema checks finish, applies host and captured bounds, verifies integrity and
+capabilities, reconstructs every logical and companion contract, and returns a
+reader view only after complete cross-section and trusted-reader validation.
+Stable failure classes cover malformed, unsupported, oversized, inconsistent,
+and cancelled inputs; captured vocabulary identity is checked without external
+lookup. The standalone `neutral-probe` binary now reads external encoded
+artifacts through public encoding/reader contracts without compiler linkage,
+and its process-boundary system test verifies deterministic categorized output.
+The stable decoder campaign covers all truncation boundaries, seeded structured
+mutations, and arbitrary byte sequences. A reviewed bounds-before-allocation
+record closes Stage 7. The Stage 8 reference formatter now renders validated
+captured source through the private parsed representation without publishing an
+AST. It enforces canonical headers, LF newlines, four-space recursive layout,
+field/item commas, normalized spacing, and deterministic source-order comment
+placement. Complete-corpus tests prove idempotence, parse/format/parse logical
+equivalence, provenance-category preservation, and source-identity separation.
+The host CLI now exposes strict `compile`, `validate`, and `format` process
+boundaries with explicit source and destination selection, captured-vocabulary
+locks, reviewed structural limits, standard streams, overwrite authorization,
+cooperative cancellation, safe diagnostic disclosure, stable exit classes, and
+synchronized same-directory atomic output. Built-binary system tests cover
+Unicode and spaced paths, stdin/stdout separation, permissions, broken pipes,
+failed commits, cancellation, output preservation, temporary cleanup, and
+external artifact decoding. Inspection remains a separate compiler-free
+`neutral-probe` responsibility. That probe now enumerates logical, identity,
+source-map, derivation, resource, type, value, vocabulary, and provenance views;
+its shared renderer produces byte-for-byte-equivalent in-process and executable
+observations. A consumer-owned diagnostic maps through the public source map,
+hostile external traversal remains bounded by decoder limits, and CI enforces
+the compiler-free dependency closure. The complete requirement/syntax evidence
+index now maps accepted contracts to decisions, fixtures, implementation, and
+tests. CI rejects missing IDs, unchecked master syntax, orphaned normative
+fixtures/oracles, and broken registered paths; the published full-language
+example compiles as conformance evidence. Stage 9 hardening now has complete
+stable property, structural-limit, cancellation, isolation, dependency, static
+review, critical and broad mutation evidence, whole-workspace LLVM coverage,
+coverage-guided fuzzing, controlled performance, extended soak, and allocation
+evidence. The sole maintainer approved its residual-risk treatment before
+Stage 10 began.
+The approved
+[freeze manifest](specs/contracts/freeze.toml) identifies
+the v0 contract family, and the
+[contract question ledger](development/evidence/contract-question-ledger.md) records the
+resolutions accepted during review.
 
 ## Stage summary and exit evidence
 
@@ -125,6 +220,7 @@ neutral-ir
 neutral-vocabulary
 neutral-compiler
 neutral-reader
+neutral-encoding      # validated-document external artifact encoder
 neutral-probe          # reader-only library + standalone binary
 neutral-cli            # compile/validate/format host
 neutral-test-support   # helpers only
@@ -138,15 +234,29 @@ effect/pure, reader/probe, and test-ownership boundaries remain enforceable.
 
 ## Standard local gates
 
-After host bootstrap, run from the future implementation repository root:
+After host bootstrap, run from this implementation repository root:
 
 ```bash
 cargo xtask environment verify
-cargo xtask ci stage1       # before contract freeze / during Stage 1
-cargo xtask ci pr           # Stage 2 onward; selects active suites
-cargo xtask ci nightly
-cargo xtask ci release      # release candidates only
+cargo xtask fmt
+cargo xtask lint
+cargo xtask check
+cargo xtask test all
+cargo xtask quality
+cargo xtask build --profile release
+cargo xtask validate binaries
 ```
+
+Release operators use `cargo xtask release prepare`; it fails unless the
+approved candidate identity, distribution scope, evidence, tag target, and
+checkout agree. It never pushes, uploads, publishes, or creates a tag.
+
+Generate the workspace API site with `cargo docs`, then open the generated
+`target/doc/index.html`. The automation runs rustdoc
+and builds the landing page from Cargo metadata, so package names, versions,
+descriptions, ownership, publication groups, and workspace dependency links
+stay synchronized without a hand-maintained crate list. All generated site
+files remain ignored.
 
 Individual tasks and evidence behavior are defined in
 [00-ENVIRONMENT-AUTOMATION.md](development/00-ENVIRONMENT-AUTOMATION.md). Test

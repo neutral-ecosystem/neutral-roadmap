@@ -40,7 +40,7 @@ candidate.
 
 ## Test ownership and source of truth
 
-The future implementation repository uses one owner for each class of test
+This implementation repository uses one owner for each class of test
 material:
 
 ```text
@@ -56,8 +56,8 @@ conformance/
 ├── expected-derivation/
 └── encoded-ir/
 
-crates/<production-crate>/src/
-└── colocated private unit tests only
+crates/<production-crate>/tests/
+└── path-based private unit modules and black-box integration targets
 
 crates/neutral-test-support/
 └── reusable builders, fixture loading, assertions, and test-only comparators
@@ -88,17 +88,23 @@ Rules:
 - `neutral-test-suite` is non-published and owns cross-crate executable tests.
 - `neutral-bench` is non-published and owns benchmark harnesses and immutable
   benchmark corpus identities.
-- Fuzz targets live only under `fuzz/` and promote confirmed failures into
-  deterministic conformance/security regression fixtures.
-- Generated results live only under ignored `test-results/<run-id>/`.
+- Coverage-guided fuzz targets live only under `fuzz/`. Stable bounded mutation
+  campaigns may live in `neutral-test-suite`; both promote confirmed failures
+  into deterministic conformance/security regression fixtures.
+- Generated results live only under ignored `test-results/`, organized by
+  bootstrap, CI profile/stage, suite, and analysis category.
 - There is no duplicate root `tests/` tree outside its owning Cargo package.
+- Production `src/` files may contain only a `#[cfg(test)]` path declaration;
+  every test body lives below the owning crate's `tests/` directory. CI enforces
+  this with `cargo xtask test-layout check`.
 
 ## Independent probe proof
 
 `neutral-probe` is both a library and standalone binary package.
 
-- Its normal and development dependency graph may include only public core and
-  reader contracts plus narrowly reviewed CLI/output dependencies.
+- Its normal dependency graph may include only public core, encoding, and reader
+  contracts plus narrowly reviewed CLI/output dependencies. Test-only public IR
+  constructors may build compiler-free encoded fixtures.
 - It may not depend on `neutral-compiler`, compiler test support, private AST,
   semantic types, source lexer/parser, or filesystem resolver implementation.
 - The library accepts a public validated reader view.
@@ -138,6 +144,8 @@ gates and is recorded in the change.
 - [ ] New parser acceptance cannot merge before semantic, IR, reader, and
       conformance obligations are implemented in the same slice.
 - [ ] Tests assert behavior/invariants, not incidental Rust layout or map order.
+- [x] Every Rust function, including private helpers and test functions, has a
+      concise Rust documentation comment describing its responsibility.
 - [ ] Goldens update only through explicit `cargo xtask golden update`, and every
       semantic difference is reviewed.
 - [ ] Flaky tests are defects; retries collect evidence but never convert a
@@ -183,6 +191,63 @@ Compiler smoke, conformance, semantic integration, full system, fuzz, and
 performance suites are planned but inactive. Stage 1 cannot require them to
 pass, and no placeholder is allowed to fail on the main branch.
 
+### Stage 2 active tests
+
+Stage 2 activates the frozen minimal scalar path across unit, smoke,
+integration, system, conformance, property, security, and bounded fuzz-smoke
+categories. `cargo xtask ci pr` enforces the configured category minimums,
+exact positive/negative oracles, reader/probe traversal, formatting invariance,
+repeated/concurrent determinism, malformed-input safety, and absence of
+authoritative IR on every failure. Broader language and performance cases remain
+inactive until their owning stages.
+
+### Stage 3 Slice 3.1 active tests
+
+The active Stage 3 profile extends every Stage 2 gate with frozen positive and
+negative identifier/comment/boundary oracles. It verifies exact source facts,
+reader/probe visibility, comment insertion/removal invariance, generated ASCII
+identifier boundaries, stable unterminated and misleading-comment failures,
+and continued rejection of future grammar. Later scalar and performance suites
+remain inactive until their owning slices.
+
+### Stage 3 Slice 3.2 active tests
+
+The active Stage 3 profile additionally freezes string escapes, raw Unicode,
+Unicode scalar boundaries, raw controls, unterminated strings, explicit scalar
+type mismatches, both Boolean values, and decoded-string resource limits.
+Reader traversal asserts typed public IR values, while probe tests require every
+decoded control character to be rendered through a safe escape.
+
+### Stage 8 Step 2 active tests
+
+The active Stage 8 profile includes built-`neutral-cli` process tests for stable
+general and command usage, exit classes, file and standard-stream operation,
+explicit vocabulary capture, reviewed limits, overwrite protection, atomic
+publication, cancellation, permission and broken-pipe failures, path-safe
+diagnostics, temporary cleanup, and compiler-independent decoding of emitted
+artifacts. These tests execute Cargo-provided binary paths and never call CLI
+internals. Standalone inspection remains owned by `neutral-probe`.
+
+### Stage 8 Step 3 active tests
+
+The active Stage 8 profile also builds and tests `neutral-probe` independently
+from compiler packages. A compiler-free public-IR fixture proves exact parity
+between in-process reader summaries, decoded summaries, and standalone binary
+lines across metadata, identities, source maps, declarations, types, values,
+and provenance. Additional system and security cases prove consumer diagnostic
+source mapping and caller-selected hostile-artifact traversal limits. The CI
+dependency gate checks the complete probe closure for every PR and release.
+
+### Stage 8 Step 4 active tests
+
+The Stage 8 profile runs repository traceability coherence before compilation:
+all accepted `NL-*` and checked `SYN-*` IDs must occur in the evidence index,
+the master and implementation syntax inventories must match with no unchecked
+items, every normative fixture/oracle must be registered, and every registered
+path must exist. The first complete `neu` block in the published language
+showcase is compiled with its exact captured vocabulary bundle. Rustdoc link
+checks and doc tests cover the public Rust API documentation.
+
 ### Activation milestones
 
 | Stage | Newly active evidence |
@@ -208,7 +273,7 @@ behavior.
 
 ### Unit
 
-Colocated pure-module invariants: spans, limits, diagnostics, exact numbers,
+Crate-local path-based pure-module invariants: spans, limits, diagnostics, exact numbers,
 tokens, layout, parser productions, symbol/type logic, graph algorithms,
 lowering, fingerprints, alpha-equivalence, schema validators, and decoder
 checks. Unit tests perform no network, process, ambient filesystem, wall-clock,
@@ -251,8 +316,10 @@ and repeated/concurrent determinism. CI records seeds and minimizes failures.
 
 ### Security and fuzz
 
-Deterministic hostile cases run on every PR. Coverage-guided fuzz smoke runs on
-PRs; extended campaigns run nightly/release for source decoding, lexer/layout,
+Deterministic hostile cases and bounded mutation smoke run on every PR. Stage 7
+adds a reproducible stable-Rust decoder campaign for truncations, structured
+mutations, and arbitrary bytes. Extended coverage-guided campaigns run during
+Stage 9 and manual release qualification for source decoding, lexer/layout,
 parser/recovery, vocabulary JSON, external IR decoder, formatter, and probe
 traversal. No crash, hang, stack exhaustion, uncontrolled allocation, invalid
 typed IR, or partial success is acceptable.
@@ -266,7 +333,7 @@ concurrent isolation, and cancellation responsiveness.
 
 PR performance is informational except for gross complexity/time-budget
 failures. Release regression gates run on a controlled dedicated runner with
-pinned toolchain, power/CPU policy, warm-up, repeated samples, dispersion, and
+exact recorded toolchain, power/CPU policy, warm-up, repeated samples, dispersion, and
 reviewed absolute/relative thresholds.
 
 ### Mutation and static review
@@ -304,6 +371,11 @@ Use and record the applicable technique:
 - thresholds ratchet upward; reduction requires a reviewed quality decision.
 
 Coverage percentage alone never proves correctness.
+
+Stage 9 thresholds and their current measured/pending state are stored in
+`config/quality-gates.toml`. Static review records live under `quality/`; a
+missing LLVM or coverage-guided fuzz toolchain leaves the applicable conclusion
+indeterminate rather than silently weakening the gate.
 
 ## Test metadata and evidence
 

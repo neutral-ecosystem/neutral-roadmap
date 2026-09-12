@@ -1,16 +1,17 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # Neutral language v0 contracts
 
-Status: proposed normative contract catalog
-
-This directory owns public, project-specific behavior that refines
-[`REQUIREMENTS.md`](../REQUIREMENTS.md). A future Neutral project may replace
-these documents with contracts for its own domain while keeping this category
-and its boundary intact.
+This directory owns externally observable contracts that refine
+[`REQUIREMENTS.md`](../REQUIREMENTS.md). They define behavior, not private
+implementation design or local working notes.
 
 - [Architectural choices](choices.md)
 - [Master syntax contract](syntax.md)
-- [Syntax checklist](syntax-checklist.md)
-- [Proposed syntax guide](proposed-syntax-guide.md)
+- [Syntax completion checklist](syntax-checklist.md)
+- [Author-facing syntax guide](proposed-syntax-guide.md)
+- [Approved freeze manifest](freeze.toml)
+- [Implementation traceability](../TRACEABILITY.md)
 
-Contracts describe externally observable behavior. They do not contain private
-implementation design or local working notes.
+The freeze manifest pins the exact governing revisions used by this
+implementation and must remain synchronized with any accepted contract change.

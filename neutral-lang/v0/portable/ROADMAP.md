@@ -1,9 +1,9 @@
 # Neutral language v0 implementation roadmap
 
-Status: proposed execution plan
+Status: active execution plan — Stage 9 hardening in progress
 
 This roadmap orders the work required to create Neutral v0. It is intentionally
-limited to the v0 contract in [ARCHITECTURE.md](ARCHITECTURE.md). It does not
+limited to the v0 contract in [architecture.md](ARCHITECTURE.md). It does not
 allocate features to later versions.
 
 The split, implementation-level gates and checklists begin at
@@ -64,8 +64,8 @@ specification.
 
 ### Work
 
-- Adopt [ARCHITECTURE.md](ARCHITECTURE.md),
-  [`REQUIREMENTS.md`](specs/REQUIREMENTS.md), and
+- Adopt [architecture.md](ARCHITECTURE.md),
+  [requirements.md](specs/REQUIREMENTS.md), and
   [the decision index](specs/decisions/README.md) as the v0 baseline.
 - Give every normative requirement and diagnostic a stable ID.
 - Define document precedence and a repository coherence check.
