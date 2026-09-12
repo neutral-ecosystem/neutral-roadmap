@@ -1,72 +1,114 @@
 # Neutral roadmap
 
 This repository is the design and planning workspace for the Neutral ecosystem.
-It contains architecture, requirements, language decisions, research, examples,
-and staged roadmaps. It is not the implementation repository and does not yet
-represent a stable released specification.
+It contains project contracts, versioned roadmaps, requirements, architecture,
+research, and portable implementation seeds. It is not an implementation
+repository or a stable released specification.
 
-## Purpose
+## Ecosystem
 
-Neutral is being designed from the top down so that its shared boundaries are
-understood before implementation choices become difficult to reverse.
+Neutral separates authoring, language compilation, and domain-specific behavior.
+The shared path is:
 
-The current priority is **Neutral language v0**: a small, typed, immutable,
-effect-free language that compiles one captured `.neu` source unit into a public
-Neutral IR. A generic probe must be able to inspect that IR without parsing the
-source or depending on compiler-private models.
-
-```text
-captured .neu source
-    -> neutral-lang compiler
-    -> Neutral IR + source map + provenance
-    -> generic effect-free consumer
+```mermaid
+flowchart TD
+    editor[Neutral Editor<br/>visual authoring surface] --> source[Captured .neu source]
+    source --> language[neutral-lang<br/>compiler]
+    language --> ir[Public Neutral IR<br/>source map, provenance, diagnostics]
+    ir --> flow[neutral-flow<br/>CI/CD domain]
+    ir --> neux[neux<br/>OS domain]
 ```
 
-The v0 work deliberately avoids application-specific behavior. Its purpose is
-to prove the source, compiler, IR, diagnostics, provenance, and reader API
-boundary first.
+- **Neutral Editor** authors `.neu` through capabilities discovered from the
+  selected language version. It does not own language semantics or execute the
+  resulting program.
+- **neutral-lang** validates versioned `.neu` source and produces public Neutral
+  IR, source maps, provenance, diagnostics, and reader contracts.
+- **neutral-flow** consumes Neutral IR and applies CI/CD-specific validation,
+  planning, portability, and provider integration.
+- **neux** is the planned independent Neutral IR consumer for operating-system
+  workflows and GNU command-shell abstraction.
 
-## Repository areas
+Neutral IR is the boundary shared by domain consumers. Flow and Neux do not
+depend on each other, and application-specific behavior does not belong in the
+language compiler or editor.
 
-- [Neutral language](neutral-lang/ARCHITECTURE.md) — the active language and IR
-  project architecture, with versioned portable specifications.
-- [Neutral Flow](neutral-flow/ARCHITECTURE.md) — earlier requirements and architecture
-  exploration for workflow-oriented tooling.
-- [Neutral Editor](neutral-editor/ARCHITECTURE.md) — the capability-driven Tauri/React/Rust
-  visual authoring architecture and full Neutral language v0 editor-compliance
-  requirements.
-- `neux/` — reserved workspace for later operating-system abstraction research.
-- [Repository rules](rules/README.md) — repository-wide documentation and
-  publishing policies.
-- `website/` — the Astro publishing layer for canonical repository
-  documentation, with Wrangler configuration for Cloudflare deployment.
+## Current direction
 
-## Start here
+Work proceeds foundation-first without collapsing the projects into one
+runtime:
 
-For the current work, read these documents in order:
+1. **Neutral language v0** is the active implementation target. It proves one
+   captured, typed, immutable, effect-free `.neu` source unit through the public
+   compiler, IR, diagnostics, provenance, and reader boundary.
+2. **Neutral Editor v0** defines a capability-driven visual authoring path for
+   the complete accepted language-v0 surface, including deterministic source
+   projection and lossless save/reopen behavior.
+3. **Neutral Flow** is establishing its architecture baseline and the smallest
+   Neutral IR consumer contract needed for inspectable CI/CD planning.
+4. **Neux** remains planned until its project-level contracts and implementation
+   scope are established.
 
-1. [Neutral language architecture](neutral-lang/ARCHITECTURE.md)
-2. [Neutral language requirements](neutral-lang/REQUIREMENTS.md)
-3. [Neutral language roadmap](neutral-lang/ROADMAP.md)
-4. [Proposed syntax guide](neutral-lang/v0/portable/specs/contracts/proposed-syntax-guide.md)
-5. [v0 decisions](neutral-lang/v0/portable/specs/decisions/README.md)
-6. [v0 implementation roadmap](neutral-lang/v0/portable/ROADMAP.md)
+Each project remains independently releasable. A successful compilation proves
+structural conformance only; it neither grants authority nor performs an
+external effect.
 
-For the visual editor workstream, continue with:
+## Repository map
 
-1. [Neutral Editor architecture](neutral-editor/ARCHITECTURE.md)
-2. [Editor project requirements](neutral-editor/REQUIREMENTS.md)
-3. [Editor project roadmap](neutral-editor/ROADMAP.md)
+- [`neutral-lang/`](neutral-lang/ARCHITECTURE.md) — shared language contracts,
+  version governance, and the portable v0 implementation seed.
+- [`neutral-editor/`](neutral-editor/ARCHITECTURE.md) — the generic visual
+  authoring architecture and proposed Editor v0 contracts.
+- [`neutral-flow/`](neutral-flow/ARCHITECTURE.md) — CI/CD capability research,
+  architecture, requirements, and evidence-gated delivery roadmaps.
+- `neux/` — reserved for the future OS-domain consumer and its supporting
+  research.
+- [`rules/`](rules/README.md) — repository-wide structure, portability,
+  publishing, and hosting policies.
+- [`website/`](website/README.md) — the Astro roadmap site that publishes
+  canonical Markdown from this repository through Cloudflare.
+- `assets/` — shared Neutral branding assets.
 
-For public documentation publishing, read:
+Private research and working material lives in underscore-prefixed directories.
+Versioned `portable/` trees are self-contained seeds intended to move into the
+corresponding implementation repositories.
 
-1. [Documentation rules](rules/DOCUMENTATION.md)
+## Reading paths
+
+### Neutral language v0
+
+1. [Project architecture](neutral-lang/ARCHITECTURE.md)
+2. [Project requirements](neutral-lang/REQUIREMENTS.md)
+3. [Project roadmap](neutral-lang/ROADMAP.md)
+4. [Portable v0 overview](neutral-lang/v0/portable/README.md)
+5. [v0 implementation plan](neutral-lang/v0/portable/PLAN.md)
+6. [v0 delivery roadmap](neutral-lang/v0/portable/ROADMAP.md)
+7. [Proposed syntax guide](neutral-lang/v0/portable/specs/contracts/proposed-syntax-guide.md)
+8. [Accepted v0 decisions](neutral-lang/v0/portable/specs/decisions/README.md)
+
+### Neutral Editor v0
+
+1. [Project architecture](neutral-editor/ARCHITECTURE.md)
+2. [Project requirements](neutral-editor/REQUIREMENTS.md)
+3. [Project roadmap](neutral-editor/ROADMAP.md)
+4. [Editor v0 overview](neutral-editor/v0/README.md)
+5. [Editor v0 architecture](neutral-editor/v0/ARCHITECTURE.md)
+6. [Editor v0 roadmap](neutral-editor/v0/ROADMAP.md)
+
+### Neutral Flow
+
+1. [Architecture](neutral-flow/ARCHITECTURE.md)
+2. [Capability requirements](neutral-flow/REQUIREMENTS.md)
+3. [Roadmap](neutral-flow/ROADMAP.md)
+
+### Repository and website
+
+1. [Repository rules](rules/README.md)
 2. [Portable documentation rules](rules/PORTABLE-DOCUMENTATION.md)
-3. [Documentation hosting rules](rules/HOSTING.md)
-4. Review the website content map and implementation entry point in the
-   repository when changing website code.
+3. [Hosting rules](rules/HOSTING.md)
+4. [Website content map](website/CONTENT-MAP.md)
+5. [Website development and deployment](website/README.md)
 
 ## License
 
-This repository is licensed under the
-[Apache License 2.0](LICENSE).
+Licensed under the [Apache License 2.0](LICENSE).
