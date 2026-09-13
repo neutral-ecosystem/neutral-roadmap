@@ -1,114 +1,142 @@
 # Neutral roadmap
 
-This repository is the design and planning workspace for the Neutral ecosystem.
-It contains project contracts, versioned roadmaps, requirements, architecture,
-research, and portable implementation seeds. It is not an implementation
-repository or a stable released specification.
+<p align="center">
+  <a href="https://github.com/neutral-ecosystem/neutral-roadmap"><img src="https://github.com/neutral-ecosystem/neutral-lang/blob/main/assets/neutral-logo-rounded.png?raw=true" alt="Neutral roadmap" width="128"></a>
+</p>
 
-## Ecosystem
+<div align="center">
 
-Neutral separates authoring, language compilation, and domain-specific behavior.
-The shared path is:
+  <p align="center">
+    <a href="https://github.com/neutral-ecosystem/neutral-lang/tree/main/conformance/releases/v0.1.0"><img src="https://img.shields.io/badge/Neutral_language-v0.1.0-2EA44F?style=for-the-badge" alt="Neutral language v0.1.0 release bundle"></a>
+    <a href="https://github.com/neutral-ecosystem/neutral-roadmap"><img src="https://img.shields.io/badge/Scope-Ecosystem_roadmap-0969DA?style=for-the-badge" alt="Neutral ecosystem roadmap"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-2EA44F?style=for-the-badge" alt="License: Apache 2.0"></a>
+    <a href="docs/README.md"><img src="https://img.shields.io/badge/Documentation%20Hub-0969DA?style=for-the-badge&amp;logo=mdbook&amp;logoColor=white" alt="Open the Neutral roadmap documentation hub"></a>
+  </p>
+
+  <p>Discover how Neutral language, visual authoring, CI/CD, and OS workflows fit together.</p>
+
+  <p align="center">
+    <a href="#features">Features</a> •
+    <a href="#showcase">Showcase</a> •
+    <a href="#quick-start">Quick Start</a> •
+    <a href="#development">Development</a> •
+    <a href="#guides">Guides</a>
+  </p>
+</div>
+
+---
+
+## Features
+
+- 🧭 Understand the purpose and boundaries of every Neutral project.
+- 🔗 Follow `.neu` source from visual authoring through compilation to domain-specific consumers.
+- 📦 Explore the released Neutral language v0.1.0 specification and conformance bundle.
+- 🗺️ See what is released, being designed, or planned across the ecosystem.
+- 🧩 Choose the Editor, Flow, or future Neux path that matches your interest.
 
 ```mermaid
-flowchart TD
-    editor[Neutral Editor<br/>visual authoring surface] --> source[Captured .neu source]
-    source --> language[neutral-lang<br/>compiler]
-    language --> ir[Public Neutral IR<br/>source map, provenance, diagnostics]
-    ir --> flow[neutral-flow<br/>CI/CD domain]
-    ir --> neux[neux<br/>OS domain]
+flowchart LR
+    Editor[Neutral Editor] --> Source[Captured .neu source]
+    Source --> Language[neutral-lang]
+    Language --> IR[Public Neutral IR]
+    IR --> Flow[neutral-flow]
+    IR --> Neux[neux]
 ```
 
-- **Neutral Editor** authors `.neu` through capabilities discovered from the
-  selected language version. It does not own language semantics or execute the
-  resulting program.
-- **neutral-lang** validates versioned `.neu` source and produces public Neutral
-  IR, source maps, provenance, diagnostics, and reader contracts.
-- **neutral-flow** consumes Neutral IR and applies CI/CD-specific validation,
-  planning, portability, and provider integration.
-- **neux** is the planned independent Neutral IR consumer for operating-system
-  workflows and GNU command-shell abstraction.
+| Project | Role | Current state |
+| --- | --- | --- |
+| [Neutral language](neutral-lang/ARCHITECTURE.md) | Compiles versioned `.neu` into public Neutral IR | v0.1.0 released |
+| [Neutral Editor](neutral-editor/ARCHITECTURE.md) | Visually authors `.neu` using discovered language capabilities | v0 proposed |
+| [Neutral Flow](neutral-flow/ARCHITECTURE.md) | Interprets Neutral IR for CI/CD planning and portability | Architecture discovery |
+| Neux | Interprets Neutral IR for operating-system workflows | Planned |
 
-Neutral IR is the boundary shared by domain consumers. Flow and Neux do not
-depend on each other, and application-specific behavior does not belong in the
-language compiler or editor.
+Each project has a separate responsibility. Neutral IR is the shared boundary:
+Flow and Neux do not depend on one another, and successful compilation does not
+grant authority or perform an external effect.
 
-## Current direction
+## Showcase
 
-Work proceeds foundation-first without collapsing the projects into one
-runtime:
+There is no single Neutral application screen to showcase yet. The ecosystem is
+a set of independently releasable projects connected through `.neu` source and
+public Neutral IR. The released
+[v0.1.0 language bundle](neutral-lang/v0/portable/README.md) is the first durable
+baseline; Editor and Flow build on its public contracts without owning or
+changing the language.
 
-1. **Neutral language v0.1.0** is the released language baseline. Its immutable
-   conformance bundle preserves the accepted source, IR, diagnostics,
-   provenance, and reader boundary.
-2. **Neutral Editor v0** defines a capability-driven visual authoring path for
-   the complete accepted language-v0 surface, including deterministic source
-   projection and lossless save/reopen behavior.
-3. **Neutral Flow** is establishing its architecture baseline and the smallest
-   Neutral IR consumer contract needed for inspectable CI/CD planning.
-4. **Neux** remains planned until its project-level contracts and implementation
-   scope are established.
+## Quick start
 
-Each project remains independently releasable. A successful compilation proves
-structural conformance only; it neither grants authority nor performs an
-external effect.
+You do not need to clone or build this repository. Explore Neutral in three
+steps:
 
-## Repository map
+1. Read the [Neutral language architecture](neutral-lang/ARCHITECTURE.md) to
+   understand `.neu`, the compiler, public IR, and consumer boundaries.
+2. Open the [v0.1.0 release archive](neutral-lang/v0/portable/README.md) to see
+   the first released language contract and conformance bundle.
+3. Choose an application direction: visual authoring with
+   [Neutral Editor](neutral-editor/ARCHITECTURE.md) or CI/CD planning with
+   [Neutral Flow](neutral-flow/ARCHITECTURE.md).
 
-- [`neutral-lang/`](neutral-lang/ARCHITECTURE.md) — shared language contracts,
-  version governance, and the portable v0 implementation seed.
-- [`neutral-editor/`](neutral-editor/ARCHITECTURE.md) — the generic visual
-  authoring architecture and proposed Editor v0 contracts.
-- [`neutral-flow/`](neutral-flow/ARCHITECTURE.md) — CI/CD capability research,
-  architecture, requirements, and evidence-gated delivery roadmaps.
-- `neux/` — reserved for the future OS-domain consumer and its supporting
-  research.
-- [`rules/`](rules/README.md) — repository-wide structure, portability,
-  publishing, and hosting policies.
-- [`website/`](website/README.md) — the Astro roadmap site that publishes
-  canonical Markdown from this repository through Cloudflare.
-- `assets/` — shared Neutral branding assets.
+If you already know what you are looking for:
 
-Private research and working material lives in underscore-prefixed directories.
-Versioned `portable/` trees are self-contained seeds intended to move into the
-corresponding implementation repositories.
+| If you want to… | Start here |
+| --- | --- |
+| Understand the shared language and IR boundary | [Neutral language architecture](neutral-lang/ARCHITECTURE.md) |
+| See the released language baseline | [Neutral language v0.1.0 archive](neutral-lang/v0/portable/README.md) |
+| Understand visual authoring | [Neutral Editor architecture](neutral-editor/ARCHITECTURE.md) |
+| Explore CI/CD planning | [Neutral Flow architecture](neutral-flow/ARCHITECTURE.md) |
+| Learn how the areas connect | [Ecosystem map](#features) |
 
-## Reading paths
+The recommended reading path is Neutral language first, then the Editor or Flow
+workstream that matches your interest. Neux is planned as a future independent
+Neutral IR consumer for operating-system workflows.
 
-### Neutral language v0
+## Development
 
-1. [Project architecture](neutral-lang/ARCHITECTURE.md)
-2. [Project requirements](neutral-lang/REQUIREMENTS.md)
-3. [Project roadmap](neutral-lang/ROADMAP.md)
-4. [Archived v0.1.0 overview](neutral-lang/v0/portable/README.md)
-5. [v0.1.0 release bundle](https://github.com/neutral-ecosystem/neutral-lang/tree/main/conformance/releases/v0.1.0)
-6. [v0.1.0 conformance manifest](neutral-lang/v0/portable/conformance/manifest.toml)
-7. [Proposed syntax guide](neutral-lang/v0/portable/specs/contracts/proposed-syntax-guide.md)
-8. [Accepted v0 decisions](neutral-lang/v0/portable/specs/decisions/README.md)
+This section is only for contributors maintaining the roadmap website.
 
-### Neutral Editor v0
+<details>
+<summary><strong>Roadmap website commands</strong></summary>
 
-1. [Project architecture](neutral-editor/ARCHITECTURE.md)
-2. [Project requirements](neutral-editor/REQUIREMENTS.md)
-3. [Project roadmap](neutral-editor/ROADMAP.md)
-4. [Editor v0 overview](neutral-editor/v0/README.md)
-5. [Editor v0 architecture](neutral-editor/v0/ARCHITECTURE.md)
-6. [Editor v0 roadmap](neutral-editor/v0/ROADMAP.md)
+| Need | Command |
+| --- | --- |
+| Check Astro and TypeScript | `pnpm --dir website check` |
+| Build the static roadmap site | `pnpm --dir website build` |
+| Preview the Cloudflare runtime | `pnpm --dir website preview:cloudflare` |
+| Deploy the checked-in Cloudflare configuration | `pnpm --dir website deploy` |
 
-### Neutral Flow
+</details>
 
-1. [Architecture](neutral-flow/ARCHITECTURE.md)
-2. [Capability requirements](neutral-flow/REQUIREMENTS.md)
-3. [Roadmap](neutral-flow/ROADMAP.md)
+The publishing contract, source boundaries, and deployment requirements are
+defined in the [website development guide](website/README.md) and
+[repository rules](rules/README.md).
 
-### Repository and website
+## Guides
 
-1. [Repository rules](rules/README.md)
-2. [Portable documentation rules](rules/PORTABLE-DOCUMENTATION.md)
-3. [Hosting rules](rules/HOSTING.md)
-4. [Website content map](website/CONTENT-MAP.md)
-5. [Website development and deployment](website/README.md)
+Choose a guide by task, or browse the complete [documentation hub](docs/README.md):
+
+| I want to… | Start here |
+| --- | --- |
+| Understand language-wide architecture | [Neutral language architecture](neutral-lang/ARCHITECTURE.md) |
+| Review the released language baseline | [v0.1.0 archive](neutral-lang/v0/portable/README.md) |
+| Plan visual authoring work | [Neutral Editor roadmap](neutral-editor/ROADMAP.md) |
+| Explore CI/CD planning and portability | [Neutral Flow roadmap](neutral-flow/ROADMAP.md) |
+| Follow content and publication rules | [Repository rules](rules/README.md) |
+| Work on the roadmap website | [Website development guide](website/README.md) |
+
+## Tech stack
+
+The following tools publish the roadmap site; they are not required to explore
+the ecosystem.
+
+<p align="left">
+  <a href="https://astro.build/"><img src="https://img.shields.io/badge/Astro-7.2-BC52EE?style=for-the-badge&amp;logo=astro&amp;logoColor=white" alt="Astro 7.2"></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&amp;logo=typescript&amp;logoColor=white" alt="TypeScript 5.9"></a>
+  <a href="https://pnpm.io/"><img src="https://img.shields.io/badge/pnpm-11.24-F69220?style=for-the-badge&amp;logo=pnpm&amp;logoColor=white" alt="pnpm 11.24"></a>
+  <a href="https://workers.cloudflare.com/"><img src="https://img.shields.io/badge/Cloudflare_Workers-Wrangler_4.127-F38020?style=for-the-badge&amp;logo=cloudflareworkers&amp;logoColor=white" alt="Cloudflare Workers with Wrangler 4.127"></a>
+</p>
+
+---
 
 ## License
 
-Licensed under the [Apache License 2.0](LICENSE).
+Distributed under the [Apache License 2.0](LICENSE).
