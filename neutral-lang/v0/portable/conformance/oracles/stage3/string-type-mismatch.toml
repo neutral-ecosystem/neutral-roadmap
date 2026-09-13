@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 schema_version = 1
-fixture = "portable/specs/fixtures/negative/strings/string-type-mismatch.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/negative/strings/string-type-mismatch.neu"
 fixture_sha256 = "d208ccf8ab665368fe0a984e871353e5fda64726ab167d275bab117900e31baa"
 expected_outcome = "reject"
 requirements = ["NL-TYP-001", "SYN-VAL-001"]

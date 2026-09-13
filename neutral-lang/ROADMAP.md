@@ -5,15 +5,16 @@ Status: project roadmap
 ## Purpose
 
 This roadmap describes the language project's version lifecycle. It is not the
-delivery plan for one language release; each version owns that plan in its
-portable documentation package.
+delivery plan for one language release; active versions own that plan in their
+portable documentation package, while released versions retain an immutable
+conformance bundle.
 
 ## Ongoing workstreams
 
 1. Maintain the project architecture, requirements, public bridge, and version
    governance defined at the language root.
-2. Complete the active version's portable specification, implementation plan,
-   fixtures, and conformance evidence.
+2. Complete an active version's portable specification, implementation plan,
+   fixtures, and conformance evidence before release.
 3. Preserve compatibility records and document any version transition before
    tools or consumers adopt it.
 4. Open a new version only when a demonstrated language need cannot be met by
@@ -23,7 +24,7 @@ portable documentation package.
 
 | Version | State | Public documentation |
 | --- | --- | --- |
-| v0 | Active implementation target | [Portable v0 overview](v0/portable/README.md) |
+| v0.1.0 | Released and archived | [Immutable v0.1.0 bundle](v0/portable/README.md) |
 | v1 | Not started | Documentation will appear when its portable seed exists |
 | v2 | Not started | Documentation will appear when its portable seed exists |
 
@@ -38,8 +39,8 @@ A version is complete only when its portable package contains:
 - evidence that supported consumers can use the public boundary without private
   compiler access.
 
-## Current delivery plan
+## Latest release record
 
-The current v0 delivery plan lives in
-[`v0/portable/ROADMAP.md`](v0/portable/ROADMAP.md). The root roadmap will remain
-generic as future versions are introduced.
+The local v0 archive mirrors the released
+[`v0.1.0` conformance bundle](https://github.com/neutral-ecosystem/neutral-lang/tree/main/conformance/releases/v0.1.0).
+The root roadmap remains generic until v1 has an active portable package.

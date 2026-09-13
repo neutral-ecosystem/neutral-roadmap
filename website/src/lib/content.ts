@@ -6,6 +6,7 @@ import { isIgnoredDirectory, isPublishedProjectSource, projectDocuments, project
 // Astro executes this module from the website project root in dev and build.
 const repositoryRoot = resolve(process.cwd(), '..');
 const repositoryUrl = 'https://github.com/neutral-ecosystem/neutral-roadmap/blob/main';
+const languageRepositoryUrl = 'https://github.com/neutral-ecosystem/neutral-lang/blob/main';
 
 export interface DocPage {
   sourcePath: string;
@@ -86,6 +87,10 @@ function rewriteLinks(source: string, currentPath: string, routes: Map<string, s
     ).split(sep).join('/');
     const route = routes.get(normalized);
     if (route) return `](${route}${fragment})`;
+    const releaseBundle = currentPath.startsWith('neutral-lang/v0/portable/');
+    if (releaseBundle && /^(?:crates|config)\//.test(normalized)) {
+      return `](${languageRepositoryUrl}/${normalized}${fragment})`;
+    }
     const portableRoot = currentPath.match(/^(neutral-(?:lang|editor|flow)\/v\d+\/portable)\//)?.[1];
     if (portableRoot && normalized.startsWith(`${portableRoot}/`)) {
       return `](${repositoryUrl}/${normalized}${fragment})`;

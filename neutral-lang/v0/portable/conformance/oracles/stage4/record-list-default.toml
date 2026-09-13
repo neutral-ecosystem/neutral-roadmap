@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/positive/lists/record-list-default.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/positive/lists/record-list-default.neu"
 fixture_sha256 = "1583be04ac21d886b88be216a802eb9751e3d47d067c16582f655c10bc69e788"
 expected_outcome = "accept"
 

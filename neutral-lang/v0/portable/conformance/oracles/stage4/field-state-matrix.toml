@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/positive/defaults/field-state-matrix.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/positive/defaults/field-state-matrix.neu"
 fixture_sha256 = "f0e6b4ad4db46b0449d88e3f8bcf9c5e4b963ad45f2018b77c60a0f163704bc7"
 expected_outcome = "accept"
 

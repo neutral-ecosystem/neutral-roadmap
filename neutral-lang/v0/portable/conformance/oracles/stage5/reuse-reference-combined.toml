@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/positive/values/immutable-value-reuse.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/positive/values/immutable-value-reuse.neu"
 fixture_sha256 = "5d4c01965db14c30e4696b6a471923df0c2ec1c0e9b89768fc2dffa75b76284e"
 expected_outcome = "accept"
 

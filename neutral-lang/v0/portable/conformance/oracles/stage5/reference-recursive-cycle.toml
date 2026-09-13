@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/positive/references/recursive-identity-cycle.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/positive/references/recursive-identity-cycle.neu"
 fixture_sha256 = "10c40bb91ea525dd7967c8c9a400897db6440269c08069926674e2d0b64380fc"
 expected_outcome = "accept"
 

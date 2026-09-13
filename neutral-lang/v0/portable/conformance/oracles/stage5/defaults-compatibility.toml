@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/positive/values/defaults-compatibility.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/positive/values/defaults-compatibility.neu"
 fixture_sha256 = "c0b88e7b8f1cbf1c1e9ae77f30487ec9894eab9c6b662e791295f654afe28171"
 expected_outcome = "accept"
 

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/negative/defaults/expression-default.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/negative/defaults/expression-default.neu"
 fixture_sha256 = "d467b73cfd5c8b522275ede2536935fb1557ed384111c20566c34ee6cc13b081"
 expected_outcome = "reject"
 failure_class = "syntax"

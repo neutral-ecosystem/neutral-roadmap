@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/negative/references/missing-constructor.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/negative/references/missing-constructor.neu"
 fixture_sha256 = "1eafd994c536daca7e31ca1fe9acab7eebb15a06d2bdd8e2fe47bd48022e8597"
 expected_outcome = "reject"
 

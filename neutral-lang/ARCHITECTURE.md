@@ -46,9 +46,11 @@ vN/
     `-- spec/vN/            normative version contract
 ```
 
-`portable/` is copied into the corresponding implementation repository. Its
-`spec/vN/` documents are authoritative for that version. The website publishes
-only the portable view; `design/` remains private repository material.
+For an active version, `portable/` is copied into the corresponding
+implementation repository. Its `spec/vN/` documents are authoritative for that
+version. After release, the portable tree becomes the immutable release bundle
+and may use the release repository's conformance layout. The website publishes
+only the portable/release view; `design/` remains private repository material.
 
 ## Evolution and compatibility
 
@@ -61,8 +63,10 @@ Shared public APIs expose the selected language version and capability profile.
 Tools discover supported behavior from those contracts rather than hard-coding a
 version's syntax or feature list.
 
-## Current version
+## Latest released version
 
-The current implementation target is [Neutral language v0](v0/portable/README.md).
-Its architecture, requirements, syntax, decisions, fixtures, and implementation
-roadmap live in its portable package.
+[Neutral language v0.1.0](v0/portable/README.md) is the latest released
+baseline. The local archive mirrors the immutable
+[v0.1.0 conformance bundle](https://github.com/neutral-ecosystem/neutral-lang/tree/main/conformance/releases/v0.1.0),
+including its architecture, specifications, fixtures, decisions, and
+conformance oracles.

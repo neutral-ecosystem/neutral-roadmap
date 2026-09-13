@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/negative/reuse/indirect-cycle.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/negative/reuse/indirect-cycle.neu"
 fixture_sha256 = "1220fc95cc27e48888839b71cd3dcf7d128a3dddc884883c07480b72c65b9067"
 expected_outcome = "reject"
 

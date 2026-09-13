@@ -38,9 +38,9 @@ language compiler or editor.
 Work proceeds foundation-first without collapsing the projects into one
 runtime:
 
-1. **Neutral language v0** is the active implementation target. It proves one
-   captured, typed, immutable, effect-free `.neu` source unit through the public
-   compiler, IR, diagnostics, provenance, and reader boundary.
+1. **Neutral language v0.1.0** is the released language baseline. Its immutable
+   conformance bundle preserves the accepted source, IR, diagnostics,
+   provenance, and reader boundary.
 2. **Neutral Editor v0** defines a capability-driven visual authoring path for
    the complete accepted language-v0 surface, including deterministic source
    projection and lossless save/reopen behavior.
@@ -80,9 +80,9 @@ corresponding implementation repositories.
 1. [Project architecture](neutral-lang/ARCHITECTURE.md)
 2. [Project requirements](neutral-lang/REQUIREMENTS.md)
 3. [Project roadmap](neutral-lang/ROADMAP.md)
-4. [Portable v0 overview](neutral-lang/v0/portable/README.md)
-5. [v0 implementation plan](neutral-lang/v0/portable/PLAN.md)
-6. [v0 delivery roadmap](neutral-lang/v0/portable/ROADMAP.md)
+4. [Archived v0.1.0 overview](neutral-lang/v0/portable/README.md)
+5. [v0.1.0 release bundle](https://github.com/neutral-ecosystem/neutral-lang/tree/main/conformance/releases/v0.1.0)
+6. [v0.1.0 conformance manifest](neutral-lang/v0/portable/conformance/manifest.toml)
 7. [Proposed syntax guide](neutral-lang/v0/portable/specs/contracts/proposed-syntax-guide.md)
 8. [Accepted v0 decisions](neutral-lang/v0/portable/specs/decisions/README.md)
 

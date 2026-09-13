@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/positive/reuse/nullable-widening.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/positive/reuse/nullable-widening.neu"
 fixture_sha256 = "2c94f7e750f47e4b5a415ad9725a4407d385e9ec870d97c961a3ee1d160ba5ea"
 expected_outcome = "accept"
 

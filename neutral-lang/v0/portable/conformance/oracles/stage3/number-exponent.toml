@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/positive/numbers/number-exponent.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/positive/numbers/number-exponent.neu"
 fixture_sha256 = "16bd69b270b18a08f501ddd2d059bdeeb3f149cec00c85d5e17ccc97acfa7e03"
 expected_outcome = "accept"
 

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/positive/references/field-name-neutrality.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/positive/references/field-name-neutrality.neu"
 fixture_sha256 = "1308d6852cbc7ff59e62ecc35d7b1449f321aaeaad71f69cbdc627c2372941df"
 expected_outcome = "accept"
 

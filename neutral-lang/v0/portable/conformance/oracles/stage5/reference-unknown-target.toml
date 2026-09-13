@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/negative/references/unknown-target.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/negative/references/unknown-target.neu"
 fixture_sha256 = "eda520663ca34b884eb1f5099464b6176f5b3fc74f9f6016fcc8449845effc72"
 expected_outcome = "reject"
 

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-fixture = "portable/specs/fixtures/positive/reuse/nested-reuse.neu"
+fixture = "conformance/releases/v0.1.0/specs/fixtures/positive/reuse/nested-reuse.neu"
 fixture_sha256 = "c21d93406f49bb8fdb8fc5e9575570c1021f2d069b74acc68f07d2babe8a5113"
 expected_outcome = "accept"
 
