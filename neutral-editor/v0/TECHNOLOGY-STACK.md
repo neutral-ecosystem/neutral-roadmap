@@ -130,8 +130,10 @@ and authoring projections rather than generic-editor constants.
 
 - discover installed Neutral language adapters;
 - return versioned capability profiles;
-- import/project one source unit through the selected public authoring API;
-- capture and validate exact inputs through `neutral-lang`;
+- resolve the exact authoring descriptor catalogue;
+- import/project all source units through the selected public authoring API;
+- form the captured-project request and validate exact inputs through
+  `neutral-lang`;
 - preserve cancellation, limits, diagnostics, source maps, provenance,
   derivation, and resource facts; and
 - reject profile substitution and unknown required capabilities.

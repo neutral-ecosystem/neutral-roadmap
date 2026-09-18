@@ -4,23 +4,26 @@ Status: proposed scope
 
 ## Purpose
 
-Neutral Editor v0 proves that a visual editor can author the complete accepted
-Neutral language v0 surface without making the canvas library, editor file, or
-UI state part of Neutral language semantics.
+Neutral Editor v0 proves that a visual editor can author the complete Neutral
+language v1 surface exposed by Neutral authoring v1 without making the canvas
+library, editor file, or UI state part of Neutral language semantics.
 
 The complete first journey is:
 
 1. Discover installed Neutral language versions and their capability profiles.
 2. Select the exact profile required by the project.
-3. Open or create one `.neu` source unit containing one logical module.
-4. Author records, bindings, nested values, lists, defaults, reuse, references,
-   and optional captured vocabulary-owned data advertised by that profile.
-5. Reject locally obvious incompatible edits using discovered compatibility
+3. Resolve the exact core and captured-vocabulary descriptor catalogue.
+4. Open or create the project's `.neu` source units and logical modules.
+5. Author imports, visibility, records, bindings, nested values, lists,
+   defaults, reuse, references, and captured vocabulary-owned data advertised
+   by that catalogue.
+6. Reject locally obvious incompatible edits using discovered compatibility
    metadata while leaving the compiler authoritative.
-6. Project the visual model deterministically to `.neu`.
-7. Ask `neutral-lang` for authoritative validation and map diagnostics back to
+7. Project the visual model deterministically to `.neu` source units.
+8. Form a captured-project request and ask `neutral-lang` for authoritative
+   validation, mapping diagnostics back to
    the affected graph element.
-8. Save, close, reopen, and obtain the same program meaning and layout.
+9. Save, close, reopen, and obtain the same program meaning and layout.
 
 This is an authoring proof, not a visual runtime.
 
@@ -63,11 +66,11 @@ v0 includes:
 - one graph canvas with pan, zoom, selection, node movement, and connections;
 - a searchable palette backed by the selected discovered capability profile;
 - one generic node renderer and generated property controls;
-- the complete Neutral v0 document surface: headers, zero or one captured
-  vocabulary, record declarations, and immutable typed bindings;
-- all v0 types: `num`, `string`, `bool`, user records, `T?`, `List<T>`,
-  `Ref<T>`, and discovered vocabulary-owned nominal types;
-- all v0 values: exact numbers, strings, Booleans, `null`, recursively nested
+- the complete Neutral v1 document surface: source units, modules, imports,
+  visibility, vocabularies, records, and immutable typed bindings;
+- all v1 types: `num`, `string`, `bool`, `url`, `path`, user records, `T?`,
+  `List<T>`, `Ref<T>`, and discovered vocabulary-owned nominal types;
+- all retained values: exact numbers, strings, Booleans, `null`, recursively nested
   contextual records and lists, ordinary value reuse, and `ref(name)`;
 - required/defaulted and nullable/non-nullable field behavior;
 - typed value ports and local preflight connection checks;
@@ -89,20 +92,21 @@ v0 does not promise:
 - automatic vocabulary installation or a plugin marketplace;
 - simultaneous free-form source and graph editing;
 - custom node components supplied by vocabularies;
-- multiple source units, multiple modules, nested module/document editing,
-  subgraphs, groups, collaboration, debugging, breakpoints, or graph diff;
+- partial modules, subgraphs, groups, collaboration, debugging, breakpoints, or
+  graph diff;
 - automatic layout or thousand-node graphs;
 - production installers for all desktop platforms; or
-- application-specific nodes for Flow, Neux, providers, or operating systems.
+- hard-coded application-specific nodes for Flow, Neux, providers, or operating
+  systems.
 
-The editor may retain a document-context stack and breadcrumbs for later nested
-editing profiles, but the selected Neutral v0 capability exposes only one root
-source/module. Recursively nested record and list **values** are part of v0 and
-must remain editable.
+The editor uses a document-context stack and breadcrumbs for project, module,
+and recursively nested record/list value contexts. It exposes only contexts
+advertised by the exact selected profile.
 
-Execution is deferred because the present Neutral language v0 is effect-free
-and defines data-only vocabularies. The editor must not invent missing runtime
-or executable-node contracts.
+Execution is outside the Editor because Neutral is effect-free and
+vocabularies are data only. A future Flow authoring extension can produce cards
+from Flow vocabulary schemas and conventions, but Flow Core and its mappers own
+their CI/CD interpretation.
 
 ## Interface shape
 

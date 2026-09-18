@@ -27,7 +27,10 @@ domain-neutral module behavior.
 ## Stage 1 — freeze observable source behavior
 
 - Decide module-name grammar and the one-unit-per-module rule.
-- Decide exact import, alias, qualified-name, and visibility syntax.
+- Decide exact import, alias, qualified-name, visibility, public-closure, and
+  SCC semantics.
+- Specify `url` and `path` as opaque data values, including their IR and
+  vocabulary-schema representation, without granting acquisition behavior.
 - Decide whether repeated vocabulary requirements belong in v1.
 - Specify every ambiguity with existing `::`, `use`, record, binding, and
   `ref(...)` syntax.
@@ -38,11 +41,12 @@ for every fixture without implementation knowledge.
 
 ## Stage 2 — specify capture and identity
 
-- Define project, source-unit, module, module-symbol, public-API, declaration,
-  derivation, and byte identities separately.
-- Define resolver requests and captured closure consistency.
-- Specify root selection, missing/extra units, duplicate modules, and cycle
-  detection.
+- Define logical project, captured closure, module, module-symbol, public-API,
+  declaration, derivation, artifact, and byte identities separately.
+- Define the versioned host-neutral `CapturedProjectRequest`, closure
+  consistency, strict-capture behavior, and host-mapping conflicts.
+- Specify root selection as derivation/view input, missing/extra units, duplicate
+  modules, and SCC collection.
 - Set structural limits for file count, total bytes, graph width/depth,
   imports, aliases, vocabularies, and diagnostics.
 
@@ -63,9 +67,13 @@ invalid fixture has stable cross-source diagnostics.
 
 ## Stage 4 — freeze public tooling contracts
 
-- Extend capability discovery with project-shape and v1 feature IDs.
+- Freeze core discovery independently from the separately versioned authoring
+  bridge discovery profile.
 - Define bounded data-only construct, type, value, name, operation, diagnostic,
   formatting, and explicit-exclusion descriptors.
+- Define qualified descriptor identity, deterministic core/vocabulary catalogue
+  merge, card ports/properties/nesting, presentation-hint limits, catalogue
+  identity, and cache invalidation.
 - Define side-effect-free type compatibility preflight and compiler-authority
   mismatch handling.
 - Specify project capture, compilation, decoding, and validated-reader APIs.
@@ -88,6 +96,8 @@ reference project without a private Neutral parser or AST.
   compiler-private model.
 - Build an Editor probe using only discovery, authoring, projection, and
   validation services.
+- Prove that the Editor can generate its palette and cards for both core and a
+  generic captured vocabulary without handwritten construct tables.
 - Test repeated, concurrent, shuffled-resolver, malformed-input, and limit
   cases.
 - Verify that `public` and successful compilation never trigger or authorize an

@@ -20,16 +20,18 @@ public-reader evidence. This checklist does not approve syntax by itself.
 - [ ] **SYN-V1-DOC-002** — Qualified logical module header
 - [ ] **SYN-V1-DOC-003** — One source unit per logical module
 - [ ] **SYN-V1-DOC-004** — Header, vocabulary, import, declaration ordering
-- [ ] **SYN-V1-DOC-005** — Multiple bounded source units and selected roots
+- [ ] **SYN-V1-DOC-005** — Multiple bounded source units and host-selected derivation roots
+- [ ] **SYN-V1-DOC-006** — Host-neutral captured-project request
 
 ## Imports and qualification
 
 - [ ] **SYN-V1-IMP-001** — `import qualified::module as alias`
 - [ ] **SYN-V1-IMP-002** — Mandatory unique `snake_case` alias
 - [ ] **SYN-V1-IMP-003** — Qualified-only imported name access
-- [ ] **SYN-V1-IMP-004** — Missing, duplicate, self, and cyclic import errors
-- [ ] **SYN-V1-IMP-005** — No paths, URLs, ranges, wildcards, or implicit imports
-- [ ] **SYN-V1-IMP-006** — Module versus vocabulary namespace resolution
+- [ ] **SYN-V1-IMP-004** — Missing, duplicate, and self-import errors
+- [ ] **SYN-V1-IMP-005** — SCC import collection and semantic-cycle rejection
+- [ ] **SYN-V1-IMP-006** — No paths, URLs, ranges, wildcards, or implicit imports
+- [ ] **SYN-V1-IMP-007** — Module versus vocabulary namespace resolution
 
 ## Visibility
 
@@ -39,6 +41,7 @@ public-reader evidence. This checklist does not approve syntax by itself.
 - [ ] **SYN-V1-VIS-004** — Cross-module access to public declarations only
 - [ ] **SYN-V1-VIS-005** — Public-surface accessibility validation
 - [ ] **SYN-V1-VIS-006** — No field modifiers, `private`, tiers, or re-exports
+- [ ] **SYN-V1-VIS-007** — Public dependency closure and private provenance
 
 ## Cross-module values and references
 
@@ -56,6 +59,12 @@ public-reader evidence. This checklist does not approve syntax by itself.
 - [ ] **SYN-V1-VOC-004** — Data-only behavior retained
 - [ ] **SYN-V1-VOC-005** — Cross-vocabulary dependencies excluded
 
+## Opaque location data
+
+- [ ] **SYN-V1-LOC-001** — `url` and `path` type spelling
+- [ ] **SYN-V1-LOC-002** — Typed string-literal construction and exact IR values
+- [ ] **SYN-V1-LOC-003** — No implicit conversion or source acquisition behavior
+
 ## Tooling and conformance
 
 - [ ] **SYN-V1-TOL-001** — Deterministic reference formatting per source unit
@@ -66,6 +75,11 @@ public-reader evidence. This checklist does not approve syntax by itself.
 - [ ] **SYN-V1-TOL-006** — Fine-grained authoring-element source mappings
 - [ ] **SYN-V1-TOL-007** — Lossless promised-content round trip
 - [ ] **SYN-V1-TOL-008** — Distinct validation and service failure outcomes
+- [ ] **SYN-V1-TOL-009** — Separately versioned authoring bridge profile
+- [ ] **SYN-V1-TOL-010** — Exact descriptor-catalogue identity and deterministic merge
+- [ ] **SYN-V1-TOL-011** — Data-only card, port, property, nesting, and availability descriptors
+- [ ] **SYN-V1-TOL-012** — Vocabulary-derived descriptors and non-semantic presentation hints
+- [ ] **SYN-V1-TOL-013** — Project-to-source-to-capture authoritative Editor loop
 - [ ] **SYN-V1-EVO-001** — Explicit v0/v1 coexistence and migration boundary
 - [ ] **SYN-V1-EVO-002** — Multi-file source-to-IR/reader conformance
 - [ ] **SYN-V1-EVO-003** — Flow and Editor public-boundary probes
@@ -93,17 +107,20 @@ Root module:
 neu "1.0"
 module example::pipeline
 
-use Flow as flow
+use ExampleDomain as domain
 import example::shared as shared
 
-public flow::Workflow pipeline = {
+public domain::Pipeline pipeline = {
     image: shared::default_image,
 }
+
+url source_url = "https://example.invalid/source"
+path config_file = "config/pipeline.neu"
 ```
 
-The example demonstrates namespace and visibility shape only. `flow::Workflow`
-and its fields remain owned by a future exact captured Flow vocabulary; this
-proposal does not define them.
+The example demonstrates namespace and visibility shape only. `domain::Pipeline`
+and its fields remain owned by an exact captured domain vocabulary; this proposal
+does not define them.
 
 ## Completion rule
 

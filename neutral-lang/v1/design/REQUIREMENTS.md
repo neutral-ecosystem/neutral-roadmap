@@ -32,6 +32,7 @@ baseline. This document specifies only v1 deltas and new obligations.
 | `NL-SRC-007` | `NL-V1-MOD-002..004`, `NL-V1-VOC-003` |
 | `NL-DOC-001..005` | `NL-V1-MOD-*`, `NL-V1-VOC-*`, `NL-V1-VIS-*` |
 | `NL-REF-001`, `NL-REF-004..005` | `NL-V1-XMOD-003..005`, `NL-V1-IR-005`, `NL-V1-IR-009` |
+| `NL-TYP-001`, `NL-VAL-001` | `NL-V1-LOC-*` |
 | `NL-VOC-001`, `NL-VOC-003` | `NL-V1-VOC-*` |
 | `NL-IR-002`, `NL-IR-004..005` | `NL-V1-IR-*` |
 | `NL-PRO-001` | `NL-V1-IR-002..004`, `NL-V1-IR-009` |
@@ -45,18 +46,20 @@ additional change must first be added to this map.
 
 - **NL-V1-001:** A conforming implementation must compile a bounded captured
   project of multiple source units into one validated project-level Neutral IR.
-- **NL-V1-002:** An independent consumer must enumerate root modules, module
-  dependencies, public exports, values, types, references, vocabularies, source
-  maps, and provenance without parsing source or using compiler-private models.
-- **NL-V1-003:** A public authoring service must import and deterministically
-  project the complete v1 surface without exposing a compiler-private AST.
+- **NL-V1-002:** An independent consumer must enumerate modules, dependencies,
+  public exports, values, types, references, vocabularies, source maps, and
+  provenance without parsing source or using compiler-private models.
+- **NL-V1-003:** A Neutral v1 release intended to support Editor conformance
+  must publish a compatible authoring bridge that imports and deterministically
+  projects the complete v1 surface without exposing a compiler-private AST.
+  Core conformance alone does not require that bridge.
 - **NL-V1-004:** v1 must assign no Flow, Editor, runtime, provider, command,
   secret, authorization, or external-effect meaning.
 
 ## Captured project
 
-- **NL-V1-CAP-001:** A project contains one or more host-selected root modules
-  and the complete finite closure of their source imports.
+- **NL-V1-CAP-001:** A project contains a complete finite source-module set
+  declared by one captured-project request.
 - **NL-V1-CAP-002:** Each logical module maps to exactly one immutable captured
   source unit; duplicate claims are invalid.
 - **NL-V1-CAP-003:** The host supplies the only resolver and all acquisition
@@ -70,12 +73,29 @@ additional change must first be added to this map.
 - **NL-V1-CAP-006:** Capture and compilation enforce independent bounds for
   source units, total bytes, imports per module, graph depth, vocabularies,
   declarations, references, diagnostics, and output size.
-- **NL-V1-CAP-007:** Root module selection is an explicit host input recorded in
-  derivation. A file location, resolver enumeration order, or `public` modifier
-  cannot silently make a module a root.
+- **NL-V1-CAP-007:** Selected derivation roots are explicit host inputs recorded
+  in derivation. They do not participate in logical project identity, logical
+  equality, or project IR payload. A file location, resolver enumeration order,
+  or `public` modifier cannot silently select a root.
 - **NL-V1-CAP-008:** Hosts may supply captured source bytes from files, editor
   buffers, generated test inputs, or other authorized stores under the same
   logical source contract; language meaning never depends on storage origin.
+- **NL-V1-CAP-009:** v1 publishes a versioned host-neutral
+  `CapturedProjectRequest` data contract containing an optional non-semantic
+  declared project key,
+  source units with logical module/source identities and bytes, exact vocabulary
+  locks, selected derivation roots, and capture-contract version.
+- **NL-V1-CAP-010:** Host path/URL locator metadata, workspace state,
+  package-manager state, credentials, and acquisition metadata are excluded from
+  the request's logical project model, IR, ordinary diagnostics, and derivation
+  identity. This exclusion does not apply to source-level `path` or `url`
+  values.
+- **NL-V1-CAP-011:** Candidate source inputs not selected into the declared
+  source-module set are excluded before capture or rejected in strict capture
+  mode. They cannot silently affect closure, equality, derivation, or output.
+- **NL-V1-CAP-012:** Conflicting source mappings for one logical module are
+  rejected. Equivalent canonical source content mapped by different hosts may
+  produce the same logical project.
 
 ## Modules and imports
 
@@ -88,14 +108,16 @@ additional change must first be added to this map.
 - **NL-V1-MOD-004:** Imported declarations are accessible only through their
   alias; imports never inject unqualified names.
 - **NL-V1-MOD-005:** Missing imports, duplicate module identities, duplicate
-  aliases, self-imports, and import cycles are errors with source-linked
-  diagnostics.
+  aliases, and self-imports are errors with source-linked diagnostics.
 - **NL-V1-MOD-006:** Import resolution order, resolver delivery order,
   filesystem order, and concurrent scheduling do not affect meaning or
   diagnostic ordering.
 - **NL-V1-MOD-007:** Wildcard imports, relative imports, implicit imports,
   re-exports, partial modules, and source-selected dependency versions are not
   part of v1.
+- **NL-V1-MOD-008:** Import cycles are captured and resolved by strongly
+  connected components. Only inherited or explicitly specified semantic cycles,
+  such as value-dependency or illegal embedded-record cycles, are errors.
 
 ## Visibility and names
 
@@ -105,12 +127,15 @@ additional change must first be added to this map.
   module or present in that module's public export index.
 - **NL-V1-VIS-003:** Record fields have no independent visibility, and v1 has no
   `private`, protected, package, friend, or runtime-access modifier.
-- **NL-V1-VIS-004:** A public declaration must not expose an inaccessible type
-  or an uninterpretable private dependency.
+- **NL-V1-VIS-004:** A public declaration signature may reference only public,
+  transitively reachable types.
 - **NL-V1-VIS-005:** Module aliases and vocabulary aliases occupy one alias
   namespace and cannot collide with each other or protected core names.
 - **NL-V1-VIS-006:** Visibility changes affect the public API fingerprint even
   when a declaration's logical value is unchanged.
+- **NL-V1-VIS-007:** A public reader view contains the public dependency closure
+  needed to interpret each exposed declaration and excludes private
+  implementation provenance. An invalid public signature fails compilation.
 
 ## Cross-module semantics
 
@@ -138,14 +163,41 @@ additional change must first be added to this map.
   scripts, native modules, hidden imports, custom validators, ambient lookup,
   or external effects.
 - **NL-V1-VOC-005:** Cross-vocabulary dependencies are rejected unless a later
-  accepted decision specifies their identity, capture, cycle, and validation
-  rules.
+  domain-neutral decision specifies their identity, capture, cycle, and
+  validation rules.
+- **NL-V1-VOC-006:** v1 defines only generic vocabulary capture, resolution, and
+  IR representation. It defines no Flow, provider, or integration vocabulary,
+  and does not interpret vocabulary mappings or application behavior.
+- **NL-V1-VOC-007:** A vocabulary semantic-contract identity is distinct from
+  any authoring-metadata identity. Only the semantic schema, defaults, required
+  features, and other compiler-observable facts participate in logical project
+  meaning.
+- **NL-V1-VOC-008:** Titles, documentation, categories, icon tokens, ordering,
+  and other declared non-semantic presentation hints may change descriptor-
+  catalogue identity but cannot change logical project identity or compiled IR.
+
+## Opaque location data
+
+- **NL-V1-LOC-001:** v1 adds distinct core scalar types `url` and `path`.
+- **NL-V1-LOC-002:** `url` and `path` values use the existing string-literal
+  spelling in a typed context, preserve exact typed text in logical IR, and have
+  no implicit conversion to or from `string` or each other.
+- **NL-V1-LOC-003:** Neutral does not fetch URLs, open paths, normalize paths,
+  select an operating-system interpretation, validate reachability, or infer
+  authority from a `url` or `path` value.
+- **NL-V1-LOC-004:** `url` and `path` are ordinary values and cannot appear as
+  import locators, resolver instructions, vocabulary locators, or acquisition
+  authority.
+- **NL-V1-LOC-005:** Project IR, reader validation, vocabulary schemas, source
+  maps, provenance, diagnostics, resource accounting, and authoring descriptors
+  represent `url` and `path` as bounded data-only types.
 
 ## Project IR and evidence
 
-- **NL-V1-IR-001:** The logical payload contains project/root identities,
+- **NL-V1-IR-001:** The logical payload contains logical project identity,
   module graph, per-module declarations, export indexes, resolved cross-module
-  edges, vocabulary identities, and required structural features.
+  edges, vocabulary identities, and required structural features. It contains
+  no selected derivation roots.
 - **NL-V1-IR-002:** Source maps identify both logical source unit and original
   half-open byte span.
 - **NL-V1-IR-003:** Provenance distinguishes local source, imported reuse,
@@ -168,57 +220,142 @@ additional change must first be added to this map.
   reference to its stable module-symbol identity and can map any exposed IR
   element to its source unit and source span when mapping evidence is present.
 
+## Project identities
+
+- **NL-V1-ID-001:** Logical project identity derives from canonical logical
+  module graph, semantic content, and exact resolved vocabulary semantic
+  contracts. Host
+  paths, aliases, capture order, selected roots, and derivation settings do not
+  participate.
+- **NL-V1-ID-002:** Captured closure identity derives from the exact canonical
+  source closure accepted by one capture operation, including resolved source
+  units and canonical source identities.
+- **NL-V1-ID-003:** Two captured closures may have different closure identities
+  while producing the same logical project identity.
+- **NL-V1-ID-004:** Derivation identity derives from logical project identity,
+  selected roots, compiler options, limits, and other inputs that affect one
+  derivation without changing project meaning.
+- **NL-V1-ID-005:** Artifact identity derives from derivation identity, artifact
+  kind, format/schema version, and artifact-specific transformation inputs.
+- **NL-V1-ID-006:** Logical module identity is independent of host mapping.
+  Equivalent canonical module content from different hosts preserves project
+  identity; conflicting mappings for one module fail capture.
+- **NL-V1-ID-007:** Vocabulary aliases are local source bindings only. Multiple
+  modules may use one vocabulary under different aliases without changing its
+  canonical vocabulary identity or version in IR.
+
 ## Public services and tooling
 
 - **NL-V1-API-001:** Public operations include project capture, captured-project
   compilation, a convenience compile operation, and project IR decode and
   validation.
-- **NL-V1-API-002:** Capability discovery reports exact language/IR/authoring
-  profiles, project shape, limits, vocabulary cardinality, operations, and
+- **NL-V1-API-002:** Core capability discovery reports exact language/IR
+  profiles, project shape, limits, vocabulary cardinality, core operations, and
   stable required capability IDs.
 - **NL-V1-API-003:** Unknown required capabilities, unavailable exact profiles,
   and mismatched captured contracts fail closed.
+- **NL-V1-API-006:** Full and incremental processing of the same complete
+  captured project produce equal logical results and diagnostic projections;
+  incremental state is never required to interpret public IR.
+- **NL-V1-API-007:** APIs remain reentrant, concurrency-safe, cancellable,
+  bounded, and explicit about partial operational outcomes.
+
+## Neutral authoring v1 bridge
+
+- **NL-V1-BRG-001:** Neutral authoring v1 is separately versioned from Neutral
+  v1 core and advertises its own profile identity and compatibility window.
+- **NL-V1-BRG-002:** An authoring profile identifies the compatible core
+  language/IR profiles it requires. Descriptor, formatting, adapter, and
+  editor-metadata changes do not create a new core language version.
+- **NL-V1-BRG-003:** Editor conformance requires a compatible core and authoring
+  profile. Headless consumers require no authoring bridge unless they explicitly
+  request one.
+- **NL-V1-BRG-004:** The bridge exposes one bounded, immutable descriptor
+  catalogue for every construct, type constructor, value form, project action,
+  and captured vocabulary data shape available under the selected profiles.
+  Editors must not derive this surface from a version string.
+- **NL-V1-BRG-005:** Every descriptor has a stable qualified identity, schema
+  version, owner (`core` or canonical vocabulary identity), required capability
+  IDs, availability conditions, and deterministic catalogue order. Colliding
+  qualified identities or incompatible duplicate meanings fail closed.
+- **NL-V1-BRG-006:** An authorable-card descriptor declares its semantic
+  projection kind, source slot, ports, properties, permitted child contexts,
+  and constraints. A card is an authoring projection of Neutral data; it does
+  not imply a Neutral function, invocation, control flow, or execution step.
+- **NL-V1-BRG-007:** Port descriptors declare stable port identity, direction,
+  semantic edge kind, exact type expression, cardinality, and requiredness.
+  Value reuse and identity reference are different edge kinds. Compatibility is
+  supplied by immutable profile data or the side-effect-free compatibility
+  service and remains subordinate to compilation.
+- **NL-V1-BRG-008:** Property descriptors declare their authoring/source slot,
+  type or value-form identity, required/defaulted/nullability state,
+  cardinality, and nesting behavior. Presentation hints cannot change any of
+  those facts.
+- **NL-V1-BRG-009:** Vocabulary authoring descriptors are derived
+  deterministically from the exact captured vocabulary semantic schema plus an
+  independently identified authoring-metadata profile. That profile may add
+  bounded non-semantic hints such as title, category, documentation, ordering,
+  and icon token, but cannot replace or contradict the semantic schema.
+- **NL-V1-BRG-010:** Core and vocabulary descriptors merge by qualified
+  identity into a deterministic catalogue. Source aliases affect labels and
+  source projection only; they do not create descriptor or vocabulary identity.
+- **NL-V1-BRG-011:** Descriptor payloads are data only. They contain no
+  callbacks, scripts, components, native modules, validators, network lookup,
+  filesystem lookup, or authority grant.
+- **NL-V1-BRG-012:** The catalogue identity commits to the exact core,
+  authoring, descriptor-schema, vocabulary semantic-contract, and vocabulary
+  authoring-metadata profiles from which it was produced. Cached controls and
+  compatibility results are invalidated when any member of that tuple changes.
+- **NL-V1-BRG-013:** Unknown required descriptor fields or capabilities fail
+  closed. Unknown fields explicitly marked optional and non-semantic may be
+  preserved and ignored.
+- **NL-V1-BRG-014:** Catalogue discovery, project import, source projection,
+  compatibility preflight, formatting, and validation are independently
+  advertised operations; absence of one is reported rather than emulated with
+  a private parser or grammar table.
 - **NL-V1-API-004:** The public authoring projection represents modules,
   imports, visibility, declarations, source value forms, supported comments,
   stable source anchors, and opaque extension fields without becoming the
   authoritative semantic model.
 - **NL-V1-API-005:** Deterministic source projection is owned by the selected
   language adapter and returns an element-to-source mapping.
-- **NL-V1-API-006:** Full and incremental processing of the same complete
-  captured project produce equal logical results and diagnostic projections;
-  incremental state is never required to interpret public IR.
-- **NL-V1-API-007:** APIs remain reentrant, concurrency-safe, cancellable,
-  bounded, and explicit about partial operational outcomes.
-- **NL-V1-API-008:** A versioned registry boundary enumerates host-supplied
+- **NL-V1-API-008:** The authoring bridge registry enumerates host-supplied
   language installations, adapter protocol versions, and exact supported
   language, IR, and authoring profiles without searching because of source
   content.
-- **NL-V1-API-009:** A capability profile describes document/project shape,
+- **NL-V1-API-009:** An authoring capability profile describes document/project shape,
   construct descriptors, identifier categories and protected names, type
   constructors, value forms, compatibility behavior, captured-input
   requirements, vocabulary behavior, supported operations, diagnostic mapping,
   formatting behavior, structural limits, and explicit exclusions.
-- **NL-V1-API-010:** Compatibility preflight is available through immutable
+- **NL-V1-API-010:** Authoring compatibility preflight is available through immutable
   profile data or a side-effect-free query keyed by exact profile and type
   identities. The compiler remains authoritative when preflight and compilation
   disagree.
-- **NL-V1-API-011:** Capability and authoring descriptors are bounded data. They
+- **NL-V1-API-011:** Authoring capability and descriptor data are bounded. They
   cannot contain executable callbacks, scripts, native modules, UI components,
   ambient resource lookups, or authority grants.
-- **NL-V1-API-012:** Validation accepts exact profile, captured project,
+- **NL-V1-API-012:** Bridge validation accepts exact authoring profile, captured project,
   behavior versions, limits, cancellation, and request-revision inputs and
   distinguishes success, invalid source, cancellation, unavailable service,
   unsupported profile/capability, resource exhaustion, and internal failure.
-- **NL-V1-API-013:** Successful validation may return a validated IR handle,
+- **NL-V1-API-013:** Successful bridge validation may return a validated IR handle,
   source map, provenance, derivation, and resource facts. Non-success outcomes
   cannot expose recovered data as authoritative IR.
+- **NL-V1-API-014:** `describeAuthoring` accepts an exact authoring profile and
+  exact captured vocabulary contracts and returns the descriptor catalogue and
+  its identity without performing external I/O.
+- **NL-V1-API-015:** Project source projection returns the complete ordered set
+  of source units and element-to-source mappings needed to form a
+  `CapturedProjectRequest`; host-owned locks, roots, identities, and limits are
+  supplied explicitly rather than inferred from editor state.
 
 ## Authoring round trip
 
 - **NL-V1-AUT-001:** The authoring profile describes and represents the complete
   retained v0 surface plus v1 modules, imports, aliases, visibility, qualified
-  types, qualified value reuse, qualified references, and repeated vocabulary
-  requirements.
+  types, qualified value reuse, qualified references, repeated vocabulary
+  requirements, `url`, and `path`.
 - **NL-V1-AUT-002:** The authoring projection preserves every authoring-relevant
   distinction required by the inherited `NL-SRC-*`, `NL-DEC-*`, `NL-TYP-*`,
   `NL-VAL-*`, `NL-REF-*`, and `NL-PRO-*` contracts, plus declaration order and
@@ -240,6 +377,14 @@ additional change must first be added to this map.
 - **NL-V1-AUT-007:** Adapter-owned projection and formatting determine Neutral
   spelling. Generic editors and consumers do not reconstruct tokens or grammar
   from display descriptors.
+- **NL-V1-AUT-008:** The supported edit loop is catalogue discovery, authoring
+  projection/editing, deterministic projection of `.neu` source units,
+  construction of a captured-project request, core compilation, and mapping of
+  returned diagnostics/evidence to authoring elements. The compiler never
+  accepts the editor graph as semantic input.
+- **NL-V1-AUT-009:** A generated project is authoritative only after its
+  projected source units pass ordinary v1 capture and compilation. Successful
+  UI preflight or source projection alone does not establish validity.
 
 ## Diagnostics and editor support
 
@@ -258,25 +403,26 @@ additional change must first be added to this map.
   remedies are untrusted bounded text and cannot disclose resolver credentials
   or unapproved host paths.
 
-## Flow and Editor boundary evidence
+## Consumer boundary evidence
 
-- **NL-V1-CNS-001:** A Flow boundary fixture uses an exact captured data-only
-  vocabulary and public reader APIs to recover a finite static definition with
-  stable element identities, declared inputs and outputs, typed dependency
-  references, requirements or preferences, and source-linked diagnostics.
-- **NL-V1-CNS-002:** The Flow fixture proves representability only. Graph
-  validation, normalization, planning, provider compatibility, authorization,
-  binding, execution, and runtime state remain Flow-owned behavior.
-- **NL-V1-CNS-003:** Provider-specific executable behavior, credentials, policy,
-  and target bindings cannot enter project Neutral IR merely because multiple
-  vocabularies or public modules are available.
-- **NL-V1-CNS-004:** An Editor boundary fixture discovers the profile and
+- **NL-V1-CNS-001:** A generic data-vocabulary fixture proves that the core
+  resolves exact captured vocabulary contracts and exposes their data through
+  public reader APIs without interpreting application behavior.
+- **NL-V1-CNS-002:** Future Flow vocabularies are ordinary data-only inputs to
+  this core mechanism. Their mapping, graph validation, normalization, planning,
+  provider compatibility, authorization, binding, execution, and runtime state
+  remain Flow-owned behavior.
+- **NL-V1-CNS-003:** An Editor boundary fixture discovers the profile and
   descriptors, imports a multi-module project, edits every retained and new
   construct, projects all source units, validates them, maps diagnostics, and
   reopens the result using only public language services.
-- **NL-V1-CNS-005:** The Editor fixture reuses the inherited v0 editor corpus and
+- **NL-V1-CNS-004:** The Editor fixture reuses the inherited v0 editor corpus and
   adds v1 cases for imports, visibility, qualification, missing project
   dependencies, stale validation results, and unknown required capabilities.
+- **NL-V1-CNS-005:** A future Flow authoring package may use ordinary
+  vocabulary schemas, conventions, and non-semantic presentation hints to
+  produce Editor cards. Flow interpretation and system/provider mapping consume
+  compiled IR outside Neutral language and outside the generic Editor engine.
 
 ## Compatibility and conformance
 
@@ -287,8 +433,8 @@ additional change must first be added to this map.
 - **NL-V1-EVO-003:** Conformance includes positive, negative, ambiguity,
   multi-file, visibility, cycle, determinism, resource, malformed-IR,
   authoring-round-trip, and adversarial fixtures.
-- **NL-V1-EVO-004:** At least one generic multi-file probe, one Flow boundary
-  probe, and one Editor authoring probe use only public contracts.
+- **NL-V1-EVO-004:** At least one generic multi-file/core-vocabulary probe and
+  one Editor authoring probe use only public contracts.
 - **NL-V1-EVO-005:** Compiler, reader, IR, authoring, and adapter protocol
   compatibility windows are advertised independently. Unsupported old or future
   profiles fail explicitly rather than being guessed from a language version.

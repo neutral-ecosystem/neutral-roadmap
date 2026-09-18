@@ -65,10 +65,11 @@ versioned, data-only descriptors.
 **Reason:** Custom executable UI modules would couple trust, portability, and
 product-specific behavior to the editor.
 
-**Consequence:** Ordinary construct/type/value descriptors come from the
-selected language profile. Captured v0 vocabularies may contribute nominal data
-descriptors only; they do not provide executable operations. Unknown required
-descriptor behavior fails visibly.
+**Consequence:** Ordinary construct/type/value descriptors come from the exact
+selected core/authoring profile and captured-vocabulary tuple. Vocabularies may
+contribute nominal data descriptors and non-semantic presentation hints only;
+they do not provide executable operations. Unknown required descriptor behavior
+fails visibly.
 
 ## ED-ADR-006: compiler validation is authoritative
 
@@ -82,24 +83,24 @@ adapter defect rather than permission to override the compiler.
 
 ## ED-ADR-007: distinguish nested values from nested documents
 
-**Decision:** Recursively nested record/list values are required v0 content.
-Nested source units, modules, namespaces, and subgraphs remain unavailable
-because the discovered v0 document profile reports one source and one module.
+**Decision:** Project/module navigation and recursively nested record/list value
+navigation are required Editor v0 content under the Neutral v1 profile.
+Namespaces, partial modules, and subgraphs remain unavailable unless a later
+profile defines them.
 
-**Reason:** Value nesting is part of current Neutral semantics, while document
-nesting would extend them.
+**Reason:** The language profile, not a fixed Editor v0 assumption, defines the
+available project and nested-value contexts.
 
-**Consequence:** The editor model retains a generic context path and breadcrumb
-mechanism, but only the root document context and nested value editors activate
-for v0.
+**Consequence:** The editor model uses a generic context path and breadcrumb
+mechanism for project, module, and nested-value contexts.
 
 ## ED-ADR-008: execution is outside v0
 
 **Decision:** v0 has Validate but no Run or Stop.
 
 **Reason:** Compilation establishes structural and semantic acceptance, not
-runtime authority or effects. The current language v0 has no execution protocol
-or executable vocabulary contract.
+runtime authority or effects. Neutral language v1 has no execution protocol or
+executable vocabulary contract.
 
 **Consequence:** Runtime controls require a later protocol and threat model.
 

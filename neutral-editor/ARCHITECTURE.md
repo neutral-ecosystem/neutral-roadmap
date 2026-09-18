@@ -29,11 +29,15 @@ accessible interaction primitives, and Tauri/Rust owns trusted host services.
 
 ## Current version
 
-The current product boundary is Neutral Editor v0. It supports the complete
-Neutral language v0 surface for one source unit and one logical module because
-the discovered v0 profile reports those limits. Recursive records and lists are
-editable now; nested documents or modules remain capability-driven future
-contexts.
+The current product boundary is Neutral Editor v0. Its reference conformance
+target is Neutral language v1 core plus a compatible Neutral authoring v1
+profile. The selected descriptor catalogue dynamically supplies the complete
+core and captured-vocabulary authoring surface, including multi-source projects,
+modules, imports, visibility, recursive values, `url`, and `path`.
+
+Future Flow visual authoring is an Editor extension built from Flow vocabulary
+schemas and conventions. The generic Editor still produces `.neu`; Flow Core
+and its system/provider mappers consume compiled IR outside the Editor.
 
 Detailed component ownership, data flow, security boundaries, and technology
 constraints remain implementation design material. This public project contract
@@ -44,6 +48,5 @@ defines the stable boundary until an Editor portable seed is published.
 - an editor-owned Neutral parser or intermediate representation;
 - hard-coded language version features in React or Rust;
 - direct execution of authoring graphs;
-- multiple source units or modules when the selected profile does not expose
-  them; or
+- project or module shapes not exposed by the selected profile; or
 - framework serialization as the canonical project format.

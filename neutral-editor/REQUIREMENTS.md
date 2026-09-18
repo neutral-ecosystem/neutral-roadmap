@@ -6,8 +6,9 @@ Status: proposed project contract
 
 Neutral Editor must represent, edit, validate, save, and reopen every construct
 advertised by the selected Neutral language capability profile without changing
-its meaning. The current conformance target is the complete Neutral language v0
-surface for one file and one module.
+its meaning. The current conformance target is Neutral language v1 core plus a
+compatible Neutral authoring v1 profile, including multi-source projects and
+exact captured vocabularies.
 
 ## Project requirements
 
@@ -33,13 +34,22 @@ surface for one file and one module.
 - **ED-PROJ-010:** Conformance evidence must cover positive, negative,
   diagnostic, source-map, determinism, vocabulary, resource-limit, and
   adversarial cases supplied by the language profile.
+- **ED-PROJ-011:** An exact, bounded descriptor catalogue must dynamically
+  generate the available palette, cards, ports, properties, and commands; a
+  language-version string alone is insufficient.
+- **ED-PROJ-012:** Core and vocabulary descriptors are data only. They cannot
+  execute code or grant host authority, and a visual card does not itself imply
+  a function or runtime operation.
+- **ED-PROJ-013:** The editor must project its authoring document to `.neu`
+  source units and submit a host-completed captured-project request to the
+  ordinary compiler; it must never submit its canvas graph as language meaning.
 
 ## Current conformance target
 
-The detailed v0 obligations and evidence matrix remain implementation design
-material. They are derived from the canonical
-[Neutral language requirements](../neutral-lang/REQUIREMENTS.md) and accepted
-v0 language decisions; this project contract does not redefine those semantics.
+The detailed Editor v0 obligations and evidence matrix remain implementation
+design material. They are derived from the selected Neutral v1 core and
+authoring profiles, including the inherited v0 baseline; this project contract
+does not redefine language semantics.
 
 ## Acceptance boundary
 

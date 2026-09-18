@@ -1,184 +1,163 @@
 # Neutral Editor v0 language integration contract
 
-Status: integration proposal; blocked on concrete `neutral-lang` authoring APIs
+Status: proposed integration contract; depends on Neutral authoring v1
 
-## Current constraint
+## Baseline
 
-The current Neutral language v0 architecture specifies compiler, reader,
-diagnostic, source-map, provenance, and data-only vocabulary contracts. It
-deliberately exposes no public syntax tree or IR rewrite API.
+Neutral Editor v0 is built after Neutral language v1 and uses Neutral v1 core
+plus a compatible Neutral authoring v1 profile as its reference conformance
+baseline. Language v1 inherits the released v0 language contract by reference;
+the Editor does not duplicate either grammar.
 
-Those public compiler contracts are sufficient for authoritative validation,
-but not by themselves for all editor requirements. Full Neutral Editor v0
-conformance additionally needs version/capability discovery and a public
-authoring projection that can import and project the complete Neutral v0 source
-surface without persisting compiler-private models.
+The editor is a generic visual source author. It does not own Neutral parsing,
+formatting, semantic validation, or IR production. The language bridge must
+describe the installed authoring surface and translate between public authoring
+records and `.neu` source. Ordinary Neutral capture and compilation remain the
+only route from source to authoritative IR.
 
-This is a dependency fact, not permission for the editor to reach into compiler
-internals or hard-code one language version.
+## Profile and catalogue discovery
 
-## Discovery boundary
-
-The host discovers installed adapters, then the editor explicitly selects the
-profile required by a project:
+The host discovers installed adapters and exact compatible profiles:
 
 ```text
-LanguageRegistry.discover() -> [
-  {
-    installationId
-    adapterProtocolVersion
-    supportedLanguageProfiles[]
-  }
-]
+LanguageRegistry.discover() -> LanguageInstallation[]
 
 LanguageAdapter.capabilities(profileId) -> {
-  languageIdentity
-  languageVersion
-  authoringProfileVersion
-  documentShape
-  constructs[]
-  typeConstructors[]
-  valueForms[]
-  compatibilityService
+  coreProfile
+  irProfile
+  authoringProfile
+  descriptorSchema
+  projectShape
   capturedInputRequirements
-  vocabularyCapabilities
   operations
   diagnosticCapabilities
   limits
+  requiredCapabilityIds[]
 }
+
+LanguageAdapter.describeAuthoring({
+  authoringProfile
+  capturedVocabularyContracts[]
+}) -> DescriptorCatalogue
 ```
 
-For Neutral language v0, `documentShape` reports exactly one source unit and one
-logical module. The generic editor does not encode those numbers as permanent
-UI rules. A later profile may report nested or multiple document contexts and
-activate the same navigation abstraction differently.
+The catalogue, not a language-version string, drives the palette, cards,
+inspectors, ports, commands, nesting, and compatibility preflight. Its identity
+commits to the exact core, authoring, descriptor-schema, and vocabulary profile
+tuple. A change to any member invalidates derived controls and caches.
 
-Capability IDs are versioned contracts with immutable meaning. Unknown required
-IDs fail closed. A language version string is display and selection data; it is
-not a substitute for capability negotiation.
+Every descriptor has a stable qualified identity, owner, schema version,
+availability conditions, required capability IDs, and deterministic order.
+Construct descriptors declare semantic projection kind, source slot, ports,
+properties, child contexts, and constraints. Port descriptors declare
+direction, semantic edge kind, exact type expression, cardinality, and
+requiredness. Property descriptors declare type/value form,
+required/defaulted/nullability state, cardinality, and nesting.
 
-## Required v0 authoring capabilities
+Descriptors are immutable data. They contain no callbacks, scripts, native
+modules, custom validators, UI components, ambient lookup, or authority grants.
+Unknown required fields or capabilities fail closed; optional non-semantic
+presentation fields may be preserved and ignored.
 
-The Neutral v0 profile must describe the complete accepted surface:
+## Core and vocabulary contributions
 
-- canonical language and module headers;
-- zero or one captured data-only vocabulary requirement;
-- record and immutable binding declarations;
-- identifier categories and protected names;
-- `num`, `string`, `bool`, nominal records, `T?`, `List<T>`, `Ref<T>`, and
-  vocabulary-owned nominal data types;
-- exact numbers, strings, Booleans, `null`, nested contextual records, ordered
-  homogeneous lists, ordinary value reuse, and `ref(name)`;
-- record fields, required/defaulted and nullable/non-nullable states, and
-  closed constant defaults;
-- forward resolution, type compatibility, reference target checks, recursion,
-  and value-cycle validation ownership;
-- comments and reference formatting behavior;
-- source-map, provenance, diagnostic, cancellation, and resource-limit support;
-  and
-- explicit exclusions so the UI cannot mistake an unavailable construct for an
-  optional control.
+The core authoring profile describes the complete selected language surface,
+including projects, source units, modules, imports, aliases, visibility,
+declarations, types, value forms, reuse, references, comments, `url`, `path`,
+diagnostics, limits, and explicit exclusions.
 
-Nested record and list values are part of this profile. Nested source units,
-modules, namespaces, and subgraphs are not.
+Exact captured vocabulary semantic schemas are merged into the catalogue under
+their canonical vocabulary identities. A separately identified authoring-
+metadata profile may contribute bounded presentation hints such as title,
+category, documentation, order, and icon token. Changing those hints invalidates
+the catalogue but not compiled project meaning. Local source aliases do not
+change descriptor identity.
 
-## Authoring and validation operations
+A displayed card is an authoring projection of Neutral data. It is not thereby
+a language function, event, command, or executable node. A future Flow
+vocabulary may define records and conventions that appear as cards, but Flow
+Core interprets the compiled IR and Flow-owned system/provider mappers perform
+CI/CD mapping. Neither Neutral language nor the generic Editor executes them.
 
-The editor needs behavior equivalent to:
+## Project authoring operations
+
+The bridge supplies behavior equivalent to:
 
 ```text
-importSource({
-  profileId
-  sourceBytes
-  logicalSourceIdentity
-  capturedVocabulary
+importProject({
+  authoringProfile
+  capturedProject
   limits
-}) -> AuthoringProjection | ImportDiagnostics
+}) -> AuthoringProject | ImportDiagnostics
 
-projectSource({
-  profileId
-  authoringDocument
+projectSources({
+  authoringProfile
+  authoringProject
   limits
 }) -> {
-  sourceBytes
+  sourceUnits[]
   elementSourceMap
 }
 
-validate({
-  profileId
-  sourceBytes
-  logicalSourceIdentity
-  capturedVocabulary
-  behaviorVersions
-  limits
-  cancellation
-  requestRevision
-}) -> {
-  requestRevision
-  outcome
-  diagnostics[]
-  validatedIrHandle?
-  sourceMap?
-  provenance?
-  derivation?
-  resourceFacts?
-}
+checkCompatibility({
+  authoringProfile
+  sourceType
+  targetType
+  edgeKind
+}) -> CompatibilityResult
 ```
 
-`AuthoringProjection` is a public editor-facing contract, not the compiler AST.
-It represents declarations, types, source value forms, reuse/reference intent,
-comments supported for round-tripping, stable source anchors, and opaque
-extension fields. Recovery records must never be mistaken for a valid semantic
-document.
+`AuthoringProject` is a public editor-facing projection, not a compiler AST. It
+represents source units, modules, imports, visibility, declarations, types,
+source value forms, comments promised for round-trip, stable source anchors,
+and opaque supported extensions. Recovery data is never authoritative.
 
-`projectSource` owns version-specific source spelling and reference formatting.
-The generic editor owns interaction and presentation, not Neutral tokens.
+`projectSources` owns version-specific spelling and produces every `.neu`
+source unit plus mappings from editor elements to generated source spans. The
+host combines those bytes with explicit logical source/module identities,
+exact vocabulary locks, selected derivation roots, limits, and the capture
+contract version to form `CapturedProjectRequest`. None of those facts is
+guessed from canvas presentation.
 
-Diagnostics include stable code, layer, severity, safe parameters/message,
-primary and related original-byte spans, optional remedy, and truncation state
-when the compiler provides them. The editor maps those spans through its
-element/source table without changing diagnostic meaning or ordering.
-
-## Compatibility queries
-
-Port compatibility and property controls must use declared capability data or a
-side-effect-free adapter query. The editor may cache responses under the exact
-profile and type identities that produced them.
+## Authoritative validation loop
 
 ```text
-checkCompatibility(profileId, sourceType, targetType) -> {
-  compatible
-  conversionKind
-  reasonCode?
-}
+descriptor catalogue
+    -> generic canvas edits
+    -> AuthoringProject
+    -> projectSources
+    -> `.neu` source units + element/source map
+    -> CapturedProjectRequest
+    -> captureProject / compileCapturedProject
+    -> IR + diagnostics + source map + provenance
+    -> mapped Editor diagnostics
 ```
 
-For the current v0 profile the adapter will report exact identity plus outer
-`T` to `T?` widening and invariant generic arguments. The generic editor must
-not contain those rules as permanent Neutral-specific code.
+The compiler receives source bytes, not the editor graph. Source projection or
+frontend compatibility preflight does not establish validity. A generated
+project is authoritative only after ordinary Neutral capture and compilation
+succeed.
 
-## Vocabulary boundary
-
-The adapter resolves the one optional vocabulary only from host-supplied exact
-captured inputs. The capability/profile response and vocabulary contract may
-generate generic editors for vocabulary-owned nominal records and values.
-
-They cannot contribute executable function/event nodes, scripts, callbacks,
-custom validators, bytecode, native libraries, or React components. Executable
-nodes and runtime controls require separate future language/runtime contracts.
+Validation is revisioned and cancellable. Diagnostics retain stable code,
+layer, severity, safe parameters/message, logical source identity, primary and
+related byte spans, optional remedy, and truncation state. The Editor maps them
+through the returned element/source table without changing their meaning or
+ordering and discards stale revisions.
 
 ## Compatibility and failure rules
 
 - Missing exact profile: preserve the project and open unresolved/read-only.
-- Unknown required capability: fail closed and identify the capability.
+- Unknown required capability or descriptor field: fail closed and identify it.
 - Adapter unavailable: distinguish service failure from invalid source.
-- Import unsupported: report the missing capability; do not parse privately.
-- Vocabulary mismatch: preserve affected values and show compatibility
-  diagnostics; never substitute a different bundle.
-- Capability/profile change: invalidate derived UI state and validation caches;
-  never migrate the project implicitly.
-- Invalid or recovered source: show diagnostics, but produce no authoritative
-  editor semantic document or IR.
+- Import or projection unavailable: report the absent operation; do not parse
+  or format privately.
+- Vocabulary mismatch: preserve affected data and report it; never substitute a
+  different vocabulary contract.
+- Catalogue tuple change: invalidate derived UI and validation caches; never
+  migrate implicitly.
+- Invalid or recovered source: show diagnostics, but expose no authoritative
+  authoring project or IR.
 
-The editor must not guess from a compiler version, search ambient installation
-paths from source, or fall back to another profile silently.
+The Editor never searches ambient paths or networks because of source content,
+falls back to another profile silently, emits Neutral IR, or treats successful
+compilation as authorization for an external effect.

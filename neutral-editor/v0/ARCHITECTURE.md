@@ -41,11 +41,15 @@ The in-memory document is framework-independent and contains:
 ProjectDocument
   formatVersion
   languageProfileRequirement
-  sourceUnit
-    logicalIdentity
+  authoringProfileRequirement
+  capturedVocabularyRequirements[]
+  sourceUnits[]
+    logicalSourceIdentity
+    logicalModuleIdentity
     module
-    optionalVocabulary
-    declarations[]
+      vocabularyRequirements[]
+      imports[]
+      declarations[]
   authoringGraph
     contexts[]
     nodes[]
@@ -62,24 +66,26 @@ construct, type, value, and port capability IDs, not React component names or
 array positions. Presentation records may change without scheduling language
 validation.
 
-The document can retain a context path so later language profiles can expose
-nested documents or modules. Neutral v0 reports one source unit and one module,
-so it activates only the root document context. Nested record/list values are
-semantic v0 content and may use nested inspector/canvas contexts below that root.
+The document context stack exposes the project, modules, and recursively nested
+record/list values reported by the selected profile. The reference Neutral v1
+profile supports multiple source units with one logical module per unit.
 
 ### Descriptor catalogue
 
-A descriptor is immutable input discovered for a selected language profile. It
-describes a construct's stable capability ID, title, documentation, semantic
-projection, ports, editable properties, nesting behavior, and constraints. The
-generic editor does not own a Neutral v0 descriptor table.
+A descriptor is immutable input discovered for an exact core, authoring,
+descriptor-schema, and captured-vocabulary profile tuple. It describes a
+construct's stable qualified identity, owner, title, documentation, semantic
+projection, source slot, ports, editable properties, nesting behavior,
+availability, capability requirements, and constraints. The generic editor
+does not own a Neutral descriptor table or infer one from a version string.
 
 Descriptors are data. They cannot contain JavaScript, Rust libraries, callbacks,
 custom validators, or custom React components.
 
-Language descriptors and captured vocabulary metadata are separate. A v0
-vocabulary may contribute nominal data types, fields, closed defaults, and
-required structural features, but never executable operation nodes.
+Core and captured-vocabulary descriptors merge deterministically by qualified
+identity. Vocabulary schemas may contribute nominal data shapes and bounded
+non-semantic presentation hints, but never executable operation nodes. A card
+is a projection of Neutral data, not a Neutral function or runtime operation.
 
 ### Command service
 
@@ -111,16 +117,18 @@ LanguageRegistry
 
 LanguageAdapter
   capabilities() -> LanguageCapabilityProfile
-  importSource(source, capturedInputs, limits) -> AuthoringProjection
-  projectSource(document, profile, limits) -> SourceProjection
-  validate(source, capturedInputs, limits, cancellation) -> ValidationResult
+  describeAuthoring(profile, capturedVocabularies) -> DescriptorCatalogue
+  importProject(capturedProject, limits) -> AuthoringProject
+  projectSources(document, profile, limits) -> SourceProjection[]
+  checkCompatibility(profile, sourceType, targetType, edgeKind) -> result
 ```
 
-The capability response includes supported language versions, document shape,
-construct/type/value descriptors, compatibility queries, captured-input needs,
-operations, diagnostics, and resource limits. The adapter returns authoritative
-diagnostics and source locations. It does not return compiler-private tokens,
-recovery trees, or mutable IR.
+The capability response includes exact core, IR, authoring, and descriptor
+profiles, project shape, captured-input needs, operations, diagnostics, and
+resource limits. The host forms a `CapturedProjectRequest` from projected source
+units and explicit locks/roots, then uses ordinary Neutral capture and compile
+operations. The adapter does not return compiler-private tokens, recovery trees,
+or mutable IR.
 
 ### View projection
 

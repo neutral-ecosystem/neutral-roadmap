@@ -35,20 +35,34 @@ or application-specific types.
 
 1. Can one logical module be represented by exactly one source unit in v1, or
    is partial-module merging already justified?
-2. Is a private-by-default `public` modifier sufficient, without re-exports or
-   friend visibility?
+2. Is a private-by-default `public` modifier sufficient once public dependency
+   closure has a precise rule?
 3. Should module names remain one `snake_case` identifier or become qualified
    logical names such as `acme::delivery::shared`?
 4. Can one project use multiple exact data-only vocabularies without creating
    ambiguous namespaces or an executable plugin mechanism?
-5. Which authoring projection is the smallest stable public contract that lets
+5. Which core identity and captured-project-request rules make the same project
+   reproducible across hosts?
+6. Which authoring projection is the smallest stable public contract that lets
    Neutral Editor import and project v1 without using a compiler-private AST?
+7. Are `url` and `path` sufficiently useful as opaque data types to justify
+   their core vocabulary-schema support, without granting acquisition authority?
+8. Which minimal data-only descriptor schema lets an Editor generate every
+   core and vocabulary card, port, property, and command without encoding the
+   grammar or accepting executable UI extensions?
 
 This proposal recommends one source unit per module, qualified logical module
 names, explicit aliased imports, private-by-default declarations, no re-exports,
-and multiple exact data-only vocabularies under unique aliases. Each choice
-still needs fixtures, lowering rules, resource treatment, and review before it
-can become accepted.
+and generic data-only vocabulary infrastructure. It permits import cycles and
+resolves them through strongly connected components. Each choice still needs
+fixtures, lowering rules, resource treatment, and review before it can become
+accepted.
+
+The proposed authoring answer is an exact profile tuple plus a deterministic
+descriptor catalogue. The catalogue drives generic UI, while adapter-owned
+source projection and ordinary core compilation remain authoritative. Future
+Flow cards are projections of Flow vocabulary data and conventions; Flow-owned
+mappers, not Neutral or the Editor, assign CI/CD behavior.
 
 ## Approval boundary
 
