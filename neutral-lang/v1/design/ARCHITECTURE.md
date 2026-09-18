@@ -10,11 +10,10 @@ compilation, public IR, and external effects. The release should establish the
 shared language substrate needed by Neutral Flow and Neutral Editor without
 embedding either product's semantics.
 
-v1 is built on the released and working v0.1 contract. Its compiler may reuse
-the v0 implementation, and its language profile retains the v0 lexical, type,
-value, reference, vocabulary, IR, provenance, diagnostic, and safety behavior
-except where the v1 requirements explicitly replace a rule. The v0 profile
-remains independently selectable and frozen.
+v1 is built on the released and working v0.1 contract by reference. Its design
+documents contain only deltas and explicitly map every superseded v0 requirement
+to its v1 replacement. The v0 profile remains independently selectable and
+frozen.
 
 ## Proposed scope
 
@@ -241,10 +240,10 @@ The compiler adapter owns Neutral spelling and validation; the editor owns
 interaction and presentation.
 
 A no-op import and projection must recompile to logically equal project IR. The
-projection retains exact numeric source values, nested values, omission/default
-states, declaration order, reuse/reference intent, and supported comments. Its
-source map reaches the narrowest stable authoring owner, including imports,
-fields, properties, values, reuse edges, and reference edges.
+projection retains every authoring distinction required by the inherited v0
+contract plus v1 module constructs. Its source map reaches the narrowest stable
+authoring owner, including imports, fields, properties, values, reuse edges, and
+reference edges.
 
 Incremental compilation may be exposed as an optimization with explicit cache
 keys and invalidation facts. Full and incremental compilation of the same

@@ -10,11 +10,9 @@ public-reader evidence. This checklist does not approve syntax by itself.
 
 ## Retained v0 surface
 
-- [ ] **SYN-V1-BASE-001** — Complete v0 requirement disposition
-- [ ] **SYN-V1-BASE-002** — Retained lexical, type, value, and reference surface
-- [ ] **SYN-V1-BASE-003** — Retained IR, provenance, diagnostics, and limits
-- [ ] **SYN-V1-BASE-004** — Adapted v0 fixture corpus under the v1 profile
-- [ ] **SYN-V1-BASE-005** — Explicit independent v0/v1 profile selection
+- [ ] **SYN-V1-BASE-001** — v0 conformance by reference
+- [ ] **SYN-V1-BASE-002** — Complete v0-to-v1 delta disposition
+- [ ] **SYN-V1-BASE-003** — Delta fixtures and explicit profile selection
 
 ## Project and document shape
 

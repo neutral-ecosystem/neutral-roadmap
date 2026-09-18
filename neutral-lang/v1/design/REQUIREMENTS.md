@@ -11,45 +11,35 @@ diagnostics, resource bounds, fixtures, and public-reader evidence.
 
 ## Relationship to v0
 
-Neutral v1 is an additive successor to the working Neutral v0.1 language, not a
-replacement designed from an empty baseline.
+Neutral v1 uses the released
+[v0 requirements](../../v0/portable/specs/REQUIREMENTS.md) as its normative
+baseline. This document specifies only v1 deltas and new obligations.
 
-- **NL-V1-BASE-001:** Every v0 boundary, source-text rule, declaration rule,
-  core type, value form, default rule, reference invariant, IR distinction,
-  source-map/provenance/derivation guarantee, diagnostic guarantee, resource
-  rule, and public-reader guarantee remains required in v1 unless this document
-  explicitly replaces it.
-- **NL-V1-BASE-002:** The v1 profile retains immutable explicitly typed
-  bindings, nominal records, `num`, `string`, `bool`, `T?`, `List<T>`, `Ref<T>`,
-  exact numbers, contextual records, ordered homogeneous lists, closed defaults,
-  ordinary value reuse, typed identity references, comments, and data-only
-  vocabularies.
-- **NL-V1-BASE-003:** A v1 specification must publish a requirement-by-
-  requirement disposition for v0: retained unchanged, extended by a named v1
-  requirement, or replaced by a named v1 requirement and migration rule.
-- **NL-V1-BASE-004:** Every v0 positive, negative, boundary, resource, IR,
-  reader, determinism, and adversarial fixture must remain applicable directly
-  or have a documented v1 adaptation with the same protected invariant.
-- **NL-V1-BASE-005:** A v1 implementation may share code with v0, but profile
-  selection remains explicit and `neu "0.1"` continues to compile under the
-  frozen v0 contract.
+- **NL-V1-BASE-001:** A v1 implementation satisfies the complete v0 contract
+  by reference, except for v0 requirements explicitly superseded below.
+- **NL-V1-BASE-002:** Every superseded v0 requirement maps to one or more named
+  v1 requirements and an explicit compatibility or migration decision.
+- **NL-V1-BASE-003:** The
+  [v0 conformance corpus](../../v0/portable/conformance/README.md) remains the
+  inherited baseline; v1 adds delta fixtures and adaptations only where a
+  superseded rule makes a v0 source fixture inapplicable.
+- **NL-V1-BASE-004:** Profile selection remains explicit. `neu "0.1"` continues
+  to use the frozen v0 contract and is never reinterpreted as v1.
 
-The intended changes to the v0 surface are currently limited to:
-
-| v0 area | Proposed v1 disposition |
+| Superseded or extended v0 requirement | Governing v1 delta |
 | --- | --- |
-| One source unit and one module | Replaced by bounded captured projects and one source unit per logical module under `NL-V1-CAP-*` and `NL-V1-MOD-*` |
-| Unqualified module name | Extended to a canonical qualified logical name by `NL-V1-MOD-002` |
-| `::` reserved only for vocabulary qualification | Extended to resolved module or vocabulary aliases by `NL-V1-MOD-003..004` and `NL-V1-VOC-003` |
-| Zero or one unaliased vocabulary requirement | Replaced by bounded explicitly aliased requirements under `NL-V1-VOC-*` |
-| Every declaration exported | Replaced by private-by-default declarations and explicit `public` under `NL-V1-VIS-*` |
-| Document-local value reuse and `ref(name)` | Extended across imported public declarations by `NL-V1-XMOD-*` |
-| Document-local IR graph and source map | Extended to a captured project graph and source-unit-qualified locations by `NL-V1-IR-*` |
-| Single-unit compiler and reader operations | Extended with project operations under `NL-V1-API-*` |
-| Single-unit diagnostic ordering | Extended across logical source identities by `NL-V1-DIA-002` |
+| `NL-CAP-001` | `NL-V1-CAP-001..008` |
+| `NL-SRC-007` | `NL-V1-MOD-002..004`, `NL-V1-VOC-003` |
+| `NL-DOC-001..005` | `NL-V1-MOD-*`, `NL-V1-VOC-*`, `NL-V1-VIS-*` |
+| `NL-REF-001`, `NL-REF-004..005` | `NL-V1-XMOD-003..005`, `NL-V1-IR-005`, `NL-V1-IR-009` |
+| `NL-VOC-001`, `NL-VOC-003` | `NL-V1-VOC-*` |
+| `NL-IR-002`, `NL-IR-004..005` | `NL-V1-IR-*` |
+| `NL-PRO-001` | `NL-V1-IR-002..004`, `NL-V1-IR-009` |
+| `NL-API-001..004` | `NL-V1-API-*` |
+| `NL-DIA-002` | `NL-V1-DIA-002` |
 
-Any additional semantic change requires another explicit row before v1 can be
-accepted.
+Unlisted v0 requirements remain authoritative without being copied here. Any
+additional change must first be added to this map.
 
 ## Product outcome
 
@@ -229,10 +219,10 @@ accepted.
   retained v0 surface plus v1 modules, imports, aliases, visibility, qualified
   types, qualified value reuse, qualified references, and repeated vocabulary
   requirements.
-- **NL-V1-AUT-002:** The authoring projection preserves exact numeric source
-  values, required/defaulted and nullable/non-nullable field states, omitted
-  versus explicit values, nested record/list values, declaration order, reuse
-  versus reference intent, and every comment position promised by the profile.
+- **NL-V1-AUT-002:** The authoring projection preserves every authoring-relevant
+  distinction required by the inherited `NL-SRC-*`, `NL-DEC-*`, `NL-TYP-*`,
+  `NL-VAL-*`, `NL-REF-*`, and `NL-PRO-*` contracts, plus declaration order and
+  every comment position promised by the selected authoring profile.
 - **NL-V1-AUT-003:** Importing a valid captured project and projecting it without
   semantic edits must produce source that recompiles to logically equal project
   IR, while preserving all authoring content the selected profile promises to
@@ -284,10 +274,9 @@ accepted.
   descriptors, imports a multi-module project, edits every retained and new
   construct, projects all source units, validates them, maps diagnostics, and
   reopens the result using only public language services.
-- **NL-V1-CNS-005:** The Editor fixture covers exact numbers, recursive nested
-  values, defaults and omission, comments, imports, visibility, qualified reuse
-  and references, missing profiles/vocabularies, stale validation results, and
-  unknown required capabilities.
+- **NL-V1-CNS-005:** The Editor fixture reuses the inherited v0 editor corpus and
+  adds v1 cases for imports, visibility, qualification, missing project
+  dependencies, stale validation results, and unknown required capabilities.
 
 ## Compatibility and conformance
 
