@@ -25,7 +25,7 @@ conformance bundle.
 | Version | State | Public documentation |
 | --- | --- | --- |
 | v0.1.0 | Released and archived | [Immutable v0.1.0 bundle](v0/portable/README.md) |
-| v1 | Not started | Documentation will appear when its portable seed exists |
+| v1 | Design exploration | A project-scale proposal exists; public documentation will appear only when its portable seed is approved |
 | v2 | Not started | Documentation will appear when its portable seed exists |
 
 ## Version exit criteria
