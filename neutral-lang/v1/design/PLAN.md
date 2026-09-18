@@ -71,6 +71,14 @@ module identities must match source headers, and one canonical vocabulary has
 one semantic revision throughout a project. These constraints give Editor and
 headless consumers the same deterministic compilation path.
 
+Cross-host logical identity uses a bounded, identity-only
+`CanonicalLogicalForm`: stable module, type, and module-symbol identities replace
+graph-local IDs, while source identities and evidence remain outside meaning.
+Public values may resolve private ordinary values, but any transitively exposed
+`Ref<T>` must target a public binding. Vocabulary locks exactly cover source
+requirements, and authoring catalogue discovery receives vocabulary semantic
+contracts and authoring metadata as separate explicit inputs.
+
 ## Approval boundary
 
 A portable v1 seed must not be created merely from this proposal. Promotion

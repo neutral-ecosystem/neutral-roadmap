@@ -206,6 +206,12 @@ not a secrecy or authorization mechanism. Vocabulary semantic contracts mark
 which schema types are externally accessible; those types count as public types
 for signature validation.
 
+Identity references need a stricter rule than ordinary value reuse. Every
+`Ref<T>` transitively exposed by a public binding, including one nested inside a
+record or list, must target a public binding. A private value may be resolved
+and its provenance redacted, but a private reference target cannot be removed
+without changing the value itself.
+
 ## Cross-module values and references
 
 Qualified imported bindings may be reused as immutable values. Their resolved
@@ -240,6 +246,11 @@ conflicting revisions for the same identity fail capture. A semantic contract
 also declares its externally accessible schema types. Non-exported vocabulary
 types cannot be named by source or leak through a public signature.
 
+The supplied lock set is an exact cover of the distinct canonical vocabulary
+identities required by all source modules. Every `use` occurrence maps to its
+covered identity and shared revision. Missing, extra, duplicate, conflicting,
+and unused locks are capture errors.
+
 Vocabularies remain closed, data-only Neutral contracts. Multiple vocabularies
 do not permit callbacks, validators, scripts, native modules, executable
 plugins, hidden imports, or ambient acquisition. v1 defines no Flow, provider,
@@ -260,23 +271,52 @@ The v1 logical payload should contain:
 - resolved local and cross-module type/value/reference edges;
 - exact vocabulary identities and required structural features;
 - tagged `url` and `path` values; and
-- identities for every source unit and public module symbol.
+- stable public and private module-symbol identities.
 
-Source maps identify the source unit as well as the half-open byte span.
+Logical source identities are companion-evidence data, not logical payload
+content. Source maps identify the source unit as well as the half-open byte span.
 Provenance records import traversal, qualified reuse, references, and defaults
 without turning source spelling into meaning. Derivation separately commits to
 the complete captured source/vocabulary closure, acceptance budgets, and
 diagnostic policy.
 
-Logical equality compares the complete project graph under consistent
-graph-local ID renaming. Module identity, module-symbol identity, declaration
-fingerprint, captured project revision, derivation identity, and encoded byte
-identity remain distinct.
+Logical equality compares the normative `CanonicalLogicalForm`. Graph-local IDs
+and logical source identities never enter that form, so equality requires no
+general graph-isomorphism search. Module identity, module-symbol identity,
+declaration fingerprint, captured project revision, derivation identity, and
+encoded byte identity remain distinct.
 
 Consumers may request the whole validated project or a root/export view. A view
 never changes logical project identity or silently omits a dependency required
 to interpret an exported declaration. Its selected roots and view schema belong
 to a separate view derivation and artifact identity.
+
+## Canonical logical form
+
+v1 identity requires an identity-only normative canonical form even though it
+does not require project IR itself to have one canonical public serialization:
+
+```text
+CanonicalLogicalForm v1
+  identityProfile
+  languageBehaviorProfile
+  modules ordered by canonical logical module identity
+    declarations addressed by stable module-symbol identity
+    semantic types and values
+    resolved edges using canonical type/module-symbol identity
+  exact vocabulary semantic contracts
+```
+
+Declaration order is omitted where inherited semantics make it non-semantic.
+Record-field and list order remain where significant. Logically unordered maps
+use a specified canonical key ordering. Text, exact numbers, `url`, and `path`
+have one platform-independent byte representation.
+
+Source identities, aliases, graph-local IDs, spans, comments, provenance,
+diagnostics, presentation data, and host data are excluded. Construction uses
+stable keys and direct bounded ordering; it cannot depend on general graph
+isomorphism or permutation search. The core identity profile fixes the exact
+canonical-form version, encoding, digest algorithm, and domain tags.
 
 ## Identity chain
 
@@ -298,17 +338,29 @@ All identities use domain-separated canonical inputs and exclude their own
 identity fields. Logical project identity commits to the canonical logical
 payload body, including module graph, semantic content, and exact vocabulary
 semantic contracts. It excludes source maps, provenance, diagnostics, host
-paths, source aliases, capture order, roots, and derivation settings. Captured
-closure identity commits to the capture-contract version, exact core profile,
-canonical source identities and bytes, and exact vocabulary semantic locks.
+paths, logical source identities, source aliases, capture order, roots, and
+derivation settings. Captured closure identity commits to the capture-contract
+version, exact core profile, canonical source identities and bytes, and exact
+vocabulary semantic locks.
 Two captures may differ while producing the same logical project identity.
 
-Compiler derivation identity binds captured closure and logical project
-identities to compiler/IR profiles, acceptance limits, and non-semantic
-compiler or diagnostic policy. It contains no roots. A separate view derivation
-identity binds the complete logical project identity to a `ViewRequest`, view
-schema, and view policy. Artifact identity additionally binds artifact kind,
-format/schema version, and artifact-specific transformation inputs.
+Compilation-result derivation identity binds captured closure and logical
+project identities to compiler/IR profiles, requested artifacts, acceptance
+limits, and non-semantic compiler or diagnostic policy. It identifies the
+result envelope, not every contained artifact, and contains no roots. A separate
+view derivation identity binds the complete logical project identity to a
+`ViewRequest`, view schema, and view policy.
+
+Artifact derivations are dependency-minimal rather than every artifact
+inheriting one monolithic compiler derivation. Project IR derivation binds
+logical project identity, IR profile, and IR-producing options. Source-map/
+provenance derivations additionally bind the captured closure and evidence
+profile. Diagnostic derivation binds captured closure, compiler behavior,
+applicable limits, and diagnostic policy. Each artifact identity then binds its
+own derivation identity, kind, format, and transformation inputs. A compilation-
+result envelope may bind all requested outputs and its operational outcome.
+Changing diagnostic verbosity therefore cannot invalidate an unchanged project
+IR artifact.
 
 Cancellation handles, request revisions, scheduling, and timing are operational
 correlation state and never enter an identity. Acceptance limits and diagnostic
@@ -342,6 +394,7 @@ deriveView(validatedProject, viewRequest, processingControls) -> ViewArtifact
 CompilerDerivationRequest
   compilerBehaviorProfile
   irProfile
+  requestedArtifactKinds[]
   nonSemanticCompilerOptions
 
 ProcessingControls
@@ -418,7 +471,11 @@ cannot collide or alter their meaning.
 Neutral Editor uses the bridge's public operations equivalent to:
 
 ```text
-describeAuthoring(authoringProfile, capturedVocabularies)
+describeAuthoring(
+    coreAuthoringProfile,
+    vocabularySemanticContracts,
+    vocabularyAuthoringMetadataProfiles
+)
     -> DescriptorCatalogue
 importProject(capturedProject) -> AuthoringProject | diagnostics
 projectSources(authoringProject) -> source units + element/source map
@@ -489,5 +546,5 @@ authority to execute, reveal a secret, access a provider, or perform an effect.
 - executable vocabularies, plugins, callbacks, or custom validators;
 - Flow planning/runtime behavior or Editor presentation state;
 - automatic v0 migration or a public general-purpose IR rewrite API; and
-- canonical serialization unless signing or content addressing supplies a
-  separate demonstrated requirement.
+- one canonical public project-IR serialization. v1 does define the separate,
+  identity-only `CanonicalLogicalForm` required for cross-host logical identity.

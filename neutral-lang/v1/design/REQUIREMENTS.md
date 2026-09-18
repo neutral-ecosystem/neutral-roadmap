@@ -165,8 +165,10 @@ additional change must first be added to this map.
   graph-local element ID.
 - **NL-V1-XMOD-004:** Import edges participate in project dependency analysis;
   identity-reference edges retain v0's non-value, non-execution semantics.
-- **NL-V1-XMOD-005:** Moving a source file without changing its logical source
-  and module identities does not change language meaning.
+- **NL-V1-XMOD-005:** Moving a host file does not change language meaning.
+  Changing only a logical source identity changes capture/evidence identity but
+  not logical project meaning; changing a logical module identity changes
+  meaning.
 
 ## Vocabularies
 
@@ -199,6 +201,10 @@ additional change must first be added to this map.
   externally accessible schema types. Those types count as public reachable
   types for public-signature validation; non-exported vocabulary types cannot
   appear in source or public signatures.
+- **NL-V1-VOC-011:** The request lock set is an exact cover of distinct canonical
+  vocabulary identities required by source. Every requirement occurrence maps
+  to exactly one covered identity and the project's one permitted revision;
+  missing, extra, duplicate, conflicting, or unused locks fail capture.
 
 ## Opaque location data
 
@@ -221,8 +227,9 @@ additional change must first be added to this map.
 - **NL-V1-IR-001:** The logical payload envelope carries logical project identity,
   module graph, per-module declarations, export indexes, resolved cross-module
   edges, vocabulary identities, and required structural features. It contains
-  no selected roots. Identity computation uses the canonical logical payload
-  body with all self-identifying envelope fields and companion evidence removed.
+  no logical source identities or selected roots. Identity computation uses the
+  canonical logical payload body with all self-identifying envelope fields and
+  companion evidence removed.
 - **NL-V1-IR-002:** Source maps identify both logical source unit and original
   half-open byte span.
 - **NL-V1-IR-003:** Provenance distinguishes local source, imported reuse,
@@ -230,17 +237,18 @@ additional change must first be added to this map.
 - **NL-V1-IR-004:** Derivation commits to the complete captured source and
   vocabulary closure while keeping meaning, acceptance/resource, and
   diagnostic/output-policy inputs separate.
-- **NL-V1-IR-005:** Logical project equality is graph equality modulo one
-  consistent renaming of graph-local element IDs; import order and encoded map
-  order are non-semantic.
+- **NL-V1-IR-005:** Logical project equality is equality of the normative
+  `CanonicalLogicalForm` defined below. Graph-local element IDs, source-unit
+  identities, aliases, import order, and encoded map order are non-semantic and
+  require no general graph-isomorphism comparison.
 - **NL-V1-IR-006:** External encoded project IR is validated as untrusted input,
   including export accessibility and every cross-module edge.
 - **NL-V1-IR-007:** A root/export projection cannot silently omit a dependency
   required to interpret an exposed declaration.
-- **NL-V1-IR-008:** Project IR artifact identity binds the exact compiler
-  derivation and logical payload identity. It remains distinct from project,
-  module, source-content, declaration, graph-local element, and serialized-byte
-  identities.
+- **NL-V1-IR-008:** Project IR artifact identity binds an IR-specific derivation
+  identity formed from logical project identity, exact IR profile, and only the
+  inputs capable of changing that IR artifact. Diagnostic policy, diagnostic
+  limits, source-map policy, and unrelated view settings do not participate.
 - **NL-V1-IR-009:** A public reader can resolve any exposed type, value, or
   reference to its stable module-symbol identity and can map any exposed IR
   element to its source unit and source span when mapping evidence is present.
@@ -252,31 +260,64 @@ additional change must first be added to this map.
   validated complete project. A materialized view is a derived artifact with
   its own derivation and artifact identities; it never changes or masquerades
   as the complete project IR.
+- **NL-V1-IR-012:** Every identity reference transitively exposed through a
+  public binding value, including references nested in records and lists, must
+  target a public binding. Private ordinary value reuse may be resolved and
+  redacted as specified above; a private `Ref<T>` target cannot be redacted
+  without changing the public value and therefore makes the public declaration
+  invalid.
+
+## Canonical logical form
+
+- **NL-V1-CAN-001:** v1 defines a versioned `CanonicalLogicalForm` solely for
+  logical equality and identity input. It is distinct from source formatting
+  and from any public project-IR serialization.
+- **NL-V1-CAN-002:** The form orders modules by canonical logical module
+  identity and addresses declarations by stable module-symbol identity.
+  Declaration order is omitted where inherited semantics make it non-semantic;
+  record-field and list order are retained where semantically significant.
+- **NL-V1-CAN-003:** Resolved type, value-reuse, and identity-reference edges
+  use canonical type or module-symbol identities. Graph-local IDs, source-unit
+  identities, aliases, source spans, comments, provenance, diagnostics,
+  presentation data, and host data are absent.
+- **NL-V1-CAN-004:** Any logically unordered collection has one specified
+  canonical key ordering. Text, exact numbers, `url`, and `path` have one
+  specified byte representation; no locale, platform, or insertion order may
+  affect it.
+- **NL-V1-CAN-005:** The exact canonical-form version, encoding rules, digest
+  algorithm, and domain tags are fixed by the core identity profile. Identity
+  verification fails when that exact profile is unavailable.
+- **NL-V1-CAN-006:** Canonical-form construction is deterministic and bounded
+  by direct ordering and stable identities. It must not require general graph
+  isomorphism, permutation search, or unbounded normalization.
 
 ## Project identities
 
 - **NL-V1-ID-001:** Logical project identity is a domain-separated digest of
   the canonical logical payload body excluding the identity field itself,
-  source maps, provenance, diagnostics, derivation records, and encoding. The
+  source maps, provenance, diagnostics, derivation records, and external artifact
+  encoding. The
   body includes the canonical logical
   module graph, semantic content, and exact resolved vocabulary semantic
   contracts. Host
-  paths, aliases, capture order, selected roots, and derivation settings do not
-  participate.
+  paths, logical source identities, aliases, capture order, selected roots, and
+  derivation settings do not participate.
 - **NL-V1-ID-002:** Captured closure identity is a domain-separated digest of
   the capture-contract version, exact core profile, canonical source-unit set
   with identities and bytes, and exact vocabulary semantic locks. It excludes
   the closure identity field itself and all processing controls.
 - **NL-V1-ID-003:** Two captured closures may have different closure identities
   while producing the same logical project identity.
-- **NL-V1-ID-004:** Compiler derivation identity derives from captured closure
-  identity, logical project identity, exact compiler/IR behavior profiles,
-  acceptance limits, and non-semantic compiler or diagnostic policy. It
-  contains no selected roots.
-- **NL-V1-ID-005:** Artifact identity derives from derivation identity, artifact
-  kind, format/schema version, and artifact-specific transformation inputs,
-  using a domain-separated canonical form that excludes the artifact identity
-  field itself.
+- **NL-V1-ID-004:** Compilation-result derivation identity derives from captured
+  closure identity, logical project identity, exact compiler/IR behavior
+  profiles, acceptance limits, requested artifact set, and non-semantic compiler
+  or diagnostic policy. It contains no selected roots and may identify the
+  complete result envelope without becoming every contained artifact's
+  derivation identity.
+- **NL-V1-ID-005:** Artifact identity derives from its artifact-specific
+  derivation identity, artifact kind, format/schema version, and transformation
+  inputs, using a domain-separated canonical form that excludes the artifact
+  identity field itself.
 - **NL-V1-ID-006:** Logical module identity is independent of host mapping.
   Equivalent canonical module content from different hosts preserves project
   identity; conflicting mappings for one module fail capture.
@@ -295,6 +336,13 @@ additional change must first be added to this map.
   in compiler derivation identity when they govern that derivation. Cancellation
   handles, request revisions, scheduling, and timing are operational correlation
   state and never participate in project, derivation, view, or artifact identity.
+- **NL-V1-ID-011:** Each artifact kind declares its own derivation input set.
+  Project IR derivation depends on logical project identity and IR-producing
+  profiles; source-map/provenance derivations additionally depend on captured
+  closure and evidence profiles; diagnostic derivation depends on captured
+  closure, compiler behavior, limits, and diagnostic policy; a compilation-
+  result envelope may bind every requested output and operational outcome. An
+  input cannot enter a derivation for an artifact it cannot change.
 
 ## Public services and tooling
 
@@ -400,9 +448,10 @@ additional change must first be added to this map.
 - **NL-V1-API-013:** Successful bridge validation may return a validated IR handle,
   source map, provenance, derivation, and resource facts. Non-success outcomes
   cannot expose recovered data as authoritative IR.
-- **NL-V1-API-014:** `describeAuthoring` accepts an exact authoring profile and
-  exact captured vocabulary contracts and returns the descriptor catalogue and
-  its identity without performing external I/O.
+- **NL-V1-API-014:** `describeAuthoring` accepts an exact core authoring profile,
+  exact vocabulary semantic contracts, and exact vocabulary authoring-metadata
+  profiles and returns the descriptor catalogue and its identity without
+  performing external I/O.
 - **NL-V1-API-015:** Project source projection returns the complete ordered set
   of source units and element-to-source mappings needed to form a
   `CapturedProjectRequest`; host-owned identities and vocabulary semantic locks

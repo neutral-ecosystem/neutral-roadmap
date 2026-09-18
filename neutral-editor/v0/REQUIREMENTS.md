@@ -104,6 +104,10 @@ Language conformance and editor conformance are different claims:
 - **ED-AUT-025:** Users can create source units, logical modules, explicit
   imports and aliases, vocabulary requirements, and qualified cross-module
   reuse/reference edges wherever the selected profile permits them.
+- **ED-AUT-026:** Public-surface preflight must distinguish ordinary private
+  value reuse from an exposed identity reference. A `Ref<T>` nested anywhere in
+  a public value may target only a public binding, subject to authoritative
+  compiler validation.
 
 ### Types
 
@@ -194,6 +198,9 @@ Language conformance and editor conformance are different claims:
 - **ED-VAL-012:** The compiler receives projected source units, never the editor
   graph. Source projection and UI preflight are non-authoritative until normal
   v1 capture and compilation succeed.
+- **ED-VAL-013:** The vocabulary semantic locks must exactly cover the distinct
+  vocabulary identities required by projected source. The Editor must not add
+  unused locks or silently repair missing, duplicate, or conflicting locks.
 
 ## 6. Editor behavior and persistence
 

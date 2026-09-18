@@ -43,8 +43,13 @@ for every fixture without implementation knowledge.
 
 - Define logical project, captured closure, module, module-symbol, public-API,
   declaration, derivation, artifact, and byte identities separately.
+- Freeze `CanonicalLogicalForm`, its bounded ordering rules, identity-profile
+  version, digest algorithm, and domain tags without requiring general graph
+  isomorphism or canonical public IR serialization.
 - Define the versioned host-neutral `CapturedProjectRequest`, closure
   consistency, header/request binding, and host-mapping conflicts.
+- Require an exact source-requirement-to-vocabulary-lock cover and reject extra,
+  missing, duplicate, conflicting, or unused locks.
 - Specify root selection only through a post-compilation `ViewRequest`, plus
   missing imports, declared disconnected units, duplicate modules, and SCC
   collection.
@@ -57,10 +62,14 @@ external I/O.
 ## Stage 3 — specify semantic and IR behavior
 
 - Define private/public resolution and inaccessible-public-surface errors.
+- Define recursive public-value validation so an exposed `Ref<T>` cannot target
+  a private binding while ordinary private value reuse remains permitted.
 - Define cross-module type, value reuse, and `Ref<T>` behavior.
 - Define module graph and declaration dependency ordering.
 - Extend logical IR, reader validation, source maps, provenance, derivation,
   equality, and resource accounting to project scope.
+- Define minimal dependency sets for project IR, source-map/provenance,
+  diagnostics, views, and result-envelope artifact identities.
 - Specify root/export views without dropping interpretive dependencies.
 
 Exit: every accepted fixture has one complete project IR meaning and every
@@ -75,6 +84,8 @@ invalid fixture has stable cross-source diagnostics.
 - Define qualified descriptor identity, deterministic core/vocabulary catalogue
   merge, card ports/properties/nesting, presentation-hint limits, catalogue
   identity, and cache invalidation.
+- Make vocabulary semantic contracts and vocabulary authoring-metadata profiles
+  separate explicit inputs to catalogue discovery.
 - Define side-effect-free type compatibility preflight and compiler-authority
   mismatch handling.
 - Specify project capture, compilation, decoding, and validated-reader APIs.

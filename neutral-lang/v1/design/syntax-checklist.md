@@ -44,6 +44,7 @@ public-reader evidence. This checklist does not approve syntax by itself.
 - [ ] **SYN-V1-VIS-005** — Public-surface accessibility validation
 - [ ] **SYN-V1-VIS-006** — No field modifiers, `private`, tiers, or re-exports
 - [ ] **SYN-V1-VIS-007** — Public dependency closure and private provenance
+- [ ] **SYN-V1-VIS-008** — Recursive public `Ref<T>` targets must be public
 
 ## Cross-module values and references
 
@@ -62,6 +63,7 @@ public-reader evidence. This checklist does not approve syntax by itself.
 - [ ] **SYN-V1-VOC-005** — Cross-vocabulary dependencies excluded
 - [ ] **SYN-V1-VOC-006** — One semantic vocabulary revision per project identity
 - [ ] **SYN-V1-VOC-007** — Externally accessible vocabulary schema types
+- [ ] **SYN-V1-VOC-008** — Exact source-requirement/vocabulary-lock cover
 
 ## Opaque location data
 
@@ -86,6 +88,9 @@ public-reader evidence. This checklist does not approve syntax by itself.
 - [ ] **SYN-V1-TOL-013** — Project-to-source-to-capture authoritative Editor loop
 - [ ] **SYN-V1-TOL-014** — Separate capture, compiler derivation, view, and artifact requests
 - [ ] **SYN-V1-TOL-015** — Domain-separated non-self-referential identities
+- [ ] **SYN-V1-TOL-016** — Bounded `CanonicalLogicalForm` without graph isomorphism
+- [ ] **SYN-V1-TOL-017** — Artifact-specific minimal identity dependencies
+- [ ] **SYN-V1-TOL-018** — Explicit vocabulary authoring-metadata catalogue input
 - [ ] **SYN-V1-EVO-001** — Explicit v0/v1 coexistence and migration boundary
 - [ ] **SYN-V1-EVO-002** — Multi-file source-to-IR/reader conformance
 - [ ] **SYN-V1-EVO-003** — Flow and Editor public-boundary probes

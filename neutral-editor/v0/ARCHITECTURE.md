@@ -43,6 +43,7 @@ ProjectDocument
   languageProfileRequirement
   authoringProfileRequirement
   capturedVocabularyRequirements[]
+  vocabularyAuthoringMetadataRequirements[]
   sourceUnits[]
     logicalSourceIdentity
     logicalModuleIdentity
@@ -117,7 +118,11 @@ LanguageRegistry
 
 LanguageAdapter
   capabilities() -> LanguageCapabilityProfile
-  describeAuthoring(profile, capturedVocabularies) -> DescriptorCatalogue
+  describeAuthoring(
+    coreAuthoringProfile,
+    vocabularySemanticContracts,
+    vocabularyAuthoringMetadataProfiles
+  ) -> DescriptorCatalogue
   importProject(capturedProject, limits) -> AuthoringProject
   projectSources(document, profile, limits) -> SourceProjection[]
   checkCompatibility(profile, sourceType, targetType, edgeKind) -> result

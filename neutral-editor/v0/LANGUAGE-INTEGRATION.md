@@ -36,8 +36,9 @@ LanguageAdapter.capabilities(profileId) -> {
 }
 
 LanguageAdapter.describeAuthoring({
-  authoringProfile
-  capturedVocabularyContracts[]
+  coreAuthoringProfile
+  vocabularySemanticContracts[]
+  vocabularyAuthoringMetadataProfiles[]
 }) -> DescriptorCatalogue
 ```
 
@@ -124,9 +125,9 @@ guessed from canvas presentation.
 Neutral capture verifies that every projected `neu` header matches the selected
 core profile and every projected `module` header matches the logical module
 identity supplied by the host. It also rejects duplicate source identities,
-missing imports, and conflicting semantic revisions of one canonical
-vocabulary. The Editor presents those as capture diagnostics rather than
-repairing or renaming source silently.
+missing imports, and any missing, extra, duplicate, unused, or conflicting
+vocabulary semantic lock. The Editor presents those as capture diagnostics
+rather than repairing, renaming, adding, or removing inputs silently.
 
 ## Authoritative validation loop
 
