@@ -61,10 +61,11 @@ cannot use paths or URLs.
 ```text
 host-specific resolution
     -> host-neutral CapturedProjectRequest
-    -> bounded capture of canonical source and vocabulary closure
+    -> bounded validation and freezing of the supplied closure
     -> immutable CapturedProject
     -> effect-free module and semantic compilation
-    -> project Neutral IR plus companion evidence
+    -> complete project Neutral IR plus companion evidence
+    -> optional consumer-selected views
     -> validated reader, Flow, Editor, and other consumers
 ```
 
@@ -72,24 +73,45 @@ The host owns filesystem, registry, workspace, network, credential, and package
 policy. Source imports identify logical modules only. They never contain host
 paths or URLs and never authorize acquisition.
 
-Capture may call only the resolver supplied by the host. It records the exact
-source and vocabulary closure before semantic compilation begins.
-`compileCapturedProject` performs no external I/O.
+The host completes all resolution before calling Neutral. Capture accepts no
+resolver or acquisition callback: it validates that the exact supplied source
+and vocabulary set is complete and internally consistent, then freezes it.
+Capture and `compileCapturedProject` perform no external I/O.
+
+The public input is intentionally small:
+
+```text
+CapturedProjectRequest
+  captureContractVersion
+  declaredProjectKey?             # non-semantic
+  coreLanguageProfile
+  sourceUnits[]
+    logicalModuleIdentity
+    logicalSourceIdentity
+    sourceBytes
+  vocabularySemanticLocks[]
+```
+
+It contains no roots, paths or URLs used to acquire inputs, compiler options,
+output policy, authoring metadata, credentials, or package-manager state.
+Caller-selected bounds, cancellation, correlation, and diagnostic-output policy
+are separate processing controls.
 
 ## Project and module model
 
 A captured project has:
 
-- one project identity and captured project revision;
+- one captured closure identity and captured project revision;
+- one exact core language profile;
 - a finite map from logical module identity to one immutable source unit;
-- exact captured vocabulary contracts and lock facts;
-- language behavior versions, limits, and semantic options; and
+- exact captured vocabulary semantic contracts and lock facts; and
 - a complete import graph for the captured closure.
 
-Selected roots are host-side derivation inputs and consumer-view selectors. They
-do not belong to the logical project payload or logical equality. A consumer may
-request a root/export view, but that view does not create a different Neutral
-project or conceal dependencies needed to interpret the view.
+Selected roots are consumer-view selectors only. They do not belong to capture,
+compiler derivation, the logical project payload, or logical equality. A
+consumer may submit a versioned `ViewRequest` after validating the complete
+project. A materialized view is a derived artifact and cannot conceal
+dependencies needed to interpret the selected exports.
 
 The initial v1 rule is one source unit per logical module. Two units claiming
 the same logical module are an error. Partial modules and directory-based merge
@@ -106,6 +128,11 @@ module example::delivery::shared
 
 The host maps that name to captured bytes. Moving a file without changing its
 logical source or module identity does not change language meaning.
+
+Capture compares each request logical module identity with the source's
+`module` header and compares every source `neu` header with the exact request
+profile. It also requires unique logical source identities. A mismatch fails
+before imports or declarations are resolved.
 
 ## Imports and name resolution
 
@@ -134,6 +161,9 @@ allowed: capture and semantic collection process each strongly connected
 component as a group. Declaration order remains non-semantic within a module.
 The inherited value-dependency and embedded-record-cycle rules, rather than the
 mere presence of a module cycle, determine whether a semantic cycle is invalid.
+Import-depth limits are measured over the acyclic SCC condensation graph;
+module count, import-edge count, imports per module, SCC size, and condensation
+depth have separate bounds.
 
 ## Visibility and exported surface
 
@@ -169,6 +199,13 @@ types. A public reader view contains the public dependency closure needed to
 interpret an exposed declaration and does not disclose private implementation
 provenance. A declaration that cannot meet those rules is invalid as public.
 
+A public binding may reuse private declarations. Its public value is still
+public, but a public view omits private symbol identities, spans, and
+implementation provenance. `private` is therefore an encapsulation boundary,
+not a secrecy or authorization mechanism. Vocabulary semantic contracts mark
+which schema types are externally accessible; those types count as public types
+for signature validation.
+
 ## Cross-module values and references
 
 Qualified imported bindings may be reused as immutable values. Their resolved
@@ -197,6 +234,12 @@ Aliases share the same namespace category as import aliases, so
 `domain::Widget` and `shared::JobConfig` remain syntactically uniform and
 unambiguous after resolution.
 
+One canonical vocabulary identity resolves to one semantic-contract revision
+throughout a project. Different modules and aliases may reuse that revision;
+conflicting revisions for the same identity fail capture. A semantic contract
+also declares its externally accessible schema types. Non-exported vocabulary
+types cannot be named by source or leak through a public signature.
+
 Vocabularies remain closed, data-only Neutral contracts. Multiple vocabularies
 do not permit callbacks, validators, scripts, native modules, executable
 plugins, hidden imports, or ambient acquisition. v1 defines no Flow, provider,
@@ -211,7 +254,7 @@ validation rules.
 The v1 logical payload should contain:
 
 - language and IR behavior versions;
-- logical project identity;
+- logical project identity in the envelope;
 - the complete logical module graph;
 - per-module declarations and public export indexes;
 - resolved local and cross-module type/value/reference edges;
@@ -232,7 +275,8 @@ identity remain distinct.
 
 Consumers may request the whole validated project or a root/export view. A view
 never changes logical project identity or silently omits a dependency required
-to interpret an exported declaration.
+to interpret an exported declaration. Its selected roots and view schema belong
+to a separate view derivation and artifact identity.
 
 ## Identity chain
 
@@ -250,17 +294,31 @@ raw host inputs
     -> artifact identity
 ```
 
-Logical project identity commits to the canonical logical module graph, semantic
-content, and exact resolved vocabulary semantic contracts. It excludes host paths,
-source aliases, capture order, selected roots, and derivation settings.
-Captured closure identity commits to the exact canonical source units and source
-identities accepted in one capture operation. Two captures may differ while
-producing the same logical project identity.
+All identities use domain-separated canonical inputs and exclude their own
+identity fields. Logical project identity commits to the canonical logical
+payload body, including module graph, semantic content, and exact vocabulary
+semantic contracts. It excludes source maps, provenance, diagnostics, host
+paths, source aliases, capture order, roots, and derivation settings. Captured
+closure identity commits to the capture-contract version, exact core profile,
+canonical source identities and bytes, and exact vocabulary semantic locks.
+Two captures may differ while producing the same logical project identity.
 
-Derivation identity binds one logical project identity to selected roots,
-compiler options, limits, and other derivation inputs that do not change
-project meaning. Artifact identity additionally binds artifact kind,
+Compiler derivation identity binds captured closure and logical project
+identities to compiler/IR profiles, acceptance limits, and non-semantic
+compiler or diagnostic policy. It contains no roots. A separate view derivation
+identity binds the complete logical project identity to a `ViewRequest`, view
+schema, and view policy. Artifact identity additionally binds artifact kind,
 format/schema version, and artifact-specific transformation inputs.
+
+Cancellation handles, request revisions, scheduling, and timing are operational
+correlation state and never enter an identity. Acceptance limits and diagnostic
+output policy are recorded in compiler derivation because they govern the
+accepted operation, while remaining outside logical project meaning.
+
+Every option is assigned to exactly one layer: meaning-changing inputs enter
+the logical payload; acceptance and diagnostic controls enter compiler
+derivation; serialization and root/export selection enter artifact or view
+derivation. There is no unclassified semantic-options bag.
 
 Host mappings cannot alter logical module identity. Conflicting mappings for one
 logical module are rejected. Vocabulary aliases are module-local source bindings;
@@ -271,11 +329,36 @@ IR records canonical vocabulary identity and version, never aliases.
 The compiler boundary should extend v0 operations rather than replace them:
 
 ```text
-captureProject(request) -> CapturedProject
-compileCapturedProject(captured) -> ProjectCompilationResult
-compileProject(request) -> ProjectCompilationResult
+captureProject(request, processingControls) -> CapturedProject
+compileCapturedProject(captured, compilerDerivationRequest, processingControls)
+    -> ProjectCompilationResult
+compileProject(request, compilerDerivationRequest, processingControls)
+    -> ProjectCompilationResult
 decodeAndValidateProject(bytes, capturedContracts) -> ValidatedProject
+deriveView(validatedProject, viewRequest, processingControls) -> ViewArtifact
 ```
+
+```text
+CompilerDerivationRequest
+  compilerBehaviorProfile
+  irProfile
+  nonSemanticCompilerOptions
+
+ProcessingControls
+  acceptanceLimits
+  diagnosticOutputPolicy
+  cancellation?                 # operational only
+  requestRevision?              # operational only
+
+ViewRequest
+  viewSchemaVersion
+  selectedModuleSymbols[]
+  evidencePolicy
+  viewSpecificOptions
+```
+
+The selected module symbols are stable public module-symbol identities, not
+source aliases, file names, graph-local element IDs, or canvas nodes.
 
 Core discovery reports exact language and IR profiles, project/module limits,
 vocabulary cardinality, core operations, core diagnostic behavior, and
@@ -305,7 +388,8 @@ DescriptorCatalogue
     core profile
     authoring profile
     descriptor schema
-    captured vocabulary identities and versions
+    vocabulary semantic-contract identities and revisions
+    vocabulary authoring-metadata profile identities and revisions
   constructs[]
   types[]
   valueForms[]
@@ -369,6 +453,7 @@ installed core + authoring profiles + exact vocabulary locks
     -> host-completed CapturedProjectRequest
     -> ordinary Neutral capture and compilation
     -> IR + diagnostics + source map + provenance
+    -> optional ViewRequest
     -> Editor diagnostic projection / external IR consumer
 ```
 

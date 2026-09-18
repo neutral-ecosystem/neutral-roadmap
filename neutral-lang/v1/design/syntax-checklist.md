@@ -20,8 +20,9 @@ public-reader evidence. This checklist does not approve syntax by itself.
 - [ ] **SYN-V1-DOC-002** — Qualified logical module header
 - [ ] **SYN-V1-DOC-003** — One source unit per logical module
 - [ ] **SYN-V1-DOC-004** — Header, vocabulary, import, declaration ordering
-- [ ] **SYN-V1-DOC-005** — Multiple bounded source units and host-selected derivation roots
-- [ ] **SYN-V1-DOC-006** — Host-neutral captured-project request
+- [ ] **SYN-V1-DOC-005** — Multiple bounded source units and separate consumer views
+- [ ] **SYN-V1-DOC-006** — Pre-resolved host-neutral captured-project request
+- [ ] **SYN-V1-DOC-007** — Request/profile/module-header identity binding
 
 ## Imports and qualification
 
@@ -32,6 +33,7 @@ public-reader evidence. This checklist does not approve syntax by itself.
 - [ ] **SYN-V1-IMP-005** — SCC import collection and semantic-cycle rejection
 - [ ] **SYN-V1-IMP-006** — No paths, URLs, ranges, wildcards, or implicit imports
 - [ ] **SYN-V1-IMP-007** — Module versus vocabulary namespace resolution
+- [ ] **SYN-V1-IMP-008** — SCC size and condensation-graph depth limits
 
 ## Visibility
 
@@ -58,6 +60,8 @@ public-reader evidence. This checklist does not approve syntax by itself.
 - [ ] **SYN-V1-VOC-003** — Unique shared alias namespace
 - [ ] **SYN-V1-VOC-004** — Data-only behavior retained
 - [ ] **SYN-V1-VOC-005** — Cross-vocabulary dependencies excluded
+- [ ] **SYN-V1-VOC-006** — One semantic vocabulary revision per project identity
+- [ ] **SYN-V1-VOC-007** — Externally accessible vocabulary schema types
 
 ## Opaque location data
 
@@ -80,6 +84,8 @@ public-reader evidence. This checklist does not approve syntax by itself.
 - [ ] **SYN-V1-TOL-011** — Data-only card, port, property, nesting, and availability descriptors
 - [ ] **SYN-V1-TOL-012** — Vocabulary-derived descriptors and non-semantic presentation hints
 - [ ] **SYN-V1-TOL-013** — Project-to-source-to-capture authoritative Editor loop
+- [ ] **SYN-V1-TOL-014** — Separate capture, compiler derivation, view, and artifact requests
+- [ ] **SYN-V1-TOL-015** — Domain-separated non-self-referential identities
 - [ ] **SYN-V1-EVO-001** — Explicit v0/v1 coexistence and migration boundary
 - [ ] **SYN-V1-EVO-002** — Multi-file source-to-IR/reader conformance
 - [ ] **SYN-V1-EVO-003** — Flow and Editor public-boundary probes

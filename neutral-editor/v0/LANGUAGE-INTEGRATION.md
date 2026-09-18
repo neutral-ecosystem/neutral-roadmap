@@ -114,10 +114,19 @@ and opaque supported extensions. Recovery data is never authoritative.
 
 `projectSources` owns version-specific spelling and produces every `.neu`
 source unit plus mappings from editor elements to generated source spans. The
-host combines those bytes with explicit logical source/module identities,
-exact vocabulary locks, selected derivation roots, limits, and the capture
-contract version to form `CapturedProjectRequest`. None of those facts is
+host combines those bytes with the exact core profile, explicit logical
+source/module identities, exact vocabulary semantic locks, and the capture
+contract version to form `CapturedProjectRequest`. Processing limits,
+cancellation, and request revision are supplied separately. Root/export
+selection is a later `ViewRequest`, not capture data. None of these facts is
 guessed from canvas presentation.
+
+Neutral capture verifies that every projected `neu` header matches the selected
+core profile and every projected `module` header matches the logical module
+identity supplied by the host. It also rejects duplicate source identities,
+missing imports, and conflicting semantic revisions of one canonical
+vocabulary. The Editor presents those as capture diagnostics rather than
+repairing or renaming source silently.
 
 ## Authoritative validation loop
 
@@ -130,6 +139,7 @@ descriptor catalogue
     -> CapturedProjectRequest
     -> captureProject / compileCapturedProject
     -> IR + diagnostics + source map + provenance
+    -> optional consumer ViewRequest
     -> mapped Editor diagnostics
 ```
 

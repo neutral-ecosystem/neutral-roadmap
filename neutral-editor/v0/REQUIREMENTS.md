@@ -178,8 +178,9 @@ Language conformance and editor conformance are different claims:
   sufficient to place diagnostics at the narrowest stable owner.
 - **ED-VAL-006:** Validation forms a versioned `CapturedProjectRequest` from the
   exact projected source bytes, logical source/module identities, exact
-  vocabulary locks, selected derivation roots, behavior/profile versions, and
-  limits; cancellation and editor revision accompany processing.
+  vocabulary semantic locks, exact core profile, and capture-contract version.
+  Limits, cancellation, and editor revision accompany processing separately;
+  root/export selection is a later view request.
 - **ED-VAL-007:** Validation is authoritative only on complete compiler success.
   Invalid, cancelled, unavailable, and internal-failure outcomes remain distinct.
 - **ED-VAL-008:** Stale results must not replace diagnostics or validated state

@@ -64,6 +64,13 @@ source projection and ordinary core compilation remain authoritative. Future
 Flow cards are projections of Flow vocabulary data and conventions; Flow-owned
 mappers, not Neutral or the Editor, assign CI/CD behavior.
 
+The proposed host boundary is likewise explicit: hosts finish acquisition and
+submit a complete `CapturedProjectRequest`; Neutral only validates, freezes, and
+compiles it. Root/export selection happens later through `ViewRequest`. Request
+module identities must match source headers, and one canonical vocabulary has
+one semantic revision throughout a project. These constraints give Editor and
+headless consumers the same deterministic compilation path.
+
 ## Approval boundary
 
 A portable v1 seed must not be created merely from this proposal. Promotion

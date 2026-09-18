@@ -44,9 +44,10 @@ for every fixture without implementation knowledge.
 - Define logical project, captured closure, module, module-symbol, public-API,
   declaration, derivation, artifact, and byte identities separately.
 - Define the versioned host-neutral `CapturedProjectRequest`, closure
-  consistency, strict-capture behavior, and host-mapping conflicts.
-- Specify root selection as derivation/view input, missing/extra units, duplicate
-  modules, and SCC collection.
+  consistency, header/request binding, and host-mapping conflicts.
+- Specify root selection only through a post-compilation `ViewRequest`, plus
+  missing imports, declared disconnected units, duplicate modules, and SCC
+  collection.
 - Set structural limits for file count, total bytes, graph width/depth,
   imports, aliases, vocabularies, and diagnostics.
 
@@ -98,7 +99,7 @@ reference project without a private Neutral parser or AST.
   validation services.
 - Prove that the Editor can generate its palette and cards for both core and a
   generic captured vocabulary without handwritten construct tables.
-- Test repeated, concurrent, shuffled-resolver, malformed-input, and limit
+- Test repeated, concurrent, shuffled-request-order, malformed-input, and limit
   cases.
 - Verify that `public` and successful compilation never trigger or authorize an
   effect.

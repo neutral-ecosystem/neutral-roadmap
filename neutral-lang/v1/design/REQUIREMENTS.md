@@ -28,7 +28,7 @@ baseline. This document specifies only v1 deltas and new obligations.
 
 | Superseded or extended v0 requirement | Governing v1 delta |
 | --- | --- |
-| `NL-CAP-001` | `NL-V1-CAP-001..008` |
+| `NL-CAP-001` | `NL-V1-CAP-001..015` |
 | `NL-SRC-007` | `NL-V1-MOD-002..004`, `NL-V1-VOC-003` |
 | `NL-DOC-001..005` | `NL-V1-MOD-*`, `NL-V1-VOC-*`, `NL-V1-VIS-*` |
 | `NL-REF-001`, `NL-REF-004..005` | `NL-V1-XMOD-003..005`, `NL-V1-IR-005`, `NL-V1-IR-009` |
@@ -62,40 +62,57 @@ additional change must first be added to this map.
   declared by one captured-project request.
 - **NL-V1-CAP-002:** Each logical module maps to exactly one immutable captured
   source unit; duplicate claims are invalid.
-- **NL-V1-CAP-003:** The host supplies the only resolver and all acquisition
-  policy. Imports name logical modules and cannot name paths, URLs, registries,
-  versions, credentials, or resolver options.
-- **NL-V1-CAP-004:** `captureProject` records exact source bytes, logical/content
-  identities, import closure, exact vocabulary inputs, behavior versions,
-  semantic options, and deterministic budgets.
-- **NL-V1-CAP-005:** `compileCapturedProject` performs no external I/O and fails
-  closed when the captured closure or required contract is incomplete.
+- **NL-V1-CAP-003:** The host owns all resolution and acquisition and completes
+  them before calling Neutral. Imports name logical modules and cannot name
+  paths, URLs, registries, versions, credentials, or resolver options.
+  `captureProject` accepts no resolver or acquisition callback.
+- **NL-V1-CAP-004:** `captureProject` validates and freezes the exact supplied
+  source bytes, logical/content identities, complete import closure, exact
+  vocabulary semantic contracts, and behavior profiles into an immutable
+  `CapturedProject`.
+- **NL-V1-CAP-005:** Capture and compilation perform no external I/O and fail
+  closed when the supplied closure or required contract is incomplete.
 - **NL-V1-CAP-006:** Capture and compilation enforce independent bounds for
-  source units, total bytes, imports per module, graph depth, vocabularies,
-  declarations, references, diagnostics, and output size.
-- **NL-V1-CAP-007:** Selected derivation roots are explicit host inputs recorded
-  in derivation. They do not participate in logical project identity, logical
-  equality, or project IR payload. A file location, resolver enumeration order,
-  or `public` modifier cannot silently select a root.
+  source units, total bytes, imports per module, total import edges, SCC size,
+  SCC-condensation depth, vocabularies, declarations, references, diagnostics,
+  and output size.
+- **NL-V1-CAP-007:** Root/export selection is not a capture or compiler input.
+  It belongs only to a later consumer `ViewRequest` over a validated complete
+  project. Roots do not participate in captured closure identity, logical
+  project identity, logical equality, or complete project IR.
 - **NL-V1-CAP-008:** Hosts may supply captured source bytes from files, editor
   buffers, generated test inputs, or other authorized stores under the same
   logical source contract; language meaning never depends on storage origin.
 - **NL-V1-CAP-009:** v1 publishes a versioned host-neutral
   `CapturedProjectRequest` data contract containing an optional non-semantic
-  declared project key,
-  source units with logical module/source identities and bytes, exact vocabulary
-  locks, selected derivation roots, and capture-contract version.
+  declared project key, exact core language profile, source units with logical
+  module/source identities and bytes, exact vocabulary semantic locks, and
+  capture-contract version. It contains no roots, compiler options, output
+  policy, authoring metadata, or host acquisition state.
 - **NL-V1-CAP-010:** Host path/URL locator metadata, workspace state,
   package-manager state, credentials, and acquisition metadata are excluded from
   the request's logical project model, IR, ordinary diagnostics, and derivation
   identity. This exclusion does not apply to source-level `path` or `url`
   values.
-- **NL-V1-CAP-011:** Candidate source inputs not selected into the declared
-  source-module set are excluded before capture or rejected in strict capture
-  mode. They cannot silently affect closure, equality, derivation, or output.
+- **NL-V1-CAP-011:** Every source unit in a `CapturedProjectRequest` is an
+  intentional project member, including a disconnected module. Candidate host
+  inputs outside that exact set are excluded before the request is formed;
+  “unreachable input” and strict candidate enumeration are host concerns, not
+  Neutral capture semantics.
 - **NL-V1-CAP-012:** Conflicting source mappings for one logical module are
   rejected. Equivalent canonical source content mapped by different hosts may
   produce the same logical project.
+- **NL-V1-CAP-013:** Each source unit's declared `module` header must equal its
+  request logical module identity exactly. Its `neu` header must equal the
+  request core language profile, and logical source identities must be unique.
+  Any mismatch fails capture before module resolution.
+- **NL-V1-CAP-014:** Every import must resolve to exactly one source unit in the
+  supplied set. Capture neither fetches a missing unit nor discards an
+  unimported declared unit.
+- **NL-V1-CAP-015:** Caller-selected resource ceilings, cancellation, request
+  correlation, and diagnostic-output policy are processing controls carried
+  separately from `CapturedProjectRequest`. They may affect acceptance or
+  operational outcome but cannot silently alter successful project meaning.
 
 ## Modules and imports
 
@@ -109,7 +126,7 @@ additional change must first be added to this map.
   alias; imports never inject unqualified names.
 - **NL-V1-MOD-005:** Missing imports, duplicate module identities, duplicate
   aliases, and self-imports are errors with source-linked diagnostics.
-- **NL-V1-MOD-006:** Import resolution order, resolver delivery order,
+- **NL-V1-MOD-006:** Request source-unit order, import declaration order,
   filesystem order, and concurrent scheduling do not affect meaning or
   diagnostic ordering.
 - **NL-V1-MOD-007:** Wildcard imports, relative imports, implicit imports,
@@ -175,6 +192,13 @@ additional change must first be added to this map.
 - **NL-V1-VOC-008:** Titles, documentation, categories, icon tokens, ordering,
   and other declared non-semantic presentation hints may change descriptor-
   catalogue identity but cannot change logical project identity or compiled IR.
+- **NL-V1-VOC-009:** One project resolves one canonical vocabulary identity to
+  exactly one semantic-contract revision. All aliases and modules requiring
+  that identity use the same revision; conflicting locks fail capture.
+- **NL-V1-VOC-010:** A vocabulary semantic contract explicitly identifies its
+  externally accessible schema types. Those types count as public reachable
+  types for public-signature validation; non-exported vocabulary types cannot
+  appear in source or public signatures.
 
 ## Opaque location data
 
@@ -194,10 +218,11 @@ additional change must first be added to this map.
 
 ## Project IR and evidence
 
-- **NL-V1-IR-001:** The logical payload contains logical project identity,
+- **NL-V1-IR-001:** The logical payload envelope carries logical project identity,
   module graph, per-module declarations, export indexes, resolved cross-module
   edges, vocabulary identities, and required structural features. It contains
-  no selected derivation roots.
+  no selected roots. Identity computation uses the canonical logical payload
+  body with all self-identifying envelope fields and companion evidence removed.
 - **NL-V1-IR-002:** Source maps identify both logical source unit and original
   half-open byte span.
 - **NL-V1-IR-003:** Provenance distinguishes local source, imported reuse,
@@ -219,36 +244,63 @@ additional change must first be added to this map.
 - **NL-V1-IR-009:** A public reader can resolve any exposed type, value, or
   reference to its stable module-symbol identity and can map any exposed IR
   element to its source unit and source span when mapping evidence is present.
+- **NL-V1-IR-010:** A public binding may depend on private declarations. Its
+  public view exposes the binding's resolved value and public interpretive type
+  closure but omits private symbol identities, source spans, and implementation
+  provenance. Visibility is encapsulation, not confidentiality or authority.
+- **NL-V1-IR-011:** A versioned `ViewRequest` selects roots or exports from a
+  validated complete project. A materialized view is a derived artifact with
+  its own derivation and artifact identities; it never changes or masquerades
+  as the complete project IR.
 
 ## Project identities
 
-- **NL-V1-ID-001:** Logical project identity derives from canonical logical
+- **NL-V1-ID-001:** Logical project identity is a domain-separated digest of
+  the canonical logical payload body excluding the identity field itself,
+  source maps, provenance, diagnostics, derivation records, and encoding. The
+  body includes the canonical logical
   module graph, semantic content, and exact resolved vocabulary semantic
   contracts. Host
   paths, aliases, capture order, selected roots, and derivation settings do not
   participate.
-- **NL-V1-ID-002:** Captured closure identity derives from the exact canonical
-  source closure accepted by one capture operation, including resolved source
-  units and canonical source identities.
+- **NL-V1-ID-002:** Captured closure identity is a domain-separated digest of
+  the capture-contract version, exact core profile, canonical source-unit set
+  with identities and bytes, and exact vocabulary semantic locks. It excludes
+  the closure identity field itself and all processing controls.
 - **NL-V1-ID-003:** Two captured closures may have different closure identities
   while producing the same logical project identity.
-- **NL-V1-ID-004:** Derivation identity derives from logical project identity,
-  selected roots, compiler options, limits, and other inputs that affect one
-  derivation without changing project meaning.
+- **NL-V1-ID-004:** Compiler derivation identity derives from captured closure
+  identity, logical project identity, exact compiler/IR behavior profiles,
+  acceptance limits, and non-semantic compiler or diagnostic policy. It
+  contains no selected roots.
 - **NL-V1-ID-005:** Artifact identity derives from derivation identity, artifact
-  kind, format/schema version, and artifact-specific transformation inputs.
+  kind, format/schema version, and artifact-specific transformation inputs,
+  using a domain-separated canonical form that excludes the artifact identity
+  field itself.
 - **NL-V1-ID-006:** Logical module identity is independent of host mapping.
   Equivalent canonical module content from different hosts preserves project
   identity; conflicting mappings for one module fail capture.
 - **NL-V1-ID-007:** Vocabulary aliases are local source bindings only. Multiple
   modules may use one vocabulary under different aliases without changing its
   canonical vocabulary identity or version in IR.
+- **NL-V1-ID-008:** Every option is classified before use. Inputs that can
+  change logical meaning participate in the logical payload and project
+  identity; acceptance/diagnostic controls participate only in compiler
+  derivation; serialization or view inputs participate only in the relevant
+  artifact derivation. No unclassified semantic-options bag is permitted.
+- **NL-V1-ID-009:** A view derivation identity derives from the complete logical
+  project identity, exact `ViewRequest`, view-schema version, and view-specific
+  policy. Selected roots participate here only.
+- **NL-V1-ID-010:** Acceptance limits and diagnostic-output policy participate
+  in compiler derivation identity when they govern that derivation. Cancellation
+  handles, request revisions, scheduling, and timing are operational correlation
+  state and never participate in project, derivation, view, or artifact identity.
 
 ## Public services and tooling
 
 - **NL-V1-API-001:** Public operations include project capture, captured-project
-  compilation, a convenience compile operation, and project IR decode and
-  validation.
+  compilation, a convenience compile operation, complete-project IR decode and
+  validation, and separate view derivation.
 - **NL-V1-API-002:** Core capability discovery reports exact language/IR
   profiles, project shape, limits, vocabulary cardinality, core operations, and
   stable required capability IDs.
@@ -259,6 +311,12 @@ additional change must first be added to this map.
   incremental state is never required to interpret public IR.
 - **NL-V1-API-007:** APIs remain reentrant, concurrency-safe, cancellable,
   bounded, and explicit about partial operational outcomes.
+- **NL-V1-API-016:** The core operation shapes are
+  `captureProject(CapturedProjectRequest, ProcessingControls)`,
+  `compileCapturedProject(CapturedProject, CompilerDerivationRequest,
+  ProcessingControls)`, and `deriveView(ValidatedProject, ViewRequest,
+  ProcessingControls)`. Processing controls are never stored as project
+  semantics.
 
 ## Neutral authoring v1 bridge
 
@@ -347,8 +405,9 @@ additional change must first be added to this map.
   its identity without performing external I/O.
 - **NL-V1-API-015:** Project source projection returns the complete ordered set
   of source units and element-to-source mappings needed to form a
-  `CapturedProjectRequest`; host-owned locks, roots, identities, and limits are
-  supplied explicitly rather than inferred from editor state.
+  `CapturedProjectRequest`; host-owned identities and vocabulary semantic locks
+  are supplied explicitly rather than inferred from editor state. Root
+  selection occurs only when an Editor or another consumer requests a view.
 
 ## Authoring round trip
 
@@ -401,7 +460,8 @@ additional change must first be added to this map.
   facts for safe cache invalidation without making cache strategy semantic.
 - **NL-V1-DIA-006:** Diagnostic messages, descriptor text, source excerpts, and
   remedies are untrusted bounded text and cannot disclose resolver credentials
-  or unapproved host paths.
+  or unapproved host paths. Such host acquisition data is not supplied to core
+  capture or compilation in the first place.
 
 ## Consumer boundary evidence
 

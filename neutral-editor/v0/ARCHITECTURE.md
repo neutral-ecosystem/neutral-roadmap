@@ -126,9 +126,11 @@ LanguageAdapter
 The capability response includes exact core, IR, authoring, and descriptor
 profiles, project shape, captured-input needs, operations, diagnostics, and
 resource limits. The host forms a `CapturedProjectRequest` from projected source
-units and explicit locks/roots, then uses ordinary Neutral capture and compile
-operations. The adapter does not return compiler-private tokens, recovery trees,
-or mutable IR.
+units, exact core profile, logical identities, and vocabulary semantic locks,
+then uses ordinary Neutral capture and compile operations with separate
+processing controls. Root/export selection is a later consumer view request.
+The adapter does not return compiler-private tokens, recovery trees, or mutable
+IR.
 
 ### View projection
 
