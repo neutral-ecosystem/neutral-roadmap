@@ -8,6 +8,14 @@ Checking an item requires normative prose, grammar, valid and invalid fixtures,
 stable diagnostics, source-to-IR lowering, provenance, resource treatment, and
 public-reader evidence. This checklist does not approve syntax by itself.
 
+## Retained v0 surface
+
+- [ ] **SYN-V1-BASE-001** — Complete v0 requirement disposition
+- [ ] **SYN-V1-BASE-002** — Retained lexical, type, value, and reference surface
+- [ ] **SYN-V1-BASE-003** — Retained IR, provenance, diagnostics, and limits
+- [ ] **SYN-V1-BASE-004** — Adapted v0 fixture corpus under the v1 profile
+- [ ] **SYN-V1-BASE-005** — Explicit independent v0/v1 profile selection
+
 ## Project and document shape
 
 - [ ] **SYN-V1-DOC-001** — Exact `neu "1.0"` header
@@ -55,6 +63,11 @@ public-reader evidence. This checklist does not approve syntax by itself.
 - [ ] **SYN-V1-TOL-001** — Deterministic reference formatting per source unit
 - [ ] **SYN-V1-TOL-002** — Module-aware authoring import and source projection
 - [ ] **SYN-V1-TOL-003** — Cross-file diagnostics and stale-result correlation
+- [ ] **SYN-V1-TOL-004** — Data-only construct/type/value descriptor catalogue
+- [ ] **SYN-V1-TOL-005** — Side-effect-free type compatibility preflight
+- [ ] **SYN-V1-TOL-006** — Fine-grained authoring-element source mappings
+- [ ] **SYN-V1-TOL-007** — Lossless promised-content round trip
+- [ ] **SYN-V1-TOL-008** — Distinct validation and service failure outcomes
 - [ ] **SYN-V1-EVO-001** — Explicit v0/v1 coexistence and migration boundary
 - [ ] **SYN-V1-EVO-002** — Multi-file source-to-IR/reader conformance
 - [ ] **SYN-V1-EVO-003** — Flow and Editor public-boundary probes

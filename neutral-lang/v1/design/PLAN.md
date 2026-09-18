@@ -4,9 +4,10 @@ Status: proposed design entry point
 
 ## Purpose
 
-This directory explores a possible Neutral v1 foundation before Neutral Flow
-and Neutral Editor commit to project-scale assumptions. It is a proposal, not
-an accepted language contract. Nothing here changes Neutral v0.1 behavior.
+This directory explores a possible Neutral v1 foundation built on the working
+Neutral v0.1 contract, before Neutral Flow and Neutral Editor commit to
+project-scale assumptions. It is a proposal, not an accepted language contract.
+Nothing here changes Neutral v0.1 behavior.
 
 The proposed outcome is deliberately narrow:
 

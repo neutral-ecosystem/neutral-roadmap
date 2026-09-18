@@ -8,7 +8,7 @@ Status: proposed implementation baseline
 Tauri 2
 |
 +-- React + TypeScript
-|   +-- React Flow / @xyflow/react
+|   +-- @xyflow/react
 |   +-- Zustand
 |   +-- Radix UI
 |   +-- Tailwind CSS
@@ -37,7 +37,7 @@ React views
     -> neutral-lang public adapter contracts
 ```
 
-Dependencies do not point back upward. React Flow records, Radix components,
+Dependencies do not point back upward. xy flow records, Radix components,
 Tailwind classes, Tauri command payloads, and Rust persistence structs must not
 become the Neutral authoring model.
 
@@ -52,9 +52,9 @@ types and validates every untrusted host response before it enters state.
 React does not parse `.neu`, discover the filesystem, resolve vocabularies, or
 implement permanent Neutral type-compatibility rules.
 
-### React Flow
+### xy flow
 
-React Flow owns:
+xy flow owns:
 
 - node and connection rendering;
 - pointer-based pan, zoom, selection, movement, and connection gestures;
@@ -69,7 +69,7 @@ It does not own:
 - language validation or execution; or
 - the undo transaction model.
 
-One canvas adapter maps editor-domain nodes/connections to React Flow records
+One canvas adapter maps editor-domain nodes/connections to xy flow records
 and maps UI events back to editor commands.
 
 ### Zustand
@@ -120,7 +120,7 @@ The domain layer sits between UI libraries and the host client. It owns:
 - project/source revision rules; and
 - mapping language diagnostics to editor elements.
 
-The domain depends on no React Flow, Radix, Tailwind, Tauri, filesystem, or
+The domain depends on no xy flow, Radix, Tailwind, Tauri, filesystem, or
 runtime API. Language-specific constructs enter through versioned capability
 and authoring projections rather than generic-editor constants.
 
@@ -151,7 +151,7 @@ This service is not an executable plugin loader.
 - preserve unknown fields and unresolved records;
 - write through an atomic replace where supported;
 - distinguish project, source, and editor settings files; and
-- never serialize React Flow/Zustand state as the project contract.
+- never serialize xy flow/Zustand state as the project contract.
 
 ### Native OS integration
 
@@ -198,7 +198,7 @@ neutral-editor/
 +-- src/
 |   +-- app/                 composition and application services
 |   +-- domain/              framework-independent editor model/commands
-|   +-- canvas/              React Flow adapter and generic renderers
+|   +-- canvas/              xy flow adapter and generic renderers
 |   +-- state/               Zustand stores, slices, and selectors
 |   +-- language/            typed frontend capability/host client
 |   +-- project/             project workflows and compatibility UI
@@ -235,7 +235,7 @@ definitions are not allowed to drift silently.
 
 ## Stack acceptance checks
 
-- React Flow can be replaced in a domain test without changing project records.
+- xy flow can be replaced in a domain test without changing project records.
 - Zustand can be initialized and command-tested without Tauri.
 - Radix and Tailwind appear only in presentation/component dependencies.
 - Dragging a node performs no IPC or semantic validation.

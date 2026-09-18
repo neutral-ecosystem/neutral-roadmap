@@ -11,6 +11,8 @@ Neutral Flow or Neutral Editor.
 
 ## Stage 0 — validate the need
 
+- Produce a complete v0 requirement disposition and preserve the passing v0
+  corpus as the implementation baseline.
 - Extract the smallest real multi-file authoring cases from Flow and Editor.
 - Demonstrate why v0's one-unit model or a data-only vocabulary cannot satisfy
   them.
@@ -62,9 +64,15 @@ invalid fixture has stable cross-source diagnostics.
 ## Stage 4 — freeze public tooling contracts
 
 - Extend capability discovery with project-shape and v1 feature IDs.
+- Define bounded data-only construct, type, value, name, operation, diagnostic,
+  formatting, and explicit-exclusion descriptors.
+- Define side-effect-free type compatibility preflight and compiler-authority
+  mismatch handling.
 - Specify project capture, compilation, decoding, and validated-reader APIs.
 - Specify the editor-facing authoring projection and deterministic multi-source
   projection operation.
+- Require fine-grained element/source mappings and a lossless promised-content
+  no-op round trip.
 - Define request revision, cancellation, partial-result, and stale-diagnostic
   behavior.
 - Define optional incremental processing and prove equivalence with clean full

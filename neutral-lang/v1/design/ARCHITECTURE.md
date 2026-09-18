@@ -10,6 +10,12 @@ compilation, public IR, and external effects. The release should establish the
 shared language substrate needed by Neutral Flow and Neutral Editor without
 embedding either product's semantics.
 
+v1 is built on the released and working v0.1 contract. Its compiler may reuse
+the v0 implementation, and its language profile retains the v0 lexical, type,
+value, reference, vocabulary, IR, provenance, diagnostic, and safety behavior
+except where the v1 requirements explicitly replace a rule. The v0 profile
+remains independently selectable and frozen.
+
 ## Proposed scope
 
 v1 extends the v0 typed, immutable, effect-free language with:
@@ -214,6 +220,12 @@ features, authoring projection version, vocabulary cardinality, supported
 operations, diagnostic behavior, and structural budgets. Consumers must use
 capability IDs rather than infer behavior from the string `1.0`.
 
+For generic tooling, the profile also supplies bounded data-only descriptors for
+constructs, identifier categories, protected names, type constructors, value
+forms, compatibility, captured inputs, formatting, diagnostics, and explicit
+exclusions. A side-effect-free compatibility query may supplement descriptors.
+Neither mechanism contains executable UI or validation code.
+
 Neutral Editor additionally needs public operations equivalent to:
 
 ```text
@@ -227,6 +239,12 @@ tree. It represents modules, imports, visibility, declarations, source value
 forms, comments promised for round-tripping, and opaque supported extensions.
 The compiler adapter owns Neutral spelling and validation; the editor owns
 interaction and presentation.
+
+A no-op import and projection must recompile to logically equal project IR. The
+projection retains exact numeric source values, nested values, omission/default
+states, declaration order, reuse/reference intent, and supported comments. Its
+source map reaches the narrowest stable authoring owner, including imports,
+fields, properties, values, reuse edges, and reference edges.
 
 Incremental compilation may be exposed as an optimization with explicit cache
 keys and invalidation facts. Full and incremental compilation of the same
