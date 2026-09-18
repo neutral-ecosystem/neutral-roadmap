@@ -1,13 +1,20 @@
-# Neutral language v1 proposed requirements
+# Neutral language v1 design requirements
 
-Status: proposed design requirements
+Status: accepted
 
 ## Purpose
 
-These candidate requirements define a possible project-scale Neutral v1. They
-are not accepted semantics and do not alter the released v0.1 contract. Each
-accepted item will require normative prose, grammar where applicable, lowering,
-diagnostics, resource bounds, fixtures, and public-reader evidence.
+These requirements define the accepted project-scale Neutral v1 design baseline
+and do not alter the released v0.1 contract. Normative delta prose, grammar,
+lowering, diagnostics, bounds, fixture obligations, and public-boundary probes
+are fixed by the companion design contracts linked from `PLAN.md`.
+
+The governing refinements are the accepted
+[decision ledger](DECISIONS.md), [source contract](SOURCE-CONTRACT.md),
+[project and identity contracts](PROJECT-CONTRACTS.md),
+[vocabulary contracts](VOCABULARY-CONTRACT.md),
+[authoring contract](AUTHORING-CONTRACT.md), and
+[conformance design](CONFORMANCE.md).
 
 ## Relationship to v0
 
@@ -376,10 +383,11 @@ additional change must first be added to this map.
 - **NL-V1-BRG-003:** Editor conformance requires a compatible core and authoring
   profile. Headless consumers require no authoring bridge unless they explicitly
   request one.
-- **NL-V1-BRG-004:** The bridge exposes one bounded, immutable descriptor
-  catalogue for every construct, type constructor, value form, project action,
-  and captured vocabulary data shape available under the selected profiles.
-  Editors must not derive this surface from a version string.
+- **NL-V1-BRG-004:** The bridge exposes one bounded, immutable profile
+  descriptor catalogue for every profile-owned construct, type constructor,
+  value form, project action, and captured vocabulary data shape available
+  under the selected profiles. Editors must not derive this surface from a
+  version string.
 - **NL-V1-BRG-005:** Every descriptor has a stable qualified identity, schema
   version, owner (`core` or canonical vocabulary identity), required capability
   IDs, availability conditions, and deterministic catalogue order. Colliding
@@ -419,6 +427,14 @@ additional change must first be added to this map.
   compatibility preflight, formatting, and validation are independently
   advertised operations; absence of one is reported rather than emulated with
   a private parser or grammar table.
+- **NL-V1-BRG-015:** Project-local records, imported records, bindings, aliases,
+  and action availability are exposed through a deterministic project
+  descriptor overlay keyed by catalogue identity and authoring revision. They
+  are not fabricated in the profile catalogue, which has no project input.
+- **NL-V1-BRG-016:** The public authoring document is a bounded closed data
+  model of modules, descriptor-owned elements, typed slot values, ordered
+  nesting, and value-reuse/reference connections. A generic Editor can create
+  and edit it without callbacks or a private grammar table.
 - **NL-V1-API-004:** The public authoring projection represents modules,
   imports, visibility, declarations, source value forms, supported comments,
   stable source anchors, and opaque extension fields without becoming the
@@ -457,6 +473,10 @@ additional change must first be added to this map.
   `CapturedProjectRequest`; host-owned identities and vocabulary semantic locks
   are supplied explicitly rather than inferred from editor state. Root
   selection occurs only when an Editor or another consumer requests a view.
+- **NL-V1-API-017:** `newProject` creates an empty authoring project from exact
+  host-selected module/source identities, and `describeProject` derives the
+  revision-bound project descriptor overlay. Neither operation performs
+  acquisition or infers a module identity from a host path.
 
 ## Authoring round trip
 
@@ -486,7 +506,8 @@ additional change must first be added to this map.
   spelling. Generic editors and consumers do not reconstruct tokens or grammar
   from display descriptors.
 - **NL-V1-AUT-008:** The supported edit loop is catalogue discovery, authoring
-  projection/editing, deterministic projection of `.neu` source units,
+  project creation or import, project-overlay derivation, direct editing of the
+  public authoring data model, deterministic projection of `.neu` source units,
   construction of a captured-project request, core compilation, and mapping of
   returned diagnostics/evidence to authoring elements. The compiler never
   accepts the editor graph as semantic input.

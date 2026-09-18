@@ -1,6 +1,6 @@
-# Neutral language v1 architecture proposal
+# Neutral language v1 design architecture
 
-Status: proposed design architecture
+Status: accepted
 
 ## Purpose
 
@@ -15,7 +15,10 @@ documents contain only deltas and explicitly map every superseded v0 requirement
 to its v1 replacement. The v0 profile remains independently selectable and
 frozen.
 
-## Proposed scope
+Exact source, project/identity, vocabulary, authoring, and conformance behavior
+is fixed by the companion contracts indexed from [PLAN.md](PLAN.md).
+
+## Scope
 
 v1 extends the v0 typed, immutable, effect-free language with:
 
@@ -118,7 +121,7 @@ the same logical module are an error. Partial modules and directory-based merge
 rules are deferred because they make identity, diagnostics, and incremental
 editing substantially less predictable.
 
-A module name is logical and is not derived from a file path. The proposed
+A module name is logical and is not derived from a file path. The accepted
 qualified form is a non-empty `::`-separated sequence of `snake_case` segments:
 
 ```neu
@@ -189,7 +192,7 @@ have independent visibility. Imported modules may access only public names.
 The project IR retains private declarations needed to validate the complete
 project, while its export index exposes only public symbols.
 
-No `private` keyword is proposed because private is the default. v1 also
+No `private` keyword is included because private is the default. v1 also
 excludes re-exports, package-only visibility, friend modules, protected
 visibility, and runtime access control. Language visibility is structural API
 surface, not authorization.
@@ -455,9 +458,11 @@ its semantic projection kind, source slot, ports, properties, nested contexts,
 constraints, availability, and required capabilities. Ports distinguish value
 reuse from identity reference and carry exact type expressions, direction, and
 cardinality. Properties carry required/defaulted/nullability and nesting facts.
-These records are sufficient for a generic palette, card, inspector, and
-connection preflight; adapter-owned source projection remains responsible for
-Neutral spelling.
+These profile-owned records are sufficient for the generic palette and base
+card/inspector behavior. Project-local records, imported records, bindings,
+aliases, and currently available actions are supplied by a separate project
+descriptor overlay keyed by catalogue identity and authoring revision.
+Adapter-owned source projection remains responsible for Neutral spelling.
 
 Captured vocabulary semantic schemas contribute nominal data shapes through the
 same catalogue. Optional titles, categories, documentation, ordering, and icon
@@ -477,16 +482,23 @@ describeAuthoring(
     vocabularyAuthoringMetadataProfiles
 )
     -> DescriptorCatalogue
+newProject(exact profiles, initial module/source identities)
+    -> AuthoringProject
 importProject(capturedProject) -> AuthoringProject | diagnostics
+describeProject(DescriptorCatalogue, AuthoringProject)
+    -> ProjectDescriptorOverlay | diagnostics
 projectSources(authoringProject) -> source units + element/source map
 validateProject(capturedProject, requestRevision) -> validation result
 ```
 
 `AuthoringProject` is a versioned editor-facing projection, not a public parser
-tree. It represents modules, imports, visibility, declarations, source value
-forms, comments promised for round-tripping, and opaque supported extensions.
-The compiler adapter owns Neutral spelling and validation; the editor owns
-interaction and presentation.
+tree. Its closed bounded data model represents modules, descriptor-owned
+elements, typed slot values, ordered nesting, value-reuse/reference
+connections, comments promised for round-tripping, and opaque supported
+extensions. A generic Editor edits those records directly under the catalogue
+and overlay constraints; no executable edit callback is needed. The compiler
+adapter owns Neutral spelling and validation; the editor owns interaction and
+presentation.
 
 A no-op import and projection must recompile to logically equal project IR. The
 projection retains every authoring distinction required by the inherited v0
@@ -504,8 +516,9 @@ The complete visual-authoring loop is:
 ```text
 installed core + authoring profiles + exact vocabulary locks
     -> descriptor catalogue
+    -> new/imported AuthoringProject + project descriptor overlay
     -> generic Editor cards, ports, properties, and commands
-    -> AuthoringProject
+    -> edited AuthoringProject
     -> adapter-owned `.neu` source projection
     -> host-completed CapturedProjectRequest
     -> ordinary Neutral capture and compilation

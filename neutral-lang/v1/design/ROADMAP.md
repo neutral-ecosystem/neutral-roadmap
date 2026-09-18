@@ -1,13 +1,25 @@
 # Neutral language v1 design roadmap
 
-Status: proposed design roadmap
+Status: accepted
 
 ## Outcome
 
-Produce an evidence-backed v1 portable seed for deterministic multi-file
-Neutral projects, explicit module APIs, and public language tooling. This
-roadmap ends at a reviewed implementation-ready contract; it does not implement
+Produce the v1 portable seed for deterministic multi-file Neutral projects,
+explicit module APIs, and public language tooling. The design-contract stages
+are closed; portable materialization is next. This roadmap does not implement
 Neutral Flow or Neutral Editor.
+
+## Gate status
+
+| Stage | Design status | Governing evidence |
+| --- | --- | --- |
+| 0 — need and boundary | closed | `DECISIONS.md`, Editor/Flow boundary requirements |
+| 1 — source behavior | closed | `SOURCE-CONTRACT.md` |
+| 2 — capture and identity | closed | `PROJECT-CONTRACTS.md` |
+| 3 — semantics and IR | closed | `SOURCE-CONTRACT.md`, `PROJECT-CONTRACTS.md`, `VOCABULARY-CONTRACT.md` |
+| 4 — public tooling | closed | `AUTHORING-CONTRACT.md` |
+| 5 — conformance definition | closed | `CONFORMANCE.md` |
+| 6 — portable promotion | next | required portable tree, materialized fixtures and manifests |
 
 ## Stage 0 — validate the need
 
@@ -84,6 +96,9 @@ invalid fixture has stable cross-source diagnostics.
 - Define qualified descriptor identity, deterministic core/vocabulary catalogue
   merge, card ports/properties/nesting, presentation-hint limits, catalogue
   identity, and cache invalidation.
+- Define a revision-bound project descriptor overlay for local/imported types,
+  symbols, aliases, and actions, plus a closed directly editable authoring
+  project data model.
 - Make vocabulary semantic contracts and vocabulary authoring-metadata profiles
   separate explicit inputs to catalogue discovery.
 - Define side-effect-free type compatibility preflight and compiler-authority
@@ -101,22 +116,23 @@ invalid fixture has stable cross-source diagnostics.
 Exit: a generic editor can import, edit, project, validate, save, and reopen the
 reference project without a private Neutral parser or AST.
 
-## Stage 5 — prove consumer independence
+## Stage 5 — freeze consumer-independence probes
 
-- Build a generic project probe using only the public reader.
-- Build a Flow boundary probe that sees resolved exported data but no source or
-  compiler-private model.
-- Build an Editor probe using only discovery, authoring, projection, and
+- Specify a generic project probe using only the public reader.
+- Specify a Flow boundary probe that sees resolved exported data but no source
+  or compiler-private model.
+- Specify an Editor probe using only discovery, authoring, projection, and
   validation services.
-- Prove that the Editor can generate its palette and cards for both core and a
+- Require proof that the Editor generates its palette and cards for core and a
   generic captured vocabulary without handwritten construct tables.
-- Test repeated, concurrent, shuffled-request-order, malformed-input, and limit
-  cases.
-- Verify that `public` and successful compilation never trigger or authorize an
-  effect.
+- Define repeated, concurrent, shuffled-request-order, malformed-input, and
+  limit cases.
+- Require proof that `public` and successful compilation never trigger or
+  authorize an effect.
 
-Exit: all three probes pass and private compiler packages are absent from their
-dependency graphs.
+Exit: all three public probe contracts and their required observations are
+frozen. Passing executions and dependency audits are implementation-conformance
+gates recorded by the portable seed.
 
 ## Stage 6 — promote the portable seed
 

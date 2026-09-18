@@ -1,15 +1,15 @@
 # Neutral language v1 design plan
 
-Status: proposed design entry point
+Status: accepted
 
 ## Purpose
 
-This directory explores a possible Neutral v1 foundation built on the working
-Neutral v0.1 contract, before Neutral Flow and Neutral Editor commit to
-project-scale assumptions. It is a proposal, not an accepted language contract.
-Nothing here changes Neutral v0.1 behavior.
+This directory defines the accepted Neutral v1 design baseline built on the
+working Neutral v0.1 contract. It is ready to be transformed into a standalone
+portable implementation seed. It does not alter the separately selectable v0.1
+profile.
 
-The proposed outcome is deliberately narrow:
+The accepted outcome is deliberately narrow:
 
 ```text
 captured multi-file Neutral project
@@ -19,52 +19,50 @@ captured multi-file Neutral project
     -> independent multi-file consumer and editor probes
 ```
 
-The proposal adds language-scale composition and tooling contracts. It does not
+The design adds language-scale composition and tooling contracts. It does not
 add workflow execution, commands, secrets, functions, control flow, mutation,
 or application-specific types.
 
 ## Reading order
 
-1. [Architecture proposal](ARCHITECTURE.md) defines the boundaries and model.
-2. [Proposed requirements](REQUIREMENTS.md) gives stable candidate IDs.
-3. [Syntax checklist](syntax-checklist.md) records surface decisions still to
-   close.
-4. [Design roadmap](ROADMAP.md) orders evidence and specification work.
+1. [Architecture](ARCHITECTURE.md) defines the boundaries and model.
+2. [Requirements](REQUIREMENTS.md) gives stable requirement IDs.
+3. [Accepted decisions](DECISIONS.md) records the closed architectural choices.
+4. [Source contract](SOURCE-CONTRACT.md) fixes grammar, resolution, visibility,
+   lowering, and source diagnostics.
+5. [Project contracts](PROJECT-CONTRACTS.md) fixes capture, identity, IR delta,
+   views, diagnostics, and limits.
+6. [Authoring contract](AUTHORING-CONTRACT.md) fixes the dynamic Editor bridge.
+7. [Vocabulary contracts](VOCABULARY-CONTRACT.md) fix semantic visibility,
+   location types, and inert authoring metadata.
+8. [Conformance design](CONFORMANCE.md) defines the delta corpus and public
+   probes to materialize in the portable seed.
+9. [Syntax checklist](syntax-checklist.md) records design closure.
+10. [Design roadmap](ROADMAP.md) identifies portable promotion as the next stage.
+11. [Portable-readiness record](PORTABLE-READINESS.md) maps accepted design
+    sources into the standalone seed and defines the remaining claims boundary.
 
-## Design questions to resolve first
+## Resolved design choices
 
-1. Can one logical module be represented by exactly one source unit in v1, or
-   is partial-module merging already justified?
-2. Is a private-by-default `public` modifier sufficient once public dependency
-   closure has a precise rule?
-3. Should module names remain one `snake_case` identifier or become qualified
-   logical names such as `acme::delivery::shared`?
-4. Can one project use multiple exact data-only vocabularies without creating
-   ambiguous namespaces or an executable plugin mechanism?
-5. Which core identity and captured-project-request rules make the same project
-   reproducible across hosts?
-6. Which authoring projection is the smallest stable public contract that lets
-   Neutral Editor import and project v1 without using a compiler-private AST?
-7. Are `url` and `path` sufficiently useful as opaque data types to justify
-   their core vocabulary-schema support, without granting acquisition authority?
-8. Which minimal data-only descriptor schema lets an Editor generate every
-   core and vocabulary card, port, property, and command without encoding the
-   grammar or accepting executable UI extensions?
+The design closes one source unit per qualified logical module, explicit aliased
+imports, SCC processing, private-by-default visibility, multiple exactly locked
+data-only vocabularies, inert `url` and `path`, host-completed capture, separate
+consumer views, bounded NHT/SHA-256 project identity, and a separately versioned
+data-only authoring bridge. [DECISIONS.md](DECISIONS.md) is the authoritative
+decision ledger.
 
-This proposal recommends one source unit per module, qualified logical module
+The baseline uses one source unit per module, qualified logical module
 names, explicit aliased imports, private-by-default declarations, no re-exports,
 and generic data-only vocabulary infrastructure. It permits import cycles and
-resolves them through strongly connected components. Each choice still needs
-fixtures, lowering rules, resource treatment, and review before it can become
-accepted.
+resolves them through strongly connected components.
 
-The proposed authoring answer is an exact profile tuple plus a deterministic
+The accepted authoring answer is an exact profile tuple plus a deterministic
 descriptor catalogue. The catalogue drives generic UI, while adapter-owned
 source projection and ordinary core compilation remain authoritative. Future
 Flow cards are projections of Flow vocabulary data and conventions; Flow-owned
 mappers, not Neutral or the Editor, assign CI/CD behavior.
 
-The proposed host boundary is likewise explicit: hosts finish acquisition and
+The accepted host boundary is likewise explicit: hosts finish acquisition and
 submit a complete `CapturedProjectRequest`; Neutral only validates, freezes, and
 compiles it. Root/export selection happens later through `ViewRequest`. Request
 module identities must match source headers, and one canonical vocabulary has
@@ -79,9 +77,13 @@ Public values may resolve private ordinary values, but any transitively exposed
 requirements, and authoring catalogue discovery receives vocabulary semantic
 contracts and authoring metadata as separate explicit inputs.
 
-## Approval boundary
+## Promotion boundary
 
-A portable v1 seed must not be created merely from this proposal. Promotion
-requires accepted answers to the open questions, a v0-to-v1 compatibility
-decision, complete observable examples, and agreement that both Flow and Editor
-can use the public contracts without private compiler access.
+The design decisions and public contracts are closed. The next authorized stage
+is to create `v1/portable/`, copy these contracts into the required standalone
+layout, materialize the named fixtures and literal identity vectors, add the
+development pipeline and conformance manifest, and validate standalone links.
+
+Portable promotion must not claim implementation conformance. Passing the
+corpus, producing independent identity vectors, and running the Reader, Editor,
+and Flow probes are implementation/release gates after the seed exists.
