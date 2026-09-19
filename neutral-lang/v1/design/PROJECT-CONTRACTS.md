@@ -12,12 +12,14 @@ it must preserve this closed abstract data model exactly.
 ```text
 Bytes<N>       bounded byte sequence
 Text<N>        bounded Unicode scalar sequence
-Id<T>          validated identity of kind T
+Id<T>          validated identity of kind T, at most 256 UTF-8 bytes
 Digest         { algorithm: "sha-256", bytes: Bytes<32> }
-Profile        { identity: Text, version: Text, digest: Digest }
+Profile        { identity: Id<Profile>, version: Text<64>, digest: Digest }
 List<T, N>     ordered list with at most N elements
 Map<K, V, N>   duplicate-free keyed collection with at most N entries
+Set<T, N>      duplicate-free unordered collection with at most N entries
 Optional<T>    absent or one T
+Count          unsigned integer in the closed range 0..2^63-1
 ```
 
 Unknown required fields, duplicate map keys, invalid identities, unsupported
@@ -26,22 +28,22 @@ versions, and over-limit input fail before an authoritative object is exposed.
 ## Captured project request
 
 ```text
-CapturedProjectRequestV1 {
+CapturedProjectRequest {
   contractVersion: "1.0"
   declaredProjectKey: Optional<Text<256>>       # non-semantic
   coreLanguageProfile: Profile                 # exact Neutral 1.0 profile
-  sourceUnits: List<SourceUnitV1, maxSourceUnits>
-  vocabularyLocks: List<VocabularySemanticLockV1, maxVocabularies>
+  sourceUnits: List<SourceUnit, maxSourceUnits>
+  vocabularyLocks: List<VocabularySemanticLock, maxVocabularies>
 }
 
-SourceUnitV1 {
+SourceUnit {
   logicalModuleIdentity: Id<LogicalModule>
   logicalSourceIdentity: Id<LogicalSource>
   sourceContentDigest: Digest
   sourceBytes: Bytes<maxSourceUnitBytes>
 }
 
-VocabularySemanticLockV1 {
+VocabularySemanticLock {
   canonicalVocabularyIdentity: Id<Vocabulary>
   semanticRevision: Text<128>
   schemaVersion: Text<64>
@@ -75,7 +77,7 @@ duplicate, unused, or conflicting locks fail capture.
 6. Validate that every import resolves once inside the declared source set.
 7. Compute the canonical import graph, SCCs, SCC condensation graph, and bounds.
 8. Freeze immutable source units, semantic vocabulary contracts, and capture
-   facts as `CapturedProjectV1`.
+   facts as `CapturedProject`.
 
 Capture does no filesystem, registry, network, environment, credential, or
 package-manager access. Declaration/body errors not required to establish the
@@ -85,27 +87,81 @@ invalid header or incomplete closure.
 ## Processing and compilation requests
 
 ```text
-ProcessingControlsV1 {
-  acceptanceLimits: ProjectLimitsV1
-  diagnosticPolicy: DiagnosticPolicyV1
-  cancellationToken: Optional<OpaqueOperationalToken>
+ProcessingControls {
+  acceptanceLimits: ProjectLimits
+  diagnosticPolicy: DiagnosticPolicy
+  cancellationToken: Optional<Bytes<128>>
   requestRevision: Optional<Text<128>>
 }
 
-CompilerDerivationRequestV1 {
+ProjectLimits {
+  sourceUnits: Count
+  sourceBytesPerUnit: Count
+  totalSourceBytes: Count
+  importsPerModule: Count
+  totalImportEdges: Count
+  modulesPerScc: Count
+  sccCondensationDepth: Count
+  vocabularyIdentities: Count
+  vocabularyBytesEach: Count
+  vocabularyFeaturesEach: Count
+  totalVocabularyFeatures: Count
+  totalDeclarations: Count
+  totalResolvedEdges: Count
+  viewRoots: Count
+  diagnosticsReturned: Count
+  relatedLocationsPerDiagnostic: Count
+  remedyBytes: Count
+  encodedArtifactBytes: Count
+}
+
+DiagnosticPolicy {
+  severitySelection: "errors" | "errors-and-warnings" |
+                     "all-supported"
+  includeSafeMessages: bool
+  includeRemedies: bool
+}
+
+CompilerDerivationRequest {
   compilerBehaviorProfile: Profile
   irProfile: Profile
-  requestedArtifactKinds: List<ArtifactKind, 16>
-  nonSemanticCompilerOptions: Map<Text, ClosedOptionValue, 64>
+  artifactRequests: List<ArtifactRequest, 16>
+  compilerOptions: CompilerOptions
+}
+
+CompilerOptions {} # closed and empty in v1
+
+ArtifactRequest {
+  kind: ArtifactKind
+  formatProfile: Profile
+  transformation: "none"
 }
 
 ArtifactKind =
   "project-ir" |
+  "project-view" |
   "source-map" |
   "provenance" |
   "diagnostics" |
   "resource-facts"
 ```
+
+Every `max...` bound in this contract denotes the corresponding effective field
+of `ProjectLimits`. The non-mechanical mappings are: `maxSourceUnitBytes` to
+`sourceBytesPerUnit`, `maxVocabularies` to `vocabularyIdentities`,
+`maxVocabularyBytes` to `vocabularyBytesEach`, `maxVocabularyFeatures` to
+`vocabularyFeaturesEach`, `maxModulesPerScc` to `modulesPerScc`, `maxViewRoots`
+to `viewRoots`, `maxDiagnostics` to `diagnosticsReturned`,
+`maxRelatedLocations` to `relatedLocationsPerDiagnostic`, `maxRemedyBytes` to
+`remedyBytes`, and `maxEncodedArtifactBytes` to `encodedArtifactBytes`.
+
+Artifact requests are unique by kind and request-list order is non-semantic;
+identity and result envelopes sort them by canonical framed kind. `project-view` is valid only for
+`deriveView` and is rejected in `CompilerDerivationRequest`. v1 defines no compiler option or artifact
+transformation beyond the exact format profile and `none`. Unknown fields,
+option names, transformation tokens, duplicate kinds, or unsupported format
+profiles fail closed. Later options require a new compatible request-contract
+profile rather than an untyped option bag.
 
 Unknown options fail closed. No option may change language meaning; a proposed
 meaning-changing option requires a new core behavior profile. Cancellation and
@@ -114,13 +170,17 @@ request revision are operational and excluded from all identities.
 ## View request
 
 ```text
-ViewRequestV1 {
+ViewRequest {
   contractVersion: "1.0"
   viewSchemaVersion: Text<64>
+  formatProfile: Profile
+  transformation: "none"
   selectedPublicSymbols: List<Id<ModuleSymbol>, maxViewRoots>
   evidencePolicy: "none" | "public-source-map" | "public-provenance"
-  viewOptions: Map<Text, ClosedOptionValue, 32>
+  viewOptions: ViewOptions
 }
+
+ViewOptions {} # closed and empty in v1
 ```
 
 Every selected symbol must be public in the validated complete project. A view
@@ -128,6 +188,147 @@ contains the complete public type/value/reference closure needed to interpret
 its selections. It excludes unselected public declarations unless required by
 that closure and always excludes private symbol identities and private source
 evidence. A view is a derived artifact, not a smaller logical project.
+
+## Public operation outcomes
+
+```text
+CapturedProject {
+  contractVersion: "1.0"
+  capturedClosureIdentity: Digest
+  coreLanguageProfile: Profile
+  sourceUnitsByModule:
+    Map<Id<LogicalModule>, SourceUnit, maxSourceUnits>
+  vocabularyLocksByIdentity:
+    Map<Id<Vocabulary>, VocabularySemanticLock, maxVocabularies>
+  importEdges: List<CapturedImportEdge, maxTotalImportEdges>
+  stronglyConnectedComponents:
+    List<List<Id<LogicalModule>, maxModulesPerScc>, maxSourceUnits>
+}
+
+CapturedImportEdge {
+  importingModule: Id<LogicalModule>
+  importedModule: Id<LogicalModule>
+}
+
+OperationFailure {
+  outcome: "invalid-input" | "resource-exhausted" | "cancelled" |
+           "service-unavailable" | "internal-defect"
+  requestRevision: Optional<Text<128>>
+  diagnostics: List<CoreDiagnostic, maxDiagnostics>
+}
+
+CaptureSuccess {
+  requestRevision: Optional<Text<128>>
+  capturedProject: CapturedProject
+}
+
+CaptureResult = CaptureSuccess | OperationFailure
+
+ArtifactEnvelope {
+  artifactIdentity: Digest
+  derivationIdentity: Digest
+  request: ArtifactRequest
+  contentDigest: Digest
+  artifactBytes: Bytes<maxEncodedArtifactBytes>
+}
+
+ProjectResourceFacts {
+  sourceUnits: Count
+  largestSourceUnitBytes: Count
+  totalSourceBytes: Count
+  largestModuleImportCount: Count
+  importEdges: Count
+  largestScc: Count
+  sccCondensationDepth: Count
+  vocabularies: Count
+  largestVocabularyBytes: Count
+  largestVocabularyFeatureCount: Count
+  totalVocabularyFeatures: Count
+  declarations: Count
+  resolvedEdges: Count
+  viewRootsRequested: Count
+  diagnosticsProduced: Count
+  largestRelatedLocationCount: Count
+  largestRemedyBytes: Count
+  artifactBytesProduced: Count
+}
+
+ProjectCompilationResult {
+  outcome: "valid" | "invalid" | "resource-exhausted" | "cancelled" |
+           "service-unavailable" | "internal-defect"
+  requestRevision: Optional<Text<128>>
+  capturedClosureIdentity: Digest
+  logicalProjectIdentity: Optional<Digest>
+  resultEnvelopeIdentity: Optional<Digest>
+  artifacts: List<ArtifactEnvelope, 16>
+  diagnostics: List<CoreDiagnostic, maxDiagnostics>
+  resourceFacts: ProjectResourceFacts
+}
+
+ValidatedProject {
+  irProfile: Profile
+  logicalProjectIdentity: Digest
+  logicalBody: ProjectLogicalBody
+}
+
+ValidateProjectIrSuccess {
+  requestRevision: Optional<Text<128>>
+  validatedProject: ValidatedProject
+}
+
+ValidateProjectIrResult = ValidateProjectIrSuccess | OperationFailure
+
+ViewArtifact {
+  requestRevision: Optional<Text<128>>
+  logicalProjectIdentity: Digest
+  viewDerivationIdentity: Digest
+  request: ViewRequest
+  artifact: ArtifactEnvelope
+  resourceFacts: ProjectResourceFacts
+}
+
+ViewResult = ViewArtifact | OperationFailure
+```
+
+The public operation shapes are:
+
+```text
+captureProject(CapturedProjectRequest, ProcessingControls)
+  -> CaptureResult
+compileCapturedProject(CapturedProject, CompilerDerivationRequest,
+                       ProcessingControls)
+  -> ProjectCompilationResult
+compileProject(CapturedProjectRequest, CompilerDerivationRequest,
+               ProcessingControls)
+  -> ProjectCompilationResult
+decodeAndValidateProject(ArtifactEnvelope, CapturedProject,
+                         ProcessingControls)
+  -> ValidateProjectIrResult
+deriveView(ValidatedProject, ViewRequest, ProcessingControls)
+  -> ViewResult
+```
+
+On `valid`, logical project identity is present and exactly one artifact exists
+for every requested kind, ordered by canonical framed kind. On any other outcome it is absent and `artifacts` is
+empty; diagnostics and resource facts remain bounded and non-authoritative.
+`CaptureResult` never returns a partial captured project. SCC member lists and
+the SCC list use canonical module-identity ordering.
+
+The `ViewArtifact.artifact.request` is exactly `{ kind: "project-view",
+formatProfile: request.formatProfile, transformation: request.transformation }`.
+Resource-fact fields not applicable to an operation are zero.
+`decodeAndValidateProject` accepts only a `project-ir` artifact whose captured
+vocabulary contracts and profile facts match the supplied captured project.
+
+`resultEnvelopeIdentity` is present only for completed `valid` and `invalid`
+outcomes. It is absent for resource exhaustion, cancellation, unavailable
+service, and internal defect, because ambient resource, timing, or service state
+cannot become an authoritative identity input.
+
+The diagnostics field is the structured operational projection selected by
+`DiagnosticPolicy`. A requested `diagnostics` artifact is its separately
+formatted, identity-bearing serialization; it does not create a second
+diagnostic meaning.
 
 ## Canonical logical form
 
@@ -141,18 +342,19 @@ neutral/logical-project-identity/v1
 The hash input is:
 
 ```text
-CanonicalLogicalFormV1 {
+CanonicalLogicalForm {
   identityProfile: "neutral-canonical-logical-form/1.0"
-  languageBehaviorProfile: exact core semantic profile identity
-  modules: map<LogicalModuleIdentity, CanonicalModuleV1>
+  languageBehaviorProfile: Profile
+  modules: Map<Id<LogicalModule>, CanonicalModule, maxSourceUnits>
   vocabularyContracts:
-    map<CanonicalVocabularyIdentity, CanonicalVocabularySemanticIdentity>
+    Map<Id<Vocabulary>, CanonicalVocabularySemanticIdentity, maxVocabularies>
 }
 
-CanonicalModuleV1 {
-  declarations: map<ModuleSymbolIdentity, CanonicalDeclarationV1>
-  publicExports: set<ModuleSymbolIdentity>
-  imports: set<LogicalModuleIdentity>
+CanonicalModule {
+  declarations:
+    Map<Id<ModuleSymbol>, CanonicalDeclaration, maxTotalDeclarations>
+  publicExports: Set<Id<ModuleSymbol>, maxTotalDeclarations>
+  imports: Set<Id<LogicalModule>, maxImportsPerModule>
 }
 ```
 
@@ -177,7 +379,8 @@ bytes, aliases, declaration order where inherited semantics make it irrelevant,
 comments, spans, provenance, diagnostics, roots, presentation, host state, and
 artifact encoding.
 
-`CanonicalVocabularySemanticIdentity` is the NHT transcript of canonical
+`CanonicalVocabularySemanticIdentity` is a `Digest` computed as SHA-256 over an
+NHT-v1 frame with domain `neutral/vocabulary-semantic-identity/v1`, canonical
 vocabulary identity, semantic revision, schema version, enabled semantic
 features, normalized exported/non-exported type schema, normalized defaults,
 and required structural features. It excludes raw contract encoding, authoring
@@ -186,10 +389,10 @@ bundle change may therefore change captured closure identity while preserving
 logical project identity.
 
 ```text
-LogicalProjectIdentityV1 = SHA-256(
+LogicalProjectIdentity = SHA-256(
   NHT-v1 frame(
     "neutral/logical-project-identity/v1",
-    CanonicalLogicalFormV1
+    CanonicalLogicalForm
   )
 )
 ```
@@ -205,7 +408,7 @@ rules above; request list or map insertion order never participates unless the
 field is explicitly an ordered semantic list.
 
 ```text
-CapturedClosureIdentityV1 = hash(
+CapturedClosureIdentity = hash(
   "neutral/captured-closure-identity/v1",
   capture contract version,
   exact core profile,
@@ -214,21 +417,24 @@ CapturedClosureIdentityV1 = hash(
     exact validated lock fields + semantic contract bytes
 )
 
-IrDerivationIdentityV1 = hash(
+IrDerivationIdentity = hash(
   "neutral/ir-derivation-identity/v1",
   logical project identity,
+  compiler behavior profile,
   exact IR profile,
-  IR-producing options
+  CompilerOptions
 )
 
-EvidenceDerivationIdentityV1 = hash(
+EvidenceDerivationIdentity = hash(
   "neutral/evidence-derivation-identity/v1",
   captured closure identity,
   logical project identity,
-  evidence profile
+  compiler behavior profile,
+  exact IR profile,
+  evidence artifact kind
 )
 
-DiagnosticDerivationIdentityV1 = hash(
+DiagnosticDerivationIdentity = hash(
   "neutral/diagnostic-derivation-identity/v1",
   captured closure identity,
   compiler behavior profile,
@@ -236,55 +442,69 @@ DiagnosticDerivationIdentityV1 = hash(
   diagnostic policy
 )
 
-ViewDerivationIdentityV1 = hash(
-  "neutral/view-derivation-identity/v1",
-  logical project identity,
-  exact ViewRequestV1
+ResourceDerivationIdentity = hash(
+  "neutral/resource-derivation-identity/v1",
+  captured closure identity,
+  compiler behavior profile,
+  applicable acceptance limits
 )
 
-ArtifactIdentityV1 = hash(
+ViewDerivationIdentity = hash(
+  "neutral/view-derivation-identity/v1",
+  logical project identity,
+  exact ViewRequest
+)
+
+ArtifactIdentity = hash(
   "neutral/artifact-identity/v1",
   artifact derivation identity,
-  artifact kind,
-  format/schema version,
-  artifact transformation inputs
+  exact ArtifactRequest
 )
 ```
 
-The compilation-result envelope has its own identity binding the captured
-closure, complete requested artifact set, compiler request, applicable
-processing policy, outcome, and produced artifact identities. It is not reused
-as an individual artifact identity.
+An authoritatively completed compilation-result envelope has its own identity
+binding the captured closure, complete requested artifact set, compiler
+request, applicable processing policy, completed outcome, and produced artifact
+identities. Cancelled, unavailable-service, and internal-defect envelopes have
+no identity. A result-envelope identity is not reused as an individual artifact
+identity.
 
 ## Project IR delta
 
 v1 extends the accepted v0 logical IR model with these validated structures:
 
 ```text
-ProjectLogicalBodyV1 {
-  languageBehaviorProfile
-  modules: Map<LogicalModuleIdentity, ModuleBodyV1>
-  vocabularySemanticIdentities
-  requiredStructuralFeatures
+ProjectLogicalBody {
+  languageBehaviorProfile: Profile
+  modules: Map<Id<LogicalModule>, ModuleBody, maxSourceUnits>
+  vocabularySemanticIdentities:
+    Map<Id<Vocabulary>, CanonicalVocabularySemanticIdentity, maxVocabularies>
+  requiredStructuralFeatures: List<Id<Feature>, maxTotalVocabularyFeatures>
 }
 
-ModuleBodyV1 {
-  declarations
-  publicExportIndex
-  resolvedImportEdges
+ModuleBody {
+  declarations:
+    Map<Id<ModuleSymbol>, CanonicalDeclaration, maxTotalDeclarations>
+  publicExportIndex: List<Id<ModuleSymbol>, maxTotalDeclarations>
+  resolvedImportEdges: List<ResolvedEdge, maxTotalResolvedEdges>
 }
 
-ResolvedEdgeV1 {
+ResolvedEdge {
   kind: "type" | "value-reuse" | "identity-reference"
-  source: ModuleSymbolIdentity
-  target: CoreTypeIdentity | VocabularyTypeIdentity | ModuleSymbolIdentity
+  source: Id<ModuleSymbol>
+  target: Id<CoreType> | Id<VocabularyType> | Id<ModuleSymbol>
 }
 ```
 
-Logical source identities are absent from `ProjectLogicalBodyV1`. Companion
+`CanonicalDeclaration` is the inherited v0 canonical declaration schema with
+v1 canonical module/vocabulary type identities and stable module-symbol
+reference targets substituted for v0 graph-local targets. Lists used as sets
+are emitted in canonical framed-identity order and reject duplicates.
+
+Logical source identities are absent from `ProjectLogicalBody`. Companion
 source-map and provenance artifacts carry them. The project IR envelope carries
 the logical project identity and IR profile but those envelope fields are
-excluded when reconstructing `CanonicalLogicalFormV1`.
+excluded when reconstructing `CanonicalLogicalForm`.
 
 An untrusted external project IR decoder validates:
 
@@ -318,20 +538,38 @@ reference to a private target is invalid before view construction.
 
 ## Diagnostics
 
-Every diagnostic contains:
+Every core diagnostic contains:
 
 ```text
-DiagnosticV1 {
-  code
-  layer: "capture" | "syntax" | "name" | "type" | "value" |
-         "reference" | "vocabulary" | "ir" | "authoring" | "resource"
-  severity
-  safeParameters
-  safeMessage
+DiagnosticFields {
+  code: Id<DiagnosticCode>
+  severity: "error" | "warning" | "information"
+  safeParameters: Map<Text<64>, SafeDiagnosticValue, 32>
+  safeMessage: Optional<Text<4096>>
   primary: Optional<{ logicalSourceIdentity, startByte, endByte }>
   related: List<RelatedLocation, maxRelatedLocations>
   remedy: Optional<Text<maxRemedyBytes>>
   truncated: bool
+}
+
+CoreDiagnostic {
+  fields: DiagnosticFields
+  layer: "capture" | "syntax" | "name" | "type" | "value" |
+         "reference" | "vocabulary" | "ir" | "resource"
+}
+
+Diagnostic = CoreDiagnostic
+
+SafeDiagnosticValue =
+  Bool | Count | Text<256> | Id<Module> | Id<LogicalSource> |
+  Id<ModuleSymbol> | Id<Vocabulary> | Id<Profile>
+
+RelatedLocation {
+  relation: "caused-by" | "conflicts-with" | "declared-here" |
+            "imported-here" | "referenced-here"
+  logicalSourceIdentity: Id<LogicalSource>
+  startByte: Count
+  endByte: Count
 }
 ```
 
@@ -363,11 +601,6 @@ v1-vocabulary-encoding-unsupported
 v1-vocabulary-visibility-invalid
 v1-vocabulary-public-closure-invalid
 v1-vocabulary-cross-dependency
-v1-vocabulary-authoring-encoding-unsupported
-v1-vocabulary-authoring-semantic-mismatch
-v1-vocabulary-authoring-entry-unknown
-v1-vocabulary-authoring-entry-duplicate
-v1-vocabulary-authoring-hint-invalid
 v1-scc-limit
 v1-project-limit
 v1-view-root-invalid
@@ -378,6 +611,10 @@ v1-project-identity-mismatch
 
 Messages are presentation, not identity. Credentials, host paths, acquisition
 metadata, and unapproved source excerpts cannot appear.
+
+Authoring diagnostics are not members of this core registry. Neutral authoring
+v1 reuses the bounded diagnostic shape with its own `authoring` layer and owns
+its independently versioned codes.
 
 ## Resource contract
 
@@ -395,11 +632,14 @@ ceilings and must support at least this baseline profile:
 | SCC condensation depth | 256 |
 | Vocabulary identities | 64 |
 | Vocabulary bytes each | 4 MiB |
+| Semantic features per vocabulary | 256 |
+| Total semantic features | 16,384 |
 | Total declarations | 100,000 |
 | Total resolved edges | 1,000,000 |
 | View roots | 10,000 |
 | Diagnostics returned | 10,000 |
 | Related locations per diagnostic | 64 |
+| Remedy bytes per diagnostic | 4 KiB |
 | Encoded artifact bytes | 64 MiB |
 
 Inherited v0 limits on nesting, strings, numeric coefficients/scales, lists,

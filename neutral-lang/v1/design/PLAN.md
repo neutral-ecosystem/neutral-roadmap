@@ -87,3 +87,25 @@ development pipeline and conformance manifest, and validate standalone links.
 Portable promotion must not claim implementation conformance. Passing the
 corpus, producing independent identity vectors, and running the Reader, Editor,
 and Flow probes are implementation/release gates after the seed exists.
+
+## Release train
+
+The portable plan uses nine release stages to bring the working implementation
+from `v0.1.0` to `v1.0.0`. A release number names the implementation package;
+the selected source-language profile remains explicit. In particular,
+`neu "0.1"` remains the frozen v0 profile throughout the train and is never
+silently reinterpreted.
+
+Each stage has exactly four bounded delivery increments:
+
+```text
+v0.n.0 -> v0.n.1 -> v0.n.2 -> v0.n.3 -> v0.n.4 -> v0.(n+1).0
+```
+
+`v0.n.1` closes executable contracts and fixtures; `v0.n.2` implements the
+stage's core behavior; `v0.n.3` integrates public reader and authoring-facing
+boundaries; and `v0.n.4` freezes conformance, migration, and release evidence.
+The final transition is `v0.9.4 -> v1.0.0`, not `v0.10.0`.
+
+The portable [release plan](../portable/PLAN.md) is the operational source for
+the nine stage contents and gates. It must stay synchronized with this rule.

@@ -112,6 +112,7 @@ Its closed top-level envelope is:
 {
   "format": "neutral-vocabulary-authoring",
   "encoding_version": "1.0",
+  "schema_version": "1.0",
   "identity": "ExampleDomain",
   "semantic_version": "1.2.3",
   "semantic_identity_digest": "sha256:<lowercase-hex>",
@@ -144,15 +145,17 @@ without its semantic contract.
   "title": "Image",
   "description": "Container image reference.",
   "order": "0200",
-  "preferred_presentation": "port"
+  "preferred_presentation": "port",
+  "initial_visibility": "visible"
 }
 ```
 
 All members shown are required except `description` and `icon`, which may be
-absent. Allowed preferred presentations are closed inert tokens:
-`card`, `property`, `port`, `nested`, and `hidden-when-defaulted`.
-`hidden-when-defaulted` changes only initial display; it never changes source
-omission/default semantics.
+absent. Type `preferred_presentation` is `card` or `nested`. Field
+`preferred_presentation` is `property`, `port`, or `nested`. Field
+`initial_visibility` is the independent token `visible` or
+`hidden-when-defaulted`. Initial visibility changes only initial display; it
+never changes source omission/default semantics.
 
 Metadata entries must match existing semantic types and fields exactly. They
 cannot add/remove fields, change visibility, types, defaults, requiredness,
@@ -161,31 +164,45 @@ Duplicate, unknown, or mismatched type/field entries fail metadata validation.
 The `types` and nested `fields` arrays are sparse presentation overrides:
 omitted semantic types and fields receive the deterministic generic fallback.
 An omitted override is not removal and has no semantic effect.
+Only public, source-authorable types and their fields may have metadata entries.
+An entry for an internal or otherwise non-authorable type is treated as
+`v1-vocabulary-authoring-entry-unknown`; it cannot make that type visible.
 
 `title`, `description`, category segments, ordering tokens, and icon tokens are
-bounded untrusted text. They cannot contain HTML authority, scripts, external
+bounded by the corresponding Neutral authoring v1 `Presentation` ceilings and
+are untrusted text. They cannot contain HTML authority, scripts, external
 resource URLs, filesystem paths, callbacks, or component identifiers. The
 Editor maps an icon token only through its own inert built-in icon namespace.
 
 ## Metadata identity and absence
 
-The metadata profile identity commits to its exact validated logical metadata,
-schema version, and matching semantic identity. It affects descriptor catalogue
-identity only. It never affects captured closure, logical project, project IR,
-or compiler derivation identity.
+`VocabularyAuthoringMetadataIdentity` is SHA-256 over an NHT-v1 frame with
+domain `neutral/vocabulary-authoring-metadata-identity/v1`, encoding/schema
+versions, canonical vocabulary identity, exact semantic revision and semantic
+identity digest, and normalized validated metadata entries. Sparse maps are
+ordered by framed semantic type/field identity. The identity affects descriptor
+catalogue identity only. It never affects captured closure, logical project,
+project IR, or compiler derivation identity.
 
 If metadata is absent, the authoring bridge deterministically derives titles
 from semantic names, uses an empty category, orders by canonical framed semantic
 identity, and selects generic presentation from the semantic type/field shape.
 Absence is therefore supported and deterministic.
 
-## Required diagnostics
+## Diagnostic ownership
+
+Core Neutral v1 owns semantic-bundle validation codes:
 
 ```text
 v1-vocabulary-encoding-unsupported
 v1-vocabulary-visibility-invalid
 v1-vocabulary-public-closure-invalid
 v1-vocabulary-cross-dependency
+```
+
+Neutral authoring v1, not core, owns metadata-validation codes:
+
+```text
 v1-vocabulary-authoring-encoding-unsupported
 v1-vocabulary-authoring-semantic-mismatch
 v1-vocabulary-authoring-entry-unknown
@@ -193,5 +210,6 @@ v1-vocabulary-authoring-entry-duplicate
 v1-vocabulary-authoring-hint-invalid
 ```
 
-All failures are bounded data-validation failures. No semantic or authoring
-bundle is executed.
+This ownership lets the metadata format evolve with the authoring profile
+without changing the core language diagnostic registry. All failures are
+bounded data-validation failures. No semantic or authoring bundle is executed.

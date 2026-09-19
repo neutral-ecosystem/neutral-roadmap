@@ -99,6 +99,11 @@ invalid fixture has stable cross-source diagnostics.
 - Define a revision-bound project descriptor overlay for local/imported types,
   symbols, aliases, and actions, plus a closed directly editable authoring
   project data model.
+- Close descriptor conditions/constraints/actions, comments, mappings, failure
+  envelopes, and authoring limits; use connections as the sole visual
+  representation of reuse/reference edges.
+- Keep the core and authoring diagnostic registries independently versioned and
+  give every required code a named conformance case.
 - Make vocabulary semantic contracts and vocabulary authoring-metadata profiles
   separate explicit inputs to catalogue discovery.
 - Define side-effect-free type compatibility preflight and compiler-authority
@@ -151,3 +156,11 @@ rules. Release still requires implementation and conformance evidence.
 Package distribution, dependency solving, re-exports, partial modules,
 composition constructs, expressions, functions, macros, secrets, runtime
 effects, Flow vocabulary semantics, and Editor UX remain separate proposals.
+
+## Implementation release sequence
+
+Portable implementation proceeds through nine release stages, from `v0.1.0`
+to `v1.0.0`. Each stage uses `v0.n.1` through `v0.n.4` for its four delivery
+gates and crosses to the next stage only at `v0.(n+1).0`; the final gate crosses
+from `v0.9.4` to `v1.0.0`. The precise stage scope and no-skip gate rule are
+maintained in [the portable plan](../portable/PLAN.md).

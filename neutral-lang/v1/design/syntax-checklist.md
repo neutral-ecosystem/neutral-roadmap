@@ -94,6 +94,13 @@ probe evidence. Execution results remain implementation conformance work.
 - [x] **SYN-V1-TOL-018** — Explicit vocabulary authoring-metadata catalogue input
 - [x] **SYN-V1-TOL-019** — Revision-bound project descriptor overlay
 - [x] **SYN-V1-TOL-020** — Closed directly editable authoring project data model
+- [x] **SYN-V1-TOL-021** — Closed descriptor, overlay, comment, mapping, and failure schemas
+- [x] **SYN-V1-TOL-022** — Baseline authoring resource ceilings
+- [x] **SYN-V1-TOL-023** — Connections as the sole reuse/reference representation
+- [x] **SYN-V1-TOL-024** — Separate core and authoring diagnostic registries
+- [x] **SYN-V1-TOL-025** — Closed public operation outcome envelopes
+- [x] **SYN-V1-TOL-026** — Domain-separated catalogue, metadata, and overlay identities
+- [x] **SYN-V1-TOL-027** — Independent presentation-mode and initial-visibility hints
 - [x] **SYN-V1-EVO-001** — Explicit v0/v1 coexistence and migration boundary
 - [x] **SYN-V1-EVO-002** — Multi-file source-to-IR/reader conformance
 - [x] **SYN-V1-EVO-003** — Flow and Editor public-boundary probes
@@ -139,7 +146,8 @@ does not define them.
 ## Completion rule
 
 This design checklist is complete. `SOURCE-CONTRACT.md`,
-`PROJECT-CONTRACTS.md`, `AUTHORING-CONTRACT.md`, and `CONFORMANCE.md` define the
+`PROJECT-CONTRACTS.md`, `VOCABULARY-CONTRACT.md`, `AUTHORING-CONTRACT.md`, and
+`CONFORMANCE.md` define the
 portable-ready obligations. The portable seed must materialize their fixture
 bytes, literal identity vectors, manifests, and runner-facing probe contracts;
 an implementation must later supply passing execution evidence.

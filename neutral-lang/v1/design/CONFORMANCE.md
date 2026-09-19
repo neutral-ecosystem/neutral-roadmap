@@ -63,6 +63,7 @@ locks, processing controls, requested artifacts, and expected oracle IDs.
 
 | Case ID | Primary diagnostic |
 | --- | --- |
+| `v1-negative-request-invalid` | `v1-request-invalid` |
 | `v1-negative-profile-mismatch` | `v1-profile-mismatch` |
 | `v1-negative-source-id-duplicate` | `v1-source-identity-duplicate` |
 | `v1-negative-module-id-duplicate` | `v1-module-identity-duplicate` |
@@ -73,6 +74,10 @@ locks, processing controls, requested artifacts, and expected oracle IDs.
 | `v1-negative-alias-module-vocabulary` | `v1-alias-duplicate` |
 | `v1-negative-path-import` | `v1-import-syntax` |
 | `v1-negative-url-import` | `v1-import-syntax` |
+| `v1-negative-relative-import` | `v1-import-syntax` |
+| `v1-negative-wildcard-import` | `v1-import-syntax` |
+| `v1-negative-versioned-import` | `v1-import-syntax` |
+| `v1-negative-import-before-use` | `v1-import-syntax` |
 | `v1-negative-private-import-type` | `v1-symbol-inaccessible` |
 | `v1-negative-private-import-value` | `v1-symbol-inaccessible` |
 | `v1-negative-public-private-type` | `v1-public-type-inaccessible` |
@@ -80,6 +85,13 @@ locks, processing controls, requested artifacts, and expected oracle IDs.
 | `v1-negative-public-nested-private-ref` | `v1-public-ref-inaccessible` |
 | `v1-negative-cross-module-value-cycle` | inherited value-cycle diagnostic class |
 | `v1-negative-cross-module-record-cycle` | inherited record-cycle diagnostic class |
+| `v1-negative-location-conversion` | inherited type-mismatch diagnostic class |
+| `v1-negative-scc-limit` | `v1-scc-limit` |
+| `v1-negative-project-limit` | `v1-project-limit` |
+| `v1-negative-view-root` | `v1-view-root-invalid` |
+| `v1-negative-view-private-evidence` | `v1-view-private-evidence` |
+| `v1-negative-canonical-profile` | `v1-canonical-form-profile-unsupported` |
+| `v1-negative-project-identity` | `v1-project-identity-mismatch` |
 
 ## Vocabulary lock projects
 
@@ -92,7 +104,34 @@ locks, processing controls, requested artifacts, and expected oracle IDs.
 | `v1-vocabulary-lock-conflicting-revision` | `v1-vocabulary-lock-conflict` |
 | `v1-vocabulary-lock-unused` | `v1-vocabulary-lock-extra` |
 | `v1-vocabulary-type-not-exported` | `v1-vocabulary-type-inaccessible` |
+| `v1-vocabulary-encoding-unsupported` | `v1-vocabulary-encoding-unsupported` |
+| `v1-vocabulary-visibility-invalid` | `v1-vocabulary-visibility-invalid` |
+| `v1-vocabulary-public-closure-invalid` | `v1-vocabulary-public-closure-invalid` |
+| `v1-vocabulary-cross-dependency` | `v1-vocabulary-cross-dependency` |
 | `v1-vocabulary-authoring-only-change` | Logical project identity unchanged; descriptor catalogue identity changed. |
+| `v1-vocabulary-authoring-formatting-only` | Metadata and catalogue identities unchanged. |
+
+## Authoring contract projects
+
+These cases run only against the exact Neutral authoring v1 profile. They are
+not core-conformance dependencies.
+
+| Case ID | Primary diagnostic or observation |
+| --- | --- |
+| `v1-authoring-model-parent-child-disagreement` | `v1-authoring-model-invalid` |
+| `v1-authoring-edge-value-conflict` | `v1-authoring-edge-conflict` |
+| `v1-authoring-edge-cardinality-conflict` | `v1-authoring-edge-conflict` |
+| `v1-authoring-overlay-stale` | `v1-authoring-overlay-stale` |
+| `v1-authoring-limit` | `v1-authoring-limit` |
+| `v1-authoring-metadata-encoding` | `v1-vocabulary-authoring-encoding-unsupported` |
+| `v1-authoring-metadata-semantic-mismatch` | `v1-vocabulary-authoring-semantic-mismatch` |
+| `v1-authoring-metadata-entry-unknown` | `v1-vocabulary-authoring-entry-unknown` |
+| `v1-authoring-metadata-entry-duplicate` | `v1-vocabulary-authoring-entry-duplicate` |
+| `v1-authoring-metadata-hint-invalid` | `v1-vocabulary-authoring-hint-invalid` |
+| `v1-authoring-presentation-visibility-independent` | A `port` may independently be `hidden-when-defaulted`; compiled meaning is unchanged. |
+| `v1-authoring-internal-type-hint` | `v1-vocabulary-authoring-entry-unknown` |
+| `v1-authoring-comment-anchor-invalid` | `v1-authoring-model-invalid` |
+| `v1-authoring-opaque-key-undeclared` | `v1-authoring-model-invalid` |
 
 ## Identity vectors
 
@@ -107,8 +146,12 @@ The portable seed must freeze exact NHT transcript bytes and SHA-256 values for:
 - changed resolved value;
 - changed vocabulary semantic revision;
 - authoring metadata-only change;
+- authoring metadata formatting-only change;
 - changed view roots;
+- changed view format profile;
 - changed diagnostic policy; and
+- changed compiler behavior profile;
+- changed artifact format profile and reordered artifact requests; and
 - each artifact-specific derivation family.
 
 Required equalities:
@@ -129,8 +172,17 @@ view-root change
 diagnostic-policy change
     => same IR artifact identity, different diagnostic derivation identity
 
+artifact-request order change
+    => same derivation and artifact identities
+
+artifact format-profile change
+    => same logical project and artifact derivation, different artifact identity
+
 authoring-metadata-only change
     => same logical project identity, different catalogue identity
+
+authoring-metadata formatting-only change
+    => same metadata and catalogue identities
 ```
 
 Two independent implementations must agree on all transcript and digest vectors
@@ -181,6 +233,11 @@ Each v1 collection bound has below-limit, exact-limit, and one-over-limit cases:
 - diagnostics and related locations; and
 - artifact output size.
 
+The authoring collection repeats this boundary pattern for modules, elements,
+connections, descriptors, ports/properties, conditions/constraints, value
+depth, child lists, comments and total comment bytes, opaque metadata and total
+opaque bytes, and element/source mappings.
+
 Additional cases include integer overflow in framed lengths, duplicate keys,
 unknown required fields/capabilities, invalid UTF-8, digest mismatch, malicious
 descriptor text, cancellation at every public stage, malformed cross-module IR
@@ -188,6 +245,10 @@ edges, private-public export corruption, and canonical project identity mismatch
 
 No resource, cancellation, recovery, unavailable-service, or malformed-input
 outcome may expose authoritative IR, authoring project, or view.
+Resource-exhausted, cancellation, unavailable-service, and internal-defect
+outcomes also have no result-envelope identity or artifact envelopes. A
+completed invalid outcome has a reproducible result-envelope identity but no
+logical project identity or artifacts.
 
 ## Public reader probe
 
@@ -220,10 +281,12 @@ The Editor probe must:
    project descriptor overlay;
 6. create/edit modules, imports, visibility, qualified reuse/references,
    repeated vocabularies, `url`, and `path`;
-7. prove local/imported type and symbol choices come from the project overlay,
-   not the static catalogue or a handwritten table;
-8. project all `.neu` units and complete element/source mappings;
-9. form an exact captured-project request and compile it;
+7. prove local/imported/vocabulary type bindings, symbol choices, and exact
+   source spellings come from the project overlay, not the static catalogue or
+   a handwritten table;
+8. project all `.neu` units, complete element/source mappings, and the canonical
+   source-used vocabulary identity list;
+9. form an exact captured-project request without reparsing source and compile it;
 10. map cross-source diagnostics and discard a stale revision; and
 11. save/reopen and reproduce equal logical project identity.
 

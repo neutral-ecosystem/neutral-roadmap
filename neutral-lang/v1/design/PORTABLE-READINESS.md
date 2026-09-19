@@ -2,11 +2,14 @@
 
 Status: accepted
 
-Readiness: ready for portable promotion
+Readiness: portable release plan created; normative seed materialization pending
 
 This record confirms that the Neutral v1 design has no unresolved semantic or
-architectural choice blocking creation of the standalone portable seed. It does
-not claim that an implementation exists or passes conformance.
+architectural choice blocking creation of the standalone portable seed. The
+portable release-plan entry points now exist and define the nine-stage journey
+from `v0.1.0` to `v1.0.0`; the normative contracts and exact conformance assets
+remain to be materialized. This does not claim that an implementation exists or
+passes conformance.
 
 ## Design-to-portable map
 
@@ -37,19 +40,26 @@ not claim that an implementation exists or passes conformance.
 - NHT-v1/SHA-256 canonical logical project identity;
 - artifact-specific derivation identities;
 - bounded diagnostics and project resource profiles;
+- closed capture, compilation, validation, and view outcome envelopes;
 - public reader behavior;
 - separately versioned data-only authoring bridge with static descriptors,
-  project overlays, and a closed editable document model; and
+  project overlays, closed descriptor/document schemas, explicit authoring
+  ceilings, and one authoritative edge representation;
+- independently owned core and authoring diagnostic registries with named
+  negative cases; and
 - Editor and Flow ownership boundaries.
 
 ## Portable materialization work
 
 The following work belongs to creating the seed and does not reopen semantics:
 
-1. Create the required portable directory structure and standalone entry points.
+1. Complete the required portable directory structure and standalone entry
+   points. The planning entry points exist; the standalone normative entries
+   below remain outstanding.
 2. Split the accepted decision ledger into portable decision records.
 3. Copy the contracts with portable-relative links and SPDX headers.
-4. Materialize every named fixture as exact source/request/vocabulary bytes.
+4. Materialize every named fixture as exact source/request/vocabulary/authoring
+   bytes, including one oracle for every required diagnostic family.
 5. Calculate and review literal NHT transcript and SHA-256 identity vectors.
 6. Create the conformance manifest and expected-result oracle inventory.
 7. Add ordered development-phase documents for implementation and release.

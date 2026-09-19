@@ -201,6 +201,8 @@ additional change must first be added to this map.
 - **NL-V1-VOC-008:** Titles, documentation, categories, icon tokens, ordering,
   and other declared non-semantic presentation hints may change descriptor-
   catalogue identity but cannot change logical project identity or compiled IR.
+  Presentation mode and initial visibility are independent closed fields;
+  metadata cannot make an internal type source-authorable.
 - **NL-V1-VOC-009:** One project resolves one canonical vocabulary identity to
   exactly one semantic-contract revision. All aliases and modules requiring
   that identity use the same revision; conflicting locks fail capture.
@@ -317,13 +319,14 @@ additional change must first be added to this map.
   while producing the same logical project identity.
 - **NL-V1-ID-004:** Compilation-result derivation identity derives from captured
   closure identity, logical project identity, exact compiler/IR behavior
-  profiles, acceptance limits, requested artifact set, and non-semantic compiler
-  or diagnostic policy. It contains no selected roots and may identify the
+  profiles, acceptance limits, exact artifact requests, the closed compiler
+  options record, and diagnostic policy. It contains no selected roots and may identify the
   complete result envelope without becoming every contained artifact's
   derivation identity.
 - **NL-V1-ID-005:** Artifact identity derives from its artifact-specific
-  derivation identity, artifact kind, format/schema version, and transformation
-  inputs, using a domain-separated canonical form that excludes the artifact
+  derivation identity and exact artifact request. v1 artifact requests contain
+  kind, format profile, and the sole transformation token `none`, using a
+  domain-separated canonical form that excludes the artifact
   identity field itself.
 - **NL-V1-ID-006:** Logical module identity is independent of host mapping.
   Equivalent canonical module content from different hosts preserves project
@@ -345,10 +348,14 @@ additional change must first be added to this map.
   state and never participate in project, derivation, view, or artifact identity.
 - **NL-V1-ID-011:** Each artifact kind declares its own derivation input set.
   Project IR derivation depends on logical project identity and IR-producing
-  profiles; source-map/provenance derivations additionally depend on captured
-  closure and evidence profiles; diagnostic derivation depends on captured
-  closure, compiler behavior, limits, and diagnostic policy; a compilation-
-  result envelope may bind every requested output and operational outcome. An
+  compiler/IR profiles; source-map/provenance derivations additionally depend
+  on captured closure and their evidence artifact kind; diagnostic derivation
+  depends on captured closure, compiler behavior, limits, and diagnostic policy;
+  resource-fact derivation depends on captured closure, compiler behavior, and
+  limits; a compilation-
+  result envelope may bind every requested output and deterministic completed
+  outcome. Cancellation, unavailable service, and internal defects have no
+  authoritative result-envelope identity. An
   input cannot enter a derivation for an artifact it cannot change.
 
 ## Public services and tooling
@@ -369,9 +376,10 @@ additional change must first be added to this map.
 - **NL-V1-API-016:** The core operation shapes are
   `captureProject(CapturedProjectRequest, ProcessingControls)`,
   `compileCapturedProject(CapturedProject, CompilerDerivationRequest,
+  ProcessingControls)`, `decodeAndValidateProject(ArtifactEnvelope,
+  CapturedProject,
   ProcessingControls)`, and `deriveView(ValidatedProject, ViewRequest,
-  ProcessingControls)`. Processing controls are never stored as project
-  semantics.
+  ProcessingControls)`. Processing controls are never stored as project semantics.
 
 ## Neutral authoring v1 bridge
 
@@ -435,6 +443,21 @@ additional change must first be added to this map.
   model of modules, descriptor-owned elements, typed slot values, ordered
   nesting, and value-reuse/reference connections. A generic Editor can create
   and edit it without callbacks or a private grammar table.
+- **NL-V1-BRG-017:** Projection kinds, contexts, conditions, constraints, type
+  expressions, value forms, project actions, comments, overlays, mappings, and
+  failure envelopes use closed versioned schemas with baseline supported
+  ceilings. Calling a payload closed or bounded without defining those schemas
+  and ceilings is insufficient.
+- **NL-V1-BRG-018:** Authoring connections are the sole representation of value
+  reuse and identity-reference edges. A connected target slot has no competing
+  symbol-valued property; duplicates or a simultaneous literal value fail with
+  a stable authoring diagnostic.
+- **NL-V1-BRG-019:** Promised comments use bounded module/element/slot anchors,
+  and opaque optional metadata is keyed, size-bounded, and accepted only when
+  the selected capability profile declares the key optional and non-semantic.
+- **NL-V1-BRG-020:** Core and authoring diagnostics share a bounded structural
+  envelope but have separate layer and code registries. Authoring metadata or
+  Editor protocol changes cannot add requirements to the core v1 registry.
 - **NL-V1-API-004:** The public authoring projection represents modules,
   imports, visibility, declarations, source value forms, supported comments,
   stable source anchors, and opaque extension fields without becoming the
@@ -464,19 +487,25 @@ additional change must first be added to this map.
 - **NL-V1-API-013:** Successful bridge validation may return a validated IR handle,
   source map, provenance, derivation, and resource facts. Non-success outcomes
   cannot expose recovered data as authoritative IR.
-- **NL-V1-API-014:** `describeAuthoring` accepts an exact core authoring profile,
-  exact vocabulary semantic contracts, and exact vocabulary authoring-metadata
-  profiles and returns the descriptor catalogue and its identity without
-  performing external I/O.
+- **NL-V1-API-014:** `describeAuthoring` accepts the exact authoring profile
+  tuple, including core/IR/descriptor profiles plus exact vocabulary semantic
+  contracts and authoring-metadata profiles, and returns the descriptor
+  catalogue and its identity without performing external I/O.
 - **NL-V1-API-015:** Project source projection returns the complete ordered set
-  of source units and element-to-source mappings needed to form a
-  `CapturedProjectRequest`; host-owned identities and vocabulary semantic locks
-  are supplied explicitly rather than inferred from editor state. Root
-  selection occurs only when an Editor or another consumer requests a view.
+  of source units, element-to-source mappings, and canonical source-used
+  vocabulary identities needed to form a `CapturedProjectRequest`; the host
+  selects the matching exact semantic locks without parsing source. Host-owned
+  identities and lock bytes remain explicit inputs. Root selection occurs only
+  when an Editor or another consumer requests a view.
 - **NL-V1-API-017:** `newProject` creates an empty authoring project from exact
   host-selected module/source identities, and `describeProject` derives the
   revision-bound project descriptor overlay. Neither operation performs
   acquisition or infers a module identity from a host path.
+- **NL-V1-API-018:** Capture, compilation, IR validation, and view derivation use
+  closed success/failure envelopes. Resource-exhausted, cancelled,
+  unavailable-service, and internal-defect outcomes expose no authoritative
+  partial object or envelope identity; requested artifacts appear only on a
+  valid completed compilation.
 
 ## Authoring round trip
 
@@ -532,6 +561,9 @@ additional change must first be added to this map.
   remedies are untrusted bounded text and cannot disclose resolver credentials
   or unapproved host paths. Such host acquisition data is not supplied to core
   capture or compilation in the first place.
+- **NL-V1-DIA-007:** Every required core and authoring diagnostic family has a
+  named negative conformance case. Core cases never require installation of an
+  authoring bridge; authoring cases name the exact compatible authoring profile.
 
 ## Consumer boundary evidence
 

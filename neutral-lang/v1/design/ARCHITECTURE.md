@@ -356,12 +356,16 @@ view derivation identity binds the complete logical project identity to a
 
 Artifact derivations are dependency-minimal rather than every artifact
 inheriting one monolithic compiler derivation. Project IR derivation binds
-logical project identity, IR profile, and IR-producing options. Source-map/
-provenance derivations additionally bind the captured closure and evidence
-profile. Diagnostic derivation binds captured closure, compiler behavior,
-applicable limits, and diagnostic policy. Each artifact identity then binds its
-own derivation identity, kind, format, and transformation inputs. A compilation-
-result envelope may bind all requested outputs and its operational outcome.
+logical project identity, compiler behavior, IR profile, and the closed v1
+compiler-options record. Source-map/provenance derivations additionally bind the
+captured closure and evidence artifact kind. Diagnostic derivation binds
+captured closure, compiler behavior, applicable limits, and diagnostic policy;
+resource-fact derivation binds captured closure, compiler behavior, and limits.
+Each artifact identity then binds its own derivation identity and exact artifact
+request. A compilation-
+completed result envelope may bind all requested outputs and its deterministic
+completed outcome. Resource exhaustion, cancellation, unavailable service, and
+internal defects produce no authoritative envelope identity.
 Changing diagnostic verbosity therefore cannot invalidate an unchanged project
 IR artifact.
 
@@ -389,7 +393,8 @@ compileCapturedProject(captured, compilerDerivationRequest, processingControls)
     -> ProjectCompilationResult
 compileProject(request, compilerDerivationRequest, processingControls)
     -> ProjectCompilationResult
-decodeAndValidateProject(bytes, capturedContracts) -> ValidatedProject
+decodeAndValidateProject(artifactEnvelope, capturedProject, processingControls)
+    -> ValidateProjectIrResult
 deriveView(validatedProject, viewRequest, processingControls) -> ViewArtifact
 ```
 
@@ -397,8 +402,8 @@ deriveView(validatedProject, viewRequest, processingControls) -> ViewArtifact
 CompilerDerivationRequest
   compilerBehaviorProfile
   irProfile
-  requestedArtifactKinds[]
-  nonSemanticCompilerOptions
+  artifactRequests[]             # kind + exact format profile
+  compilerOptions {}             # closed and empty in v1
 
 ProcessingControls
   acceptanceLimits
@@ -408,10 +413,16 @@ ProcessingControls
 
 ViewRequest
   viewSchemaVersion
+  formatProfile
+  transformation "none"
   selectedModuleSymbols[]
   evidencePolicy
-  viewSpecificOptions
+  viewOptions {}                 # closed and empty in v1
 ```
+
+v1 deliberately has no untyped option bags or artifact transformations. New
+options require a versioned request-contract revision and an explicit identity
+classification.
 
 The selected module symbols are stable public module-symbol identities, not
 source aliases, file names, graph-local element IDs, or canvas nodes.
@@ -476,11 +487,7 @@ cannot collide or alter their meaning.
 Neutral Editor uses the bridge's public operations equivalent to:
 
 ```text
-describeAuthoring(
-    coreAuthoringProfile,
-    vocabularySemanticContracts,
-    vocabularyAuthoringMetadataProfiles
-)
+describeAuthoring(exactAuthoringProfileTuple)
     -> DescriptorCatalogue
 newProject(exact profiles, initial module/source identities)
     -> AuthoringProject
@@ -499,6 +506,12 @@ extensions. A generic Editor edits those records directly under the catalogue
 and overlay constraints; no executable edit callback is needed. The compiler
 adapter owns Neutral spelling and validation; the editor owns interaction and
 presentation.
+
+Connections are the only authoring representation of reuse and reference
+edges; symbol identities are not also stored as slot values. Descriptor
+conditions, constraints, actions, comments, overlays, mappings, and failures
+use closed schemas and advertised limits. Core and authoring diagnostics share
+bounded field shapes but retain independently versioned code registries.
 
 A no-op import and projection must recompile to logically equal project IR. The
 projection retains every authoring distinction required by the inherited v0

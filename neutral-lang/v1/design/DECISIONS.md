@@ -26,6 +26,8 @@ portable contract remains authoritative where it is not explicitly superseded.
 | `V1-DEC-014` | The Editor generates `.neu` source through the authoring bridge; the compiler never consumes a canvas graph. |
 | `V1-DEC-015` | Flow authoring is an Editor vocabulary/convention package; Flow interpretation and provider mapping remain Flow-owned. |
 | `V1-DEC-016` | Static profile/vocabulary descriptors, project-derived descriptors, and editable authoring state are separate data contracts. |
+| `V1-DEC-017` | Authoring connections solely encode reuse/reference edges, and authoring diagnostics remain outside the core code registry. |
+| `V1-DEC-018` | Public operations use closed outcome envelopes; operational aborts carry no authoritative object or identity. |
 
 ## Source and module choices
 
@@ -122,6 +124,11 @@ cannot contain local or imported project symbols. A revision-bound project
 overlay supplies those choices. The authoring project itself is a closed,
 bounded, directly editable graph/tree data model; neither catalogue needs
 callbacks, and the compiler still receives only projected source.
+
+The editable model never duplicates an edge as both a connection and a symbol
+slot value. Core and authoring diagnostics reuse one bounded structural shape,
+but their layer values and required code sets are versioned by their respective
+owners.
 
 ## Deferred choices
 
