@@ -83,29 +83,21 @@ behavior has been implemented and gated.
 | 8 | `v0.8.0` -> `v0.9.0` | Separately versioned authoring bridge: descriptor catalogue, project overlay, editable model, deterministic source projection, formatting, and generic Editor probe. |
 | 9 | `v0.9.0` -> `v1.0.0` | Full v1 conformance corpus, public Reader/Editor/Flow-boundary probes, migration evidence, release hardening, and v1.0.0 publication gate. |
 
-## Critical path
+## Critical-path tracker
 
-```text
-v0.1.0 baseline and environment
-    ↓
-Stage 1: profile dispatch and v1 contract freeze
-    ↓
-Stage 2: complete no-I/O project capture
-    ↓
-Stage 3: modules, imports, SCCs, diagnostics
-    ↓
-Stage 4: public APIs and cross-module semantics
-    ↓
-Stage 5: multi-vocabulary and inert location values
-    ↓
-Stage 6: project IR, reader, and views
-    ↓
-Stage 7: canonical identities and reproducibility vectors
-    ↓
-Stage 8: dynamic authoring bridge and generic Editor probe
-    ↓
-Stage 9: full conformance and v1.0.0 qualification
-```
+- [ ] `v0.1.0` baseline and environment validated.
+- [ ] Stage 1 — profile dispatch and v1 contract freeze.
+- [ ] Stage 2 — complete no-I/O project capture.
+- [ ] Stage 3 — modules, imports, SCCs, and diagnostics.
+- [ ] Stage 4 — public APIs and cross-module semantics.
+- [ ] Stage 5 — multiple vocabularies and inert location values.
+- [ ] Stage 6 — project IR, reader, and views.
+- [ ] Stage 7 — canonical identities and reproducibility vectors.
+- [ ] Stage 8 — dynamic authoring bridge and generic Editor probe.
+- [ ] Stage 9 — full conformance and `v1.0.0` qualification.
+
+The step-by-step release and validation tracker is the
+[full implementation checklist](development/07-IMPLEMENTATION-CHECKLIST.md).
 
 ## Operational documents
 
@@ -118,6 +110,7 @@ Stage 9: full conformance and v1.0.0 qualification
 | [04 — testing and conformance](development/04-TESTING-CONFORMANCE.md) | Fixture-first development, determinism, limits, hostile inputs, and probe evidence. |
 | [05 — release qualification](development/05-RELEASE-QUALIFICATION.md) | Stage 9 promotion rules and the `v0.9.4 -> v1.0.0` release decision. |
 | [06 — validation ledger](development/06-VALIDATION-LEDGER.md) | Per-stage status and the evidence stack for every `.1` through `.4` release. |
+| [07 — full implementation checklist](development/07-IMPLEMENTATION-CHECKLIST.md) | Every version increment, implementation slice, validation command class, and promotion decision from `v0.1.0` to `v1.0.0`. |
 
 ## Non-negotiable delivery rules
 
