@@ -1,10 +1,14 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-# Neutral v1 conformance materialization
+# Neutral v1 conformance
 
-Status: accepted planning baseline
+Status: accepted release-train baseline
 
-The v1 conformance manifest, exact fixture bytes, diagnostics oracles, and
-identity vectors are created and reviewed during stages 1 through 9. Their
-successful execution is required before `v0.9.4` may be promoted to `v1.0.0`.
-See [../PLAN.md](../PLAN.md).
+[manifest.toml](manifest.toml) is the activation inventory for the inherited
+v0 suite and v1 delta suites. Each active v1 case must name exact bytes and an
+expected result; no planned inventory entry is passing evidence.
+
+The v1.0.0 gate requires the full inherited v0 corpus, all v1 fixture/oracle
+families, reviewed canonical identity vectors, and independent Reader, generic
+Editor, and Flow-boundary probes. See [the plan](../PLAN.md) and
+[testing rules](../development/04-TESTING-CONFORMANCE.md).

@@ -2,9 +2,14 @@
 
 # Development pipeline
 
-Status: accepted planning baseline
+Status: accepted operational baseline
 
-Development artifacts will be added in stage order: environment and baseline,
-capture/modules, semantic and IR contracts, identity, authoring, conformance,
-and release. Each lifecycle document uses a continuous two-digit prefix as it
-is materialized. The governing release gate is [../PLAN.md](../PLAN.md).
+1. [00 — environment and baseline](00-ENVIRONMENT-BASELINE.md)
+2. [01 — capture and modules](01-CAPTURE-MODULES.md)
+3. [02 — semantic project core](02-SEMANTIC-PROJECT-CORE.md)
+4. [03 — identity and authoring](03-IDENTITY-AUTHORING.md)
+5. [04 — testing and conformance](04-TESTING-CONFORMANCE.md)
+6. [05 — release qualification](05-RELEASE-QUALIFICATION.md)
+7. [06 — validation ledger](06-VALIDATION-LEDGER.md)
+
+The governing nine-stage release gate is [the portable plan](../PLAN.md).

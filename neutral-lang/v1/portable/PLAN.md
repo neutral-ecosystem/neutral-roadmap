@@ -17,6 +17,23 @@ URLs, registries, and credentials; vocabularies may interpret `url` and `path`
 values but Neutral never acquires through them. Flow owns any CI/CD mapping and
 execution semantics.
 
+## Governing package
+
+Read this package in the following order:
+
+1. [Architecture](ARCHITECTURE.md) — the v1 boundary and non-goals.
+2. [Requirements](specs/REQUIREMENTS.md) — the portable v1 delta requirement
+   index and inherited-v0 rule.
+3. [Contracts](specs/contracts/README.md) — source, project, vocabulary, and
+   authoring behavior.
+4. [Decisions](specs/decisions/README.md) — closed architectural choices.
+5. [Conformance](conformance/README.md) — the executable evidence inventory.
+6. [Development pipeline](development/README.md) — how work is gated.
+
+The plan orders implementation work; it cannot add syntax, execution behavior,
+or product semantics. More-specific accepted contracts govern if a planning
+description is less precise.
+
 ## Version rule
 
 There are exactly nine stages:
@@ -65,6 +82,59 @@ behavior has been implemented and gated.
 | 7 | `v0.7.0` -> `v0.8.0` | Canonical logical-project identity, captured-closure and artifact identity separation, deterministic derivations, and reviewed identity vectors. |
 | 8 | `v0.8.0` -> `v0.9.0` | Separately versioned authoring bridge: descriptor catalogue, project overlay, editable model, deterministic source projection, formatting, and generic Editor probe. |
 | 9 | `v0.9.0` -> `v1.0.0` | Full v1 conformance corpus, public Reader/Editor/Flow-boundary probes, migration evidence, release hardening, and v1.0.0 publication gate. |
+
+## Critical path
+
+```text
+v0.1.0 baseline and environment
+    ↓
+Stage 1: profile dispatch and v1 contract freeze
+    ↓
+Stage 2: complete no-I/O project capture
+    ↓
+Stage 3: modules, imports, SCCs, diagnostics
+    ↓
+Stage 4: public APIs and cross-module semantics
+    ↓
+Stage 5: multi-vocabulary and inert location values
+    ↓
+Stage 6: project IR, reader, and views
+    ↓
+Stage 7: canonical identities and reproducibility vectors
+    ↓
+Stage 8: dynamic authoring bridge and generic Editor probe
+    ↓
+Stage 9: full conformance and v1.0.0 qualification
+```
+
+## Operational documents
+
+| Document | Owns |
+| --- | --- |
+| [00 — environment and baseline](development/00-ENVIRONMENT-BASELINE.md) | Rust workspace readiness, v0.1 preservation, CI, evidence retention, and package boundaries. |
+| [01 — capture and modules](development/01-CAPTURE-MODULES.md) | Stages 1–3: profiles, request capture, graph construction, imports, and SCCs. |
+| [02 — semantic project core](development/02-SEMANTIC-PROJECT-CORE.md) | Stages 4–6: visibility, vocabulary, project IR, reader, and views. |
+| [03 — identity and authoring](development/03-IDENTITY-AUTHORING.md) | Stages 7–8: identities, vectors, descriptor catalogue, projection, and Editor probe. |
+| [04 — testing and conformance](development/04-TESTING-CONFORMANCE.md) | Fixture-first development, determinism, limits, hostile inputs, and probe evidence. |
+| [05 — release qualification](development/05-RELEASE-QUALIFICATION.md) | Stage 9 promotion rules and the `v0.9.4 -> v1.0.0` release decision. |
+| [06 — validation ledger](development/06-VALIDATION-LEDGER.md) | Per-stage status and the evidence stack for every `.1` through `.4` release. |
+
+## Non-negotiable delivery rules
+
+- Preserve the passing v0.1 corpus and its explicit profile at every release.
+- Build every v1 feature as request/fixture -> source -> semantics -> IR ->
+  reader -> independent probe; do not add parser-only behavior.
+- Keep acquisition, filesystem, network, paths, URLs, credentials, and package
+  resolution outside core capture and compilation.
+- Emit complete project IR only after successful semantic completion; recovery
+  ASTs and partial compiler models are never public contracts.
+- Keep roots out of capture, project IR equality, and logical identity. They are
+  post-compilation views.
+- Keep Flow mapper/execution meaning and Editor UX out of core contracts.
+- Do not promote a stage from a happy-path demo: negative diagnostics, bounds,
+  deterministic order, reader behavior, and retained evidence close first.
+- Never turn skipped, retried, flaky, missing, or indeterminate evidence into a
+  passing gate.
 
 ## Stage gates
 
