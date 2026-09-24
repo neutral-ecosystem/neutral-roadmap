@@ -356,6 +356,5 @@ Target transition: `v0.9.0 -> v1.0.0`.
   [v1 contract checklist](../specs/contracts/v1-checklist.md).
 - [ ] No active manifest case is missing, skipped, flaky, retried, or
   indeterminate.
-- [ ] Documentation links, standalone portable paths, and website publication
-  validation pass.
+- [ ] Documentation links and standalone portable paths validate successfully.
 - [ ] v1 is claimed conformant only after all preceding evidence is approved.

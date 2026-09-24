@@ -64,7 +64,7 @@ The following work belongs to creating the seed and does not reopen semantics:
 6. Create the conformance manifest and expected-result oracle inventory.
 7. Add ordered development-phase documents for implementation and release.
 8. Add design/portable traceability and portability-exception records, if any.
-9. Run standalone link, documentation, website-discovery, and drift checks.
+9. Run standalone link, documentation, and drift checks.
 
 ## Claims boundary
 

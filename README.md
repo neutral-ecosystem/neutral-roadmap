@@ -90,26 +90,6 @@ The recommended reading path is Neutral language first, then the Editor or Flow
 workstream that matches your interest. Neux is planned as a future independent
 Neutral IR consumer for operating-system workflows.
 
-## Development
-
-This section is only for contributors maintaining the roadmap website.
-
-<details>
-<summary><strong>Roadmap website commands</strong></summary>
-
-| Need | Command |
-| --- | --- |
-| Check Astro and TypeScript | `pnpm --dir website check` |
-| Build the static roadmap site | `pnpm --dir website build` |
-| Preview the Cloudflare runtime | `pnpm --dir website preview:cloudflare` |
-| Deploy the checked-in Cloudflare configuration | `pnpm --dir website deploy` |
-
-</details>
-
-The publishing contract, source boundaries, and deployment requirements are
-defined in the [website development guide](website/README.md) and
-[repository rules](rules/README.md).
-
 ## Guides
 
 Choose a guide by task, or browse the complete [documentation hub](docs/README.md):
@@ -120,20 +100,6 @@ Choose a guide by task, or browse the complete [documentation hub](docs/README.m
 | Review the released language baseline | [v0.1.0 archive](neutral-lang/v0/portable/README.md) |
 | Plan visual authoring work | [Neutral Editor roadmap](neutral-editor/ROADMAP.md) |
 | Explore CI/CD planning and portability | [Neutral Flow roadmap](neutral-flow/ROADMAP.md) |
-| Follow content and publication rules | [Repository rules](rules/README.md) |
-| Work on the roadmap website | [Website development guide](website/README.md) |
-
-## Tech stack
-
-The following tools publish the roadmap site; they are not required to explore
-the ecosystem.
-
-<p align="left">
-  <a href="https://astro.build/"><img src="https://img.shields.io/badge/Astro-7.2-BC52EE?style=for-the-badge&amp;logo=astro&amp;logoColor=white" alt="Astro 7.2"></a>
-  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&amp;logo=typescript&amp;logoColor=white" alt="TypeScript 5.9"></a>
-  <a href="https://pnpm.io/"><img src="https://img.shields.io/badge/pnpm-11.24-F69220?style=for-the-badge&amp;logo=pnpm&amp;logoColor=white" alt="pnpm 11.24"></a>
-  <a href="https://workers.cloudflare.com/"><img src="https://img.shields.io/badge/Cloudflare_Workers-Wrangler_4.127-F38020?style=for-the-badge&amp;logo=cloudflareworkers&amp;logoColor=white" alt="Cloudflare Workers with Wrangler 4.127"></a>
-</p>
 
 ---
 

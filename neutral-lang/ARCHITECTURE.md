@@ -49,8 +49,8 @@ vN/
 For an active version, `portable/` is copied into the corresponding
 implementation repository. Its `spec/vN/` documents are authoritative for that
 version. After release, the portable tree becomes the immutable release bundle
-and may use the release repository's conformance layout. The website publishes
-only the portable/release view; `design/` remains private repository material.
+and may use the release repository's conformance layout. The `design/` tree
+remains private repository material.
 
 ## Evolution and compatibility
 

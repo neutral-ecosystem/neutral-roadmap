@@ -144,8 +144,8 @@ gates recorded by the portable seed.
 - Record accepted decisions and v0-to-v1 compatibility/migration policy.
 - Create the required `portable/` entry points, specifications, development
   pipeline, fixtures, and conformance manifest.
-- Verify standalone links, design-to-portable synchronization, website
-  discovery, and requirement-to-evidence traceability.
+- Verify standalone links, design-to-portable synchronization, and
+  requirement-to-evidence traceability.
 - Update the project roadmap only after the portable package is complete.
 
 Exit: v1 is implementation-ready under the repository's portable documentation
